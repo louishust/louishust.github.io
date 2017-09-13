@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="现场问题客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query ..... 查找问题从include/my_base.h中找到错误码定义： 1#define HA_ERR_INTERNAL_ERROR   122	/* Internal error */ 没什么意">
+<meta name="description" content="现场问题客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query .....">
 <meta name="keywords" content="mysql">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Got error 122 from storage engine">
 <meta property="og:url" content="http://yoursite.com/2017/09/13/mysql-error-122/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="现场问题客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query ..... 查找问题从include/my_base.h中找到错误码定义： 1#define HA_ERR_INTERNAL_ERROR   122	/* Internal error */ 没什么意">
+<meta property="og:description" content="现场问题客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query .....">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-09-13T09:59:38.000Z">
+<meta property="og:updated_time" content="2017-09-13T10:01:03.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Got error 122 from storage engine">
-<meta name="twitter:description" content="现场问题客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query ..... 查找问题从include/my_base.h中找到错误码定义： 1#define HA_ERR_INTERNAL_ERROR   122	/* Internal error */ 没什么意">
+<meta name="twitter:description" content="现场问题客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query .....">
 
 
 
@@ -383,6 +383,7 @@
       
         <h2 id="现场问题"><a href="#现场问题" class="headerlink" title="现场问题"></a>现场问题</h2><p>客户重库SQL线程报错如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Last_Errno: 1030</div><div class="line">Last_Error: Error <span class="string">'Got error 122 from storage engine'</span> on query .....</div></pre></td></tr></table></figure>
+<a id="more"></a>
 <h2 id="查找问题"><a href="#查找问题" class="headerlink" title="查找问题"></a>查找问题</h2><p>从include/my_base.h中找到错误码定义：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> HA_ERR_INTERNAL_ERROR   122	<span class="comment">/* Internal error */</span></span></div></pre></td></tr></table></figure>
 <p>没什么意义，没有具体说明。接着从mysql-test里面搜索是否有类似报错：</p>
