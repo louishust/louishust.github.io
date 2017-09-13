@@ -281,6 +281,170 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/13/mysql-error-122/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/09/13/mysql-error-122/" itemprop="url">Got error 122 from storage engine</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-13T17:13:09+08:00">
+                2017-09-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MySQL/" itemprop="url" rel="index">
+                    <span itemprop="name">MySQL</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MySQL/MySQL运维/" itemprop="url" rel="index">
+                    <span itemprop="name">MySQL运维</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="现场问题"><a href="#现场问题" class="headerlink" title="现场问题"></a>现场问题</h2><p>客户重库SQL线程报错如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Last_Errno: 1030</div><div class="line">Last_Error: Error <span class="string">'Got error 122 from storage engine'</span> on query .....</div></pre></td></tr></table></figure>
+<h2 id="查找问题"><a href="#查找问题" class="headerlink" title="查找问题"></a>查找问题</h2><p>从include/my_base.h中找到错误码定义：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> HA_ERR_INTERNAL_ERROR   122	<span class="comment">/* Internal error */</span></span></div></pre></td></tr></table></figure>
+<p>没什么意义，没有具体说明。接着从mysql-test里面搜索是否有类似报错：</p>
+<p>在mysql-test/suite/innodb/r/partition.result里面搜到如下信息：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"># Bug#20819189: Assert if .frm exists but no partitioned InnoDB table</div><div class="line">#</div><div class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t1 (a <span class="built_in">int</span>) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">PARTITION</span> <span class="keyword">BY</span> <span class="keyword">HASH</span> (a) <span class="keyword">PARTITIONS</span> <span class="number">2</span>;</div><div class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t2;</div><div class="line">ERROR HY000: Got error 122 from storage engine</div><div class="line"><span class="keyword">FLUSH</span> <span class="keyword">TABLE</span> t2;</div><div class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> t1;</div></pre></td></tr></table></figure>
+<p>对应的test文件是：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">--echo #</span></div><div class="line"><span class="comment">--echo # Bug#20819189: Assert if .frm exists but no partitioned InnoDB table</span></div><div class="line"><span class="comment">--echo #</span></div><div class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t1 (a <span class="built_in">int</span>) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">PARTITION</span> <span class="keyword">BY</span> <span class="keyword">HASH</span> (a) <span class="keyword">PARTITIONS</span> <span class="number">2</span>;</div><div class="line"><span class="comment">--copy_file $MYSQLD_DATADIR/test/t1.frm $MYSQLD_DATADIR/test/t2.frm</span></div><div class="line"><span class="comment">--error ER_GET_ERRNO</span></div><div class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t2;</div><div class="line"><span class="comment">--remove_file $MYSQLD_DATADIR/test/t2.frm</span></div><div class="line"># Flush table is needed to remove the 'orphan' t2 definition.</div><div class="line"><span class="keyword">FLUSH</span> <span class="keyword">TABLE</span> t2;</div><div class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> t1;</div></pre></td></tr></table></figure>
+<p>可以看到是因为表只有frm文件，而缺失ibd文件导致的。</p>
+<h2 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h2><p>这种情况一般是在建表的时候，服务器异常宕机，导致只有frm文件生成。<br>对于这种问题，处理方法很简单，重建此表就行。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">rm t2.frm</div><div class="line"><span class="keyword">flush</span> <span class="keyword">table</span> t2;</div><div class="line"><span class="keyword">set</span> sql_log_bin=<span class="keyword">off</span>;</div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> t2 xxx</div><div class="line"><span class="keyword">set</span> sql_log_bin=<span class="keyword">on</span>;</div><div class="line"><span class="keyword">start</span> <span class="keyword">slave</span>;</div></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/13/newsql/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1208,7 +1372,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1219,7 +1383,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">8</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
