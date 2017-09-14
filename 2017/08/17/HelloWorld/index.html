@@ -118,7 +118,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"left","display":"hide","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -163,7 +163,7 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail ">
+  <div class="container sidebar-position-right page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -370,12 +370,18 @@
       
 
       
-        <h1 id="Here-comes-hexo-Here-comes-me"><a href="#Here-comes-hexo-Here-comes-me" class="headerlink" title="Here comes hexo, Here comes me!"></a>Here comes hexo, Here comes me!</h1>
+        <h1><span id="here-comes-hexo-here-comes-me">Here comes hexo, Here comes me!</span></h1>
       
     </div>
     
     
     
+    <div>
+      
+        
+
+      
+    </div>
 
     
 
@@ -555,7 +561,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Here-comes-hexo-Here-comes-me"><span class="nav-number">1.</span> <span class="nav-text">Here comes hexo, Here comes me!</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">Here comes hexo, Here comes me!</span></a></li></ol></div>
             
 
           </div>
@@ -563,6 +569,13 @@
       <!--/noindex-->
       
 
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
       
 
     </div>
@@ -614,11 +627,6 @@
       </div>
     </footer>
 
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
-      </div>
     
 
   </div>

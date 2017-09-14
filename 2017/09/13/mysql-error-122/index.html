@@ -106,7 +106,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="现场问题客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query .....">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-09-13T10:01:03.000Z">
+<meta property="og:updated_time" content="2017-09-14T01:09:40.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Got error 122 from storage engine">
 <meta name="twitter:description" content="现场问题客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query .....">
@@ -118,7 +118,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"left","display":"hide","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -163,7 +163,7 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail ">
+  <div class="container sidebar-position-right page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -381,10 +381,10 @@
       
 
       
-        <h2 id="现场问题"><a href="#现场问题" class="headerlink" title="现场问题"></a>现场问题</h2><p>客户重库SQL线程报错如下：</p>
+        <h2><span id="现场问题">现场问题</span></h2><p>客户重库SQL线程报错如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Last_Errno: 1030</div><div class="line">Last_Error: Error <span class="string">'Got error 122 from storage engine'</span> on query .....</div></pre></td></tr></table></figure>
 <a id="more"></a>
-<h2 id="查找问题"><a href="#查找问题" class="headerlink" title="查找问题"></a>查找问题</h2><p>从include/my_base.h中找到错误码定义：</p>
+<h2><span id="查找问题">查找问题</span></h2><p>从include/my_base.h中找到错误码定义：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> HA_ERR_INTERNAL_ERROR   122	<span class="comment">/* Internal error */</span></span></div></pre></td></tr></table></figure>
 <p>没什么意义，没有具体说明。接着从mysql-test里面搜索是否有类似报错：</p>
 <p>在mysql-test/suite/innodb/r/partition.result里面搜到如下信息：</p>
@@ -392,7 +392,7 @@
 <p>对应的test文件是：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">--echo #</span></div><div class="line"><span class="comment">--echo # Bug#20819189: Assert if .frm exists but no partitioned InnoDB table</span></div><div class="line"><span class="comment">--echo #</span></div><div class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t1 (a <span class="built_in">int</span>) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">PARTITION</span> <span class="keyword">BY</span> <span class="keyword">HASH</span> (a) <span class="keyword">PARTITIONS</span> <span class="number">2</span>;</div><div class="line"><span class="comment">--copy_file $MYSQLD_DATADIR/test/t1.frm $MYSQLD_DATADIR/test/t2.frm</span></div><div class="line"><span class="comment">--error ER_GET_ERRNO</span></div><div class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t2;</div><div class="line"><span class="comment">--remove_file $MYSQLD_DATADIR/test/t2.frm</span></div><div class="line"># Flush table is needed to remove the 'orphan' t2 definition.</div><div class="line"><span class="keyword">FLUSH</span> <span class="keyword">TABLE</span> t2;</div><div class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> t1;</div></pre></td></tr></table></figure>
 <p>可以看到是因为表只有frm文件，而缺失ibd文件导致的。</p>
-<h2 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h2><p>这种情况一般是在建表的时候，服务器异常宕机，导致只有frm文件生成。<br>对于这种问题，处理方法很简单，重建此表就行。</p>
+<h2><span id="解决问题">解决问题</span></h2><p>这种情况一般是在建表的时候，服务器异常宕机，导致只有frm文件生成。<br>对于这种问题，处理方法很简单，重建此表就行。</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">rm t2.frm</div><div class="line"><span class="keyword">flush</span> <span class="keyword">table</span> t2;</div><div class="line"><span class="keyword">set</span> sql_log_bin=<span class="keyword">off</span>;</div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> t2 xxx</div><div class="line"><span class="keyword">set</span> sql_log_bin=<span class="keyword">on</span>;</div><div class="line"><span class="keyword">start</span> <span class="keyword">slave</span>;</div></pre></td></tr></table></figure>
 
       
@@ -400,6 +400,43 @@
     
     
     
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/09/13/mysql-error-122/">Got error 122 from storage engine</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年09月13日 - 17:09</p>
+  <p><span>最后更新:</span>2017年09月14日 - 09:09</p>
+  <p><span>原始链接:</span><a href="/2017/09/13/mysql-error-122/" title="Got error 122 from storage engine">http://yoursite.com/2017/09/13/mysql-error-122/</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="http://yoursite.com/2017/09/13/mysql-error-122/"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+<script>
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({
+          title: "",
+          text: '复制成功',
+          html: false,
+          timer: 500,
+          showConfirmButton: false
+        });
+      });
+    }));
+</script>
+
+
+      
+    </div>
 
     
 
@@ -583,7 +620,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#现场问题"><span class="nav-number">1.</span> <span class="nav-text">现场问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查找问题"><span class="nav-number">2.</span> <span class="nav-text">查找问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决问题"><span class="nav-number">3.</span> <span class="nav-text">解决问题</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">现场问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">查找问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">解决问题</span></a></li></ol></div>
             
 
           </div>
@@ -591,6 +628,13 @@
       <!--/noindex-->
       
 
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
       
 
     </div>
@@ -642,11 +686,6 @@
       </div>
     </footer>
 
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
-      </div>
     
 
   </div>

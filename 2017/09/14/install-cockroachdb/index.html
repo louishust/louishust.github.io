@@ -106,7 +106,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="安装12345678910111213$ go get github.com/cockroachdb/cockroach$ cd $GOPATH/src/github.com/cockroachdb/cockroach$ make build$ sudo make install$ cockroach versionBuild Tag:    341f413Build Time:   2017/0">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-09-14T00:35:16.000Z">
+<meta property="og:updated_time" content="2017-09-14T01:09:32.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="源码安装cockroachdb">
 <meta name="twitter:description" content="安装12345678910111213$ go get github.com/cockroachdb/cockroach$ cd $GOPATH/src/github.com/cockroachdb/cockroach$ make build$ sudo make install$ cockroach versionBuild Tag:    341f413Build Time:   2017/0">
@@ -118,7 +118,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"left","display":"hide","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -163,7 +163,7 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail ">
+  <div class="container sidebar-position-right page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -370,14 +370,14 @@
       
 
       
-        <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">$ go get github.com/cockroachdb/cockroach</div><div class="line">$ <span class="built_in">cd</span> <span class="variable">$GOPATH</span>/src/github.com/cockroachdb/cockroach</div><div class="line">$ make build</div><div class="line">$ sudo make install</div><div class="line">$ cockroach version</div><div class="line">Build Tag:    341f413</div><div class="line">Build Time:   2017/09/13 23:39:20</div><div class="line">Distribution: CCL</div><div class="line">Platform:     darwin amd64</div><div class="line">Go Version:   go1.8.1</div><div class="line">C Compiler:   4.2.1 Compatible Apple LLVM 8.1.0 (clang-802.0.42)</div><div class="line">Build SHA-1:  341f4134c1e99e9e1a404d6984f15815120af5be</div><div class="line">Build Type:   development</div></pre></td></tr></table></figure>
+        <h2><span id="安装">安装</span></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">$ go get github.com/cockroachdb/cockroach</div><div class="line">$ <span class="built_in">cd</span> <span class="variable">$GOPATH</span>/src/github.com/cockroachdb/cockroach</div><div class="line">$ make build</div><div class="line">$ sudo make install</div><div class="line">$ cockroach version</div><div class="line">Build Tag:    341f413</div><div class="line">Build Time:   2017/09/13 23:39:20</div><div class="line">Distribution: CCL</div><div class="line">Platform:     darwin amd64</div><div class="line">Go Version:   go1.8.1</div><div class="line">C Compiler:   4.2.1 Compatible Apple LLVM 8.1.0 (clang-802.0.42)</div><div class="line">Build SHA-1:  341f4134c1e99e9e1a404d6984f15815120af5be</div><div class="line">Build Type:   development</div></pre></td></tr></table></figure>
 <a id="more"></a>
-<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><h3 id="启动第一个节点"><a href="#启动第一个节点" class="headerlink" title="启动第一个节点"></a>启动第一个节点</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cockroach start --insecure --store=node1</div></pre></td></tr></table></figure>
-<h3 id="启动第二个节点"><a href="#启动第二个节点" class="headerlink" title="启动第二个节点"></a>启动第二个节点</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">➜  cockroach cockroach start --insecure \</div><div class="line">--store=node2 \</div><div class="line">--host=localhost \</div><div class="line">--port=26258 \</div><div class="line">--http-port=8081 \</div><div class="line">--join=localhost:26257</div></pre></td></tr></table></figure>
-<h3 id="启动第三个节点"><a href="#启动第三个节点" class="headerlink" title="启动第三个节点"></a>启动第三个节点</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">➜  cockroach cockroach start --insecure \</div><div class="line">--store=node3 \</div><div class="line">--host=localhost \</div><div class="line">--port=26259 \</div><div class="line">--http-port=8082 \</div><div class="line">--join=localhost:26257</div></pre></td></tr></table></figure>
-<h2 id="登录客户端"><a href="#登录客户端" class="headerlink" title="登录客户端"></a>登录客户端</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ cockroach sql --insecure</div></pre></td></tr></table></figure>
-<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p><a href="http://localhost:8080/#/cluster/all/overview" target="_blank" rel="external">http://localhost:8080/#/cluster/all/overview</a></p>
-<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
+<h2><span id="启动">启动</span></h2><h3><span id="启动第一个节点">启动第一个节点</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cockroach start --insecure --store=node1</div></pre></td></tr></table></figure>
+<h3><span id="启动第二个节点">启动第二个节点</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">➜  cockroach cockroach start --insecure \</div><div class="line">--store=node2 \</div><div class="line">--host=localhost \</div><div class="line">--port=26258 \</div><div class="line">--http-port=8081 \</div><div class="line">--join=localhost:26257</div></pre></td></tr></table></figure>
+<h3><span id="启动第三个节点">启动第三个节点</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">➜  cockroach cockroach start --insecure \</div><div class="line">--store=node3 \</div><div class="line">--host=localhost \</div><div class="line">--port=26259 \</div><div class="line">--http-port=8082 \</div><div class="line">--join=localhost:26257</div></pre></td></tr></table></figure>
+<h2><span id="登录客户端">登录客户端</span></h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ cockroach sql --insecure</div></pre></td></tr></table></figure>
+<h2><span id="监控">监控</span></h2><p><a href="http://localhost:8080/#/cluster/all/overview" target="_blank" rel="external">http://localhost:8080/#/cluster/all/overview</a></p>
+<h2><span id="参考链接">参考链接</span></h2><ul>
 <li><a href="https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html" target="_blank" rel="external">https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html</a></li>
 <li><a href="https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html" target="_blank" rel="external">https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html</a></li>
 <li><a href="https://www.cockroachlabs.com/docs/stable/learn-cockroachdb-sql.html" target="_blank" rel="external">https://www.cockroachlabs.com/docs/stable/learn-cockroachdb-sql.html</a></li>
@@ -388,6 +388,43 @@
     
     
     
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/09/14/install-cockroachdb/">源码安装cockroachdb</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年09月14日 - 08:09</p>
+  <p><span>最后更新:</span>2017年09月14日 - 09:09</p>
+  <p><span>原始链接:</span><a href="/2017/09/14/install-cockroachdb/" title="源码安装cockroachdb">http://yoursite.com/2017/09/14/install-cockroachdb/</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="http://yoursite.com/2017/09/14/install-cockroachdb/"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+<script>
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({
+          title: "",
+          text: '复制成功',
+          html: false,
+          timer: 500,
+          showConfirmButton: false
+        });
+      });
+    }));
+</script>
+
+
+      
+    </div>
 
     
 
@@ -569,7 +606,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动"><span class="nav-number">2.</span> <span class="nav-text">启动</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#启动第一个节点"><span class="nav-number">2.1.</span> <span class="nav-text">启动第一个节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动第二个节点"><span class="nav-number">2.2.</span> <span class="nav-text">启动第二个节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动第三个节点"><span class="nav-number">2.3.</span> <span class="nav-text">启动第三个节点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#登录客户端"><span class="nav-number">3.</span> <span class="nav-text">登录客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#监控"><span class="nav-number">4.</span> <span class="nav-text">监控</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考链接"><span class="nav-number">5.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">启动</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text">启动第一个节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text">启动第二个节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text">启动第三个节点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">登录客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">监控</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
             
 
           </div>
@@ -577,6 +614,13 @@
       <!--/noindex-->
       
 
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
       
 
     </div>
@@ -628,11 +672,6 @@
       </div>
     </footer>
 
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
-      </div>
     
 
   </div>

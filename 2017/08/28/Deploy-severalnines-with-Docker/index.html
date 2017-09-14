@@ -106,7 +106,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="部署集群结构12345678910             +------------+                               +================+             |  proxysql  |   &amp;lt;- - - - - deploy/manage - -| ClusterControl |             +------------+">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-09-01T07:14:14.000Z">
+<meta property="og:updated_time" content="2017-09-14T01:09:58.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Deploy ClusterControl with Docker">
 <meta name="twitter:description" content="部署集群结构12345678910             +------------+                               +================+             |  proxysql  |   &amp;lt;- - - - - deploy/manage - -| ClusterControl |             +------------+">
@@ -118,7 +118,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"left","display":"hide","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -163,7 +163,7 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail ">
+  <div class="container sidebar-position-right page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -381,27 +381,64 @@
       
 
       
-        <h2 id="部署集群结构"><a href="#部署集群结构" class="headerlink" title="部署集群结构"></a>部署集群结构</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">             +------------+                               +================+</div><div class="line">             |  proxysql  |   &lt;- - - - - deploy/manage - -| ClusterControl |</div><div class="line">             +------------+                    |          +================+</div><div class="line">                    |                          |</div><div class="line">     _______________|_________________         |</div><div class="line">    |                                 |        |</div><div class="line">+--------+                       +--------+    |</div><div class="line">| master |                       | slave  |  &lt;-</div><div class="line">+--------+                       +--------+</div></pre></td></tr></table></figure>
+        <h2><span id="部署集群结构">部署集群结构</span></h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">             +------------+                               +================+</div><div class="line">             |  proxysql  |   &lt;- - - - - deploy/manage - -| ClusterControl |</div><div class="line">             +------------+                    |          +================+</div><div class="line">                    |                          |</div><div class="line">     _______________|_________________         |</div><div class="line">    |                                 |        |</div><div class="line">+--------+                       +--------+    |</div><div class="line">| master |                       | slave  |  &lt;-</div><div class="line">+--------+                       +--------+</div></pre></td></tr></table></figure>
 <a id="more"></a>
-<h2 id="获取所需镜像"><a href="#获取所需镜像" class="headerlink" title="获取所需镜像"></a>获取所需镜像</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ docker pull severalnines/clustercontrol</div><div class="line">$ docker pull severalnines/centos-ssh</div></pre></td></tr></table></figure>
-<h2 id="创建Network"><a href="#创建Network" class="headerlink" title="创建Network"></a>创建Network</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker network create --subnet=192.168.10.0/24 db-cluster</div></pre></td></tr></table></figure>
-<h2 id="创建clustercontrol容器"><a href="#创建clustercontrol容器" class="headerlink" title="创建clustercontrol容器"></a>创建clustercontrol容器</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name clustercontrol \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.10 \</div><div class="line">-h clustercontrol \</div><div class="line">-p 5000:80 \</div><div class="line">-p 5001:443 \</div><div class="line">severalnines/clustercontrol</div></pre></td></tr></table></figure>
-<h2 id="创建master-amp-slave容器"><a href="#创建master-amp-slave容器" class="headerlink" title="创建master&amp;slave容器"></a>创建master&amp;slave容器</h2><h3 id="创建master容器"><a href="#创建master容器" class="headerlink" title="创建master容器"></a>创建master容器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name master \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.100 \</div><div class="line">-h master \</div><div class="line">-p 6000:3306 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure>
-<h3 id="创建slave容器"><a href="#创建slave容器" class="headerlink" title="创建slave容器"></a>创建slave容器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name slave \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.101 \</div><div class="line">-h slave \</div><div class="line">-p 6001:3306 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure>
-<h2 id="通过clustercontrol部署master-amp-slave"><a href="#通过clustercontrol部署master-amp-slave" class="headerlink" title="通过clustercontrol部署master&amp;slave"></a>通过clustercontrol部署master&amp;slave</h2><ul>
+<h2><span id="获取所需镜像">获取所需镜像</span></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ docker pull severalnines/clustercontrol</div><div class="line">$ docker pull severalnines/centos-ssh</div></pre></td></tr></table></figure>
+<h2><span id="创建network">创建Network</span></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker network create --subnet=192.168.10.0/24 db-cluster</div></pre></td></tr></table></figure>
+<h2><span id="创建clustercontrol容器">创建clustercontrol容器</span></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name clustercontrol \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.10 \</div><div class="line">-h clustercontrol \</div><div class="line">-p 5000:80 \</div><div class="line">-p 5001:443 \</div><div class="line">severalnines/clustercontrol</div></pre></td></tr></table></figure>
+<h2><span id="创建masterampslave容器">创建master&amp;slave容器</span></h2><h3><span id="创建master容器">创建master容器</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name master \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.100 \</div><div class="line">-h master \</div><div class="line">-p 6000:3306 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure>
+<h3><span id="创建slave容器">创建slave容器</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name slave \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.101 \</div><div class="line">-h slave \</div><div class="line">-p 6001:3306 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure>
+<h2><span id="通过clustercontrol部署masterampslave">通过clustercontrol部署master&amp;slave</span></h2><ul>
 <li>SSH User: ‘root’</li>
 <li>SSH Key Path: ‘/root/.ssh/id_rsa’</li>
 <li>SSH Port: 22</li>
 </ul>
-<h2 id="创建proxysql容器"><a href="#创建proxysql容器" class="headerlink" title="创建proxysql容器"></a>创建proxysql容器</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name proxysql \</div><div class="line">-p 6033:3306 \</div><div class="line">--network db-cluster \</div><div class="line">-h proxysql \</div><div class="line">--ip 192.168.10.205 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure>
-<h2 id="为集群添加proxysql管理"><a href="#为集群添加proxysql管理" class="headerlink" title="为集群添加proxysql管理"></a>为集群添加proxysql管理</h2><p>ClusterControl -&gt; choose the cluster -&gt; Manage -&gt; Load Balancers -&gt; ProxySQL -&gt; Deploy ProxySQL.</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/severalnines/docker/tree/master/examples/docker" target="_blank" rel="external">Example Deployment on Standalone Docker</a></p>
+<h2><span id="创建proxysql容器">创建proxysql容器</span></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name proxysql \</div><div class="line">-p 6033:3306 \</div><div class="line">--network db-cluster \</div><div class="line">-h proxysql \</div><div class="line">--ip 192.168.10.205 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure>
+<h2><span id="为集群添加proxysql管理">为集群添加proxysql管理</span></h2><p>ClusterControl -&gt; choose the cluster -&gt; Manage -&gt; Load Balancers -&gt; ProxySQL -&gt; Deploy ProxySQL.</p>
+<h2><span id="参考文档">参考文档</span></h2><p><a href="https://github.com/severalnines/docker/tree/master/examples/docker" target="_blank" rel="external">Example Deployment on Standalone Docker</a></p>
 
       
     </div>
     
     
     
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/08/28/Deploy-severalnines-with-Docker/">Deploy ClusterControl with Docker</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年08月28日 - 14:08</p>
+  <p><span>最后更新:</span>2017年09月14日 - 09:09</p>
+  <p><span>原始链接:</span><a href="/2017/08/28/Deploy-severalnines-with-Docker/" title="Deploy ClusterControl with Docker">http://yoursite.com/2017/08/28/Deploy-severalnines-with-Docker/</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="http://yoursite.com/2017/08/28/Deploy-severalnines-with-Docker/"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+<script>
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({
+          title: "",
+          text: '复制成功',
+          html: false,
+          timer: 500,
+          showConfirmButton: false
+        });
+      });
+    }));
+</script>
+
+
+      
+    </div>
 
     
 
@@ -587,7 +624,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#部署集群结构"><span class="nav-number">1.</span> <span class="nav-text">部署集群结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#获取所需镜像"><span class="nav-number">2.</span> <span class="nav-text">获取所需镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建Network"><span class="nav-number">3.</span> <span class="nav-text">创建Network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建clustercontrol容器"><span class="nav-number">4.</span> <span class="nav-text">创建clustercontrol容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建master-amp-slave容器"><span class="nav-number">5.</span> <span class="nav-text">创建master&slave容器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建master容器"><span class="nav-number">5.1.</span> <span class="nav-text">创建master容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建slave容器"><span class="nav-number">5.2.</span> <span class="nav-text">创建slave容器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#通过clustercontrol部署master-amp-slave"><span class="nav-number">6.</span> <span class="nav-text">通过clustercontrol部署master&slave</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建proxysql容器"><span class="nav-number">7.</span> <span class="nav-text">创建proxysql容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为集群添加proxysql管理"><span class="nav-number">8.</span> <span class="nav-text">为集群添加proxysql管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文档"><span class="nav-number">9.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">部署集群结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">获取所需镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">创建Network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">创建clustercontrol容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">创建master&slave容器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text">创建master容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text">创建slave容器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">通过clustercontrol部署master&slave</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">7.</span> <span class="nav-text">创建proxysql容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">8.</span> <span class="nav-text">为集群添加proxysql管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">9.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
             
 
           </div>
@@ -595,6 +632,13 @@
       <!--/noindex-->
       
 
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
       
 
     </div>
@@ -646,11 +690,6 @@
       </div>
     </footer>
 
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
-      </div>
     
 
   </div>
