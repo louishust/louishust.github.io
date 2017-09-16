@@ -82,7 +82,7 @@
 <link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="hexo,blog," />
+  <meta name="keywords" content="mysql," />
 
 
 
@@ -98,18 +98,21 @@
 
 
 
-<meta name="description" content="Quick StartInstall hexo1$ npm install hexo-cli -g">
-<meta name="keywords" content="hexo,blog">
+<meta name="description" content="现场问题客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。">
+<meta name="keywords" content="mysql">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Set up blog with hexo &amp; next">
-<meta property="og:url" content="http://yoursite.com/2017/08/17/setup-hexo/index.html">
+<meta property="og:title" content="查找MySQL Table Lock">
+<meta property="og:url" content="http://yoursite.com/2017/09/16/table-lock/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="Quick StartInstall hexo1$ npm install hexo-cli -g">
+<meta property="og:description" content="现场问题客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-09-14T01:09:48.000Z">
+<meta property="og:image" content="http://yoursite.com/images/mysql/table_lock.jpeg">
+<meta property="og:image" content="http://yoursite.com/images/mysql/table_lock1.jpeg">
+<meta property="og:updated_time" content="2017-09-16T02:31:17.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Set up blog with hexo &amp; next">
-<meta name="twitter:description" content="Quick StartInstall hexo1$ npm install hexo-cli -g">
+<meta name="twitter:title" content="查找MySQL Table Lock">
+<meta name="twitter:description" content="现场问题客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。">
+<meta name="twitter:image" content="http://yoursite.com/images/mysql/table_lock.jpeg">
 
 
 
@@ -138,13 +141,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/08/17/setup-hexo/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/09/16/table-lock/"/>
 
 
 
 
 
-  <title>Set up blog with hexo & next | 小贝壳爸爸</title>
+  <title>查找MySQL Table Lock | 小贝壳爸爸</title>
   
 
 
@@ -281,7 +284,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/17/setup-hexo/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/16/table-lock/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -298,7 +301,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Set up blog with hexo & next</h1>
+          <h1 class="post-title" itemprop="name headline">查找MySQL Table Lock</h1>
         
 
         <div class="post-meta">
@@ -310,8 +313,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-17T20:17:04+08:00">
-                2017-08-17
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-16T10:13:13+08:00">
+                2017-09-16
               </time>
             
 
@@ -333,8 +336,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/X/" itemprop="url" rel="index">
-                    <span itemprop="name">X</span>
+                  <a href="/categories/MySQL/" itemprop="url" rel="index">
+                    <span itemprop="name">MySQL</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MySQL/MySQL运维/" itemprop="url" rel="index">
+                    <span itemprop="name">MySQL运维</span>
                   </a>
                 </span>
 
@@ -370,18 +384,24 @@
       
 
       
-        <h2><span id="quick-start">Quick Start</span></h2><h3><span id="install-hexo">Install hexo</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ npm install hexo-cli -g</div></pre></td></tr></table></figure>
-<a id="more"></a>
-<h3><span id="init-blog-directory">Init blog Directory</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ hexo init blog</div><div class="line">$ <span class="built_in">cd</span> blog</div><div class="line">$ npm install</div></pre></td></tr></table></figure>
-<h3><span id="create-a-new-post">Create a new post</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3><span id="run-server">Run server</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3><span id="generate-static-files">Generate static files</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3><span id="deploy-to-remote-sites">Deploy to remote sites</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-<h3><span id="tags-and-categories">Tags and Categories</span></h3><p>More info: <a href="http://theme-next.iissnan.com/theme-settings.html" target="_blank" rel="external">Tags&amp;Categories</a></p>
+        <h2><span id="现场问题">现场问题</span></h2><p>客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。</p>
+<p><img src="/images/mysql/table_lock.jpeg" alt=""><br><a id="more"></a></p>
+<h2><span id="查找问题">查找问题</span></h2><p>可以看到xtrabackup执行了FTWRL,此操作会阻塞住后续所有的操作，所以后续其它会话出现了<strong>waiting for global read lock</strong>.</p>
+<p>FTWRL也被阻塞住了，但是除了FTWRL被阻塞，还有很多时间更久的线程被阻塞住了，报的是waiting for table level lock。可以知道肯定是MyIsam表被阻塞了，但是在processlist里面没有找到最长的阻塞其它线程的语句。</p>
+<p>猜测可能是执行了LOCK TABLE操作，导致看不到会话信息，但是同样达到了阻塞其它线程的效果。</p>
+<p><strong>一般这种问题，我们把最长的那个语句找到，kill之后，集群就正常了。</strong></p>
+<p>但是目前从processlist中无法看到哪个会话是执行了LOCK TABLE操作，由于是操作的MyISAM表，故无法从innodb_lock等表中获取所信息。</p>
+<p>这时想到了<strong>mysqladmin debug</strong>操作，可以看到锁信息以及会话id.</p>
+<p><img src="/images/mysql/table_lock1.jpeg" alt=""></p>
+<h2><span id="解决问题">解决问题</span></h2><ol>
+<li>找到堵塞其它所有线程的那个线程，kill<ul>
+<li>通过processlist查找</li>
+<li>通过mysqladmin debug查找</li>
+</ul>
+</li>
+<li>尽量避免使用MyISAM表</li>
+<li>备份一定要在备库执行</li>
+</ol>
 
       
     </div>
@@ -398,11 +418,11 @@
   <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
   <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
-  <p><span>本文标题:</span><a href="/2017/08/17/setup-hexo/">Set up blog with hexo & next</a></p>
+  <p><span>本文标题:</span><a href="/2017/09/16/table-lock/">查找MySQL Table Lock</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
-  <p><span>发布时间:</span>2017年08月17日 - 20:08</p>
-  <p><span>最后更新:</span>2017年09月14日 - 09:09</p>
-  <p><span>原始链接:</span><a href="/2017/08/17/setup-hexo/">/2017/08/17/setup-hexo/</a></p>
+  <p><span>发布时间:</span>2017年09月16日 - 10:09</p>
+  <p><span>最后更新:</span>2017年09月16日 - 10:09</p>
+  <p><span>原始链接:</span><a href="/2017/09/16/table-lock/">/2017/09/16/table-lock/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
 
@@ -420,9 +440,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/hexo/" rel="tag"># hexo</a>
-          
-            <a href="/tags/blog/" rel="tag"># blog</a>
+            <a href="/tags/mysql/" rel="tag"># mysql</a>
           
         </div>
       
@@ -435,8 +453,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/08/17/HelloWorld/" rel="next" title="HelloWorld">
-                <i class="fa fa-chevron-left"></i> HelloWorld
+              <a href="/2017/09/14/ikea/" rel="next" title="宜家体验日">
+                <i class="fa fa-chevron-left"></i> 宜家体验日
               </a>
             
           </div>
@@ -444,10 +462,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/08/17/小贝壳喊爸爸/" rel="prev" title="小贝壳喊爸爸啦">
-                小贝壳喊爸爸啦 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -594,7 +608,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">Quick Start</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.1.</span> <span class="nav-text">Install hexo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.</span> <span class="nav-text">Init blog Directory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.3.</span> <span class="nav-text">Create a new post</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.4.</span> <span class="nav-text">Run server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.5.</span> <span class="nav-text">Generate static files</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.6.</span> <span class="nav-text">Deploy to remote sites</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.7.</span> <span class="nav-text">Tags and Categories</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">现场问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">查找问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">解决问题</span></a></li></ol></div>
             
 
           </div>
