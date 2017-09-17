@@ -82,7 +82,7 @@
 <link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="newsql," />
+  <meta name="keywords" content="bash," />
 
 
 
@@ -98,20 +98,18 @@
 
 
 
-<meta name="description" content="摘要NewSQL是真的优于传统的RDBMS，还是只是销售的噱头？ 如果是真的优于传统的RDBMS，那么其科学依据是什么？">
-<meta name="keywords" content="newsql">
+<meta name="description" content="移动光标 ctrl+b: 前移一个字符(backward) ctrl+f: 后移一个字符(forward) alt+b: 前移一个单词 alt+f: 后移一个单词 ctrl+a: 移到行首（a是首字母）  ctrl+e: 移到行尾（end） ctrl+x: 行首到当前光标替换">
+<meta name="keywords" content="bash">
 <meta property="og:type" content="article">
-<meta property="og:title" content="What’s Really New with NewSQL?">
-<meta property="og:url" content="http://yoursite.com/2017/09/13/newsql/index.html">
+<meta property="og:title" content="Bash Shell常用快捷键">
+<meta property="og:url" content="http://yoursite.com/2017/09/17/bash/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="摘要NewSQL是真的优于传统的RDBMS，还是只是销售的噱头？ 如果是真的优于传统的RDBMS，那么其科学依据是什么？">
+<meta property="og:description" content="移动光标 ctrl+b: 前移一个字符(backward) ctrl+f: 后移一个字符(forward) alt+b: 前移一个单词 alt+f: 后移一个单词 ctrl+a: 移到行首（a是首字母）  ctrl+e: 移到行尾（end） ctrl+x: 行首到当前光标替换">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/images/paper/newsql.png">
-<meta property="og:updated_time" content="2017-09-13T07:42:05.000Z">
+<meta property="og:updated_time" content="2017-09-17T13:32:03.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="What’s Really New with NewSQL?">
-<meta name="twitter:description" content="摘要NewSQL是真的优于传统的RDBMS，还是只是销售的噱头？ 如果是真的优于传统的RDBMS，那么其科学依据是什么？">
-<meta name="twitter:image" content="http://yoursite.com/images/paper/newsql.png">
+<meta name="twitter:title" content="Bash Shell常用快捷键">
+<meta name="twitter:description" content="移动光标 ctrl+b: 前移一个字符(backward) ctrl+f: 后移一个字符(forward) alt+b: 前移一个单词 alt+f: 后移一个单词 ctrl+a: 移到行首（a是首字母）  ctrl+e: 移到行尾（end） ctrl+x: 行首到当前光标替换">
 
 
 
@@ -140,13 +138,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/09/13/newsql/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/09/17/bash/"/>
 
 
 
 
 
-  <title>What’s Really New with NewSQL? | 小贝壳爸爸</title>
+  <title>Bash Shell常用快捷键 | 小贝壳爸爸</title>
   
 
 
@@ -283,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/13/newsql/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/17/bash/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -300,7 +298,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">What’s Really New with NewSQL?</h1>
+          <h1 class="post-title" itemprop="name headline">Bash Shell常用快捷键</h1>
         
 
         <div class="post-meta">
@@ -312,8 +310,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-13T09:24:43+08:00">
-                2017-09-13
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-17T21:29:31+08:00">
+                2017-09-17
               </time>
             
 
@@ -335,8 +333,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/paper/" itemprop="url" rel="index">
-                    <span itemprop="name">paper</span>
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
                   </a>
                 </span>
 
@@ -372,85 +370,49 @@
       
 
       
-        <h2><span id="摘要">摘要</span></h2><p>NewSQL是真的优于传统的RDBMS，还是只是销售的噱头？</p>
-<p>如果是真的优于传统的RDBMS，那么其科学依据是什么？</p>
-<a id="more"></a>
-<h2><span id="dbms历史">DBMS历史</span></h2><p>1960年IBM’s IMS.</p>
-<p>1970年IBM SYSTEM R, INGRES, Oracle.</p>
-<p>1983年IBM DB2.</p>
-<p>1990年MySQL,PG.</p>
-<p>2000年，数据库中间件，中间件只能执行简单的操作，对于多表更新，多表连接无能为力。</p>
-<p>2000年末，NOSQL，抛弃了事务特性和关系模型，取而代之的是最终一致性和替代模型，如KV,Document等模型 典型代表:Google BigTabel &amp; Amazon Dynamo &amp; MongoDB.</p>
-<p>很多使用NOSQL的开发人员发现需要自己处理最终一致性，导致开发效率低下，NewSQL应运而生。</p>
-<h2><span id="newsql定义">NewSQL定义</span></h2><p>NewSQL同时包含NOSQL的可扩展性以及传统RDBMS的事务特性，关注于OLTP场景。</p>
-<p>一些数据仓库如GP,关注于OLAP场景，不能称之为NEWSQL。</p>
-<p>NewSQL的特点:</p>
-<ol>
-<li>事务较短</li>
-<li>每个语句涉及到的数据量很少</li>
-<li>语句可重复性强</li>
-</ol>
-<p>更技术的定义是：</p>
-<ol>
-<li>使用lock-free并发控制</li>
-<li>share-nothing架构</li>
-</ol>
-<h2><span id="newsql分类">NewSQL分类</span></h2><p>大概分为三类：</p>
-<ol>
-<li>采用新架构的全新系统</li>
-<li>2000s左右的中间件系统</li>
-<li>DaaS</li>
-</ol>
-<p>单节点的引擎替换不属于NEWSQL，比如TokuDB,ScaleDB等。这类系统基本都走进了衰落。</p>
-<h3><span id="新架构">新架构</span></h3><p>特点：</p>
-<ol>
-<li>新架构基于share-nothing的方式，包含多节点并发控制，复制的容错技术，流量控制，以及分布式SQL执行器。</li>
-<li>分布式执行器是此类系统的特性，各个节点可以交换数据，不用像中间件那样，所有数据必须经过中间件处理。</li>
-<li>负责后端数据的分布,而不是依赖于一些分布式存储比如HDFS. SQL ON Hadoop我们不认为是NewSQL。</li>
-</ol>
-<p>新架构的问题是：</p>
-<ol>
-<li>使用的人太少</li>
-<li>用户之前的工具和程序没法直接使用</li>
-</ol>
-<h3><span id="透明中间件">透明中间件</span></h3><p>优点是用户应用程序兼容性好。<br>缺点是每个节点后端存储使用现成的MySQL，优化程度有限。而且对于复杂查询处理难度很大。但是可以利用每个后端节点的执行器。</p>
-<h3><span id="daas">DaaS</span></h3><p>大部分DaaS都是提供单点服务。这类称不上NewSQL。<br>Amazon的Aurora使用LSM提升了并发IO。<br>ClearDB只提供DaaS软件。<br>目前DaSS做的并不是特别好。</p>
-<h2><span id="先进的架构">先进的架构</span></h2><h3><span id="内存架构">内存架构</span></h3><p>内存性价比已经提升，大内存，价格降低，已经可以讲很大的数据量放进内存。<br>基于内存的优化可以不用再考虑对数据的等待，以及不用存在buffer pool的管理和非常繁重的并发控制模式。<br>目前内存数据库根据内部的内存追踪系统可以将部分内存swap到磁盘，从而达到可以处理的数据量大于实际内存容量的情况。</p>
-<h3><span id="分片">分片</span></h3><p>通过指定分片列，对数据进行水平切分，分散到不同的数据节点。<br>尽量将相关联的数据分配到同一个切片，这样可以将执行下放到一个节点，而且不需要使用2PC来维护分布式事务的原子性。<br>NUODB和MemSQL使用异构架构。<br>NuoDB架构：</p>
-<ol>
-<li>Storage Manager SM 负责存储数据,将数据切分成atoms。</li>
-<li>Transaction Engine TE 是atom的内存镜像，每个atom只会出现在一个TE中。</li>
-</ol>
-<p>MemSQL架构:</p>
-<ol>
-<li>只负责执行的聚集节点</li>
-<li>只负责存储的叶子节点</li>
-</ol>
-<p>两个架构的区别在于数据的缓存。NuoDB TE会缓存atom，MemSQL的聚集节点不缓存数据，但是叶子节点会执行部分语句,<br>来减少返回给聚集节点的数据。<br>分片另一个方面是在线迁移功能,包括数据迁移以及数据的rebalance。<br>主要两种技术手段：</p>
-<ol>
-<li>virtual partition</li>
-<li>根据range分区做更细粒度的balance.</li>
-</ol>
-<h3><span id="并发控制">并发控制</span></h3><p>并发控制分为中心化和无中心化两种。<br>中心化存在一个中心事务协调器。<br>去中心化系统每个节点维护事务状态，需要和其它节点通信来发现事务冲突。<br>去中心化系统扩展性好，但是需要一个强同步的时钟系统，保证事务的全局顺序。<br>2PL两阶段锁，开销比较大，处理死锁复杂。目前大多NewSQL系统采用2PL + MVCC。修改操作加锁，读不加锁，使用基于Time Order的MVCC获取对应的版本数据即可。</p>
-<h3><span id="二级索引">二级索引</span></h3><p>二级索引的分片方式和表的分片列不一致。<br>二级索引设计要点：</p>
-<ol>
-<li>存储在什么位置</li>
-<li>在事务中如何维护他们</li>
-</ol>
-<p>所有的NewSQL系统都使用分片二级索引的方式。分片方式和复制方式的区别：</p>
-<ol>
-<li>分片方式查找的时候可能找多个节点，更新只更新一个节点。</li>
-<li>复制方式，只查找一个节点，更新的话，所有副本都要更新。</li>
-</ol>
-<h3><span id="复制">复制</span></h3><p>数据库复制设计要点：保证各个节点数据的强一致性</p>
-<ul>
-<li>2PC消耗大</li>
-<li>active-active 多点写方式,很难实现，不同节点的执行顺序可能不一致。</li>
-<li>active-passive 单点写，给副本传递状态</li>
+        <h2><span id="移动光标">移动光标</span></h2><ul>
+<li><code>ctrl+b</code>: 前移一个字符(backward)</li>
+<li><code>ctrl+f</code>: 后移一个字符(forward)</li>
+<li><code>alt+b</code>: 前移一个单词</li>
+<li><code>alt+f</code>: 后移一个单词</li>
+<li><code>ctrl+a</code>: 移到行首（a是首字母） </li>
+<li><code>ctrl+e</code>: 移到行尾（end）</li>
+<li><code>ctrl+x</code>: 行首到当前光标替换<a id="more"></a>
+</li>
 </ul>
-<h3><span id="宕机恢复">宕机恢复</span></h3><p>传统单机的宕机恢复是找到最近的检查点，从此检查点开始重新应用WAL日志。NewSQL不能简单使用单机的策略。<br>因为分布式数据库一个master宕机后，其replica会提升为master，原master重启后，不仅仅需要应用WAL，还需要与当前的master同步数据。</p>
-<h2><span id="趋势">趋势</span></h2><p>可预见的未来，数据库的发展是朝向HTAP,即OLTP+OLAP混合型的方向发展。</p>
-<h2><span id="总结">总结</span></h2><p><img src="/images/paper/newsql.png" alt=""></p>
+<h2><span id="编辑命令">编辑命令</span></h2><ul>
+<li><code>alt+.</code>: 粘帖最后一次命令最后的参数（通常用于<code>mkdir long-long-dir</code>后, <code>cd</code>配合着<code>alt+.</code>）</li>
+<li><code>alt+d</code>: 删除当前光标到临近右边单词开始(delete)</li>
+<li><code>ctrl+w</code>: 删除当前光标到临近左边单词结束(word)</li>
+<li><code>ctrl+h</code>: 删除光标前一个字符（相当于backspace）</li>
+<li><code>ctrl+d</code>: 删除光标后一个字符（相当于delete）</li>
+<li><code>ctrl+u</code>: 删除光标左边所有</li>
+<li><code>ctrl+k</code>: 删除光标右边所有</li>
+<li><code>ctrl+l</code>: 清屏</li>
+<li><code>ctrl+shift+c</code>: 复制（相当于鼠标左键拖拽）</li>
+<li><code>ctrl+shift+v</code>: 粘贴（相当于鼠标中键）</li>
+</ul>
+<h2><span id="其它">其它</span></h2><ul>
+<li><code>ctrl+n</code>: 下一条命令</li>
+<li><code>ctrl+p</code>: 上一条命令</li>
+<li><code>alt+n</code>: 下一条命令（例如输入<code>ls</code>, 然后按’alt+n’, 就会找到历史记录下的<code>ls</code>命令）</li>
+<li><code>alt+p</code>: 上一条命令（跟<code>alt+n</code>相似）</li>
+<li><code>shift+PageUp</code>: 向上翻页</li>
+<li><code>shift+PageDown</code>: 向下翻页</li>
+<li><code>ctrl+r</code>: 进入历史查找命令记录， 输入关键字。 多次按返回下一个匹配项</li>
+</ul>
+<h2><span id="zsh">zsh</span></h2><ul>
+<li><code>d</code>: 列出以前的打开的命令</li>
+<li><code>j</code>: jump到以前某个目录，模糊匹配</li>
+</ul>
+<h2><span id="vim">Vim</span></h2><h3><span id="移动光标">移动光标</span></h3><ul>
+<li><code>b</code>: 向前移动一个单词</li>
+<li><code>w</code>: 向后移动一个单词</li>
+</ul>
+<h3><span id="删除">删除</span></h3><ul>
+<li><code>dw</code>: 从当前光标开始删除到下一个单词头</li>
+<li><code>de</code>: 从当前光标开始删除到单词尾</li>
+</ul>
 
       
     </div>
@@ -460,6 +422,21 @@
     <div>
       
         
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/09/17/bash/">Bash Shell常用快捷键</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年09月17日 - 21:09</p>
+  <p><span>最后更新:</span>2017年09月17日 - 21:09</p>
+  <p><span>原始链接:</span><a href="/2017/09/17/bash/">/2017/09/17/bash/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
 
       
     </div>
@@ -474,7 +451,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/newsql/" rel="tag"># newsql</a>
+            <a href="/tags/bash/" rel="tag"># bash</a>
           
         </div>
       
@@ -487,8 +464,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/09/01/install-mysql-5-7-18/" rel="next" title="MySQL源码学习001--Mac下MySQL 5.7.18源码安装">
-                <i class="fa fa-chevron-left"></i> MySQL源码学习001--Mac下MySQL 5.7.18源码安装
+              <a href="/2017/09/16/table-lock/" rel="next" title="查找MySQL Table Lock">
+                <i class="fa fa-chevron-left"></i> 查找MySQL Table Lock
               </a>
             
           </div>
@@ -496,10 +473,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/09/13/mysql-error-122/" rel="prev" title="Got error 122 from storage engine">
-                Got error 122 from storage engine <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -646,7 +619,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">DBMS历史</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">NewSQL定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">NewSQL分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text">新架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text">透明中间件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.</span> <span class="nav-text">DaaS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">先进的架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text">内存架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text">分片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.</span> <span class="nav-text">并发控制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.4.</span> <span class="nav-text">二级索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.5.</span> <span class="nav-text">复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.6.</span> <span class="nav-text">宕机恢复</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">趋势</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">移动光标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">编辑命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">其它</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">zsh</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">Vim</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text">移动光标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text">删除</span></a></li></ol></li></ol></div>
             
 
           </div>
