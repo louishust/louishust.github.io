@@ -98,20 +98,20 @@
 
 
 
-<meta name="description" content="现场问题客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。">
+<meta name="description" content="现场问题 客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。  &amp;lt;!--more--&amp;gt; 查找问题 可以看到xtrabackup执行了FTWRL,此操作会阻塞住后续所有的操作，所以后续其它会话出现了waiting for global read lock. FTWRL也被阻塞住了，但是除了FTWRL被阻塞，还有很多时间更久的">
 <meta name="keywords" content="mysql">
 <meta property="og:type" content="article">
 <meta property="og:title" content="查找MySQL Table Lock">
 <meta property="og:url" content="http://yoursite.com/2017/09/16/table-lock/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="现场问题客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。">
+<meta property="og:description" content="现场问题 客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。  &amp;lt;!--more--&amp;gt; 查找问题 可以看到xtrabackup执行了FTWRL,此操作会阻塞住后续所有的操作，所以后续其它会话出现了waiting for global read lock. FTWRL也被阻塞住了，但是除了FTWRL被阻塞，还有很多时间更久的">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/mysql/table_lock.jpeg">
 <meta property="og:image" content="http://yoursite.com/images/mysql/table_lock1.jpeg">
 <meta property="og:updated_time" content="2017-09-16T02:31:55.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="查找MySQL Table Lock">
-<meta name="twitter:description" content="现场问题客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。">
+<meta name="twitter:description" content="现场问题 客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。  &amp;lt;!--more--&amp;gt; 查找问题 可以看到xtrabackup执行了FTWRL,此操作会阻塞住后续所有的操作，所以后续其它会话出现了waiting for global read lock. FTWRL也被阻塞住了，但是除了FTWRL被阻塞，还有很多时间更久的">
 <meta name="twitter:image" content="http://yoursite.com/images/mysql/table_lock.jpeg">
 
 
@@ -121,7 +121,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -384,17 +384,22 @@
       
 
       
-        <h2><span id="现场问题">现场问题</span></h2><p>客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。</p>
-<p><img src="/images/mysql/table_lock.jpeg" alt=""><br><a id="more"></a></p>
-<h2><span id="查找问题">查找问题</span></h2><p>可以看到xtrabackup执行了FTWRL,此操作会阻塞住后续所有的操作，所以后续其它会话出现了<strong>waiting for global read lock</strong>.</p>
+        <h2><span id="xian-chang-wen-ti">现场问题</span></h2>
+<p>客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。</p>
+<p><img src="/images/mysql/table_lock.jpeg" alt="">
+&lt;!--more--&gt;</p>
+<h2><span id="cha-zhao-wen-ti">查找问题</span></h2>
+<p>可以看到xtrabackup执行了FTWRL,此操作会阻塞住后续所有的操作，所以后续其它会话出现了<strong>waiting for global read lock</strong>.</p>
 <p>FTWRL也被阻塞住了，但是除了FTWRL被阻塞，还有很多时间更久的线程被阻塞住了，报的是waiting for table level lock。可以知道肯定是MyIsam表被阻塞了，但是在processlist里面没有找到最长的阻塞其它线程的语句。</p>
 <p>猜测可能是执行了LOCK TABLE操作，导致看不到会话信息，但是同样达到了阻塞其它线程的效果。</p>
 <p><strong>一般这种问题，我们把最长的那个语句找到，kill之后，集群就正常了。</strong></p>
 <p>但是目前从processlist中无法看到哪个会话是执行了LOCK TABLE操作，由于是操作的MyISAM表，故无法从innodb_lock等表中获取所信息。</p>
 <p>这时想到了<strong>mysqladmin debug</strong>操作，可以看到锁信息以及会话id.</p>
 <p><img src="/images/mysql/table_lock1.jpeg" alt=""></p>
-<h2><span id="解决问题">解决问题</span></h2><ol>
-<li>找到堵塞其它所有线程的那个线程，kill掉<ul>
+<h2><span id="jie-jue-wen-ti">解决问题</span></h2>
+<ol>
+<li>找到堵塞其它所有线程的那个线程，kill掉
+<ul>
 <li>通过processlist查找</li>
 <li>通过mysqladmin debug查找</li>
 </ul>
@@ -517,17 +522,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview sidebar-panel">
+      <section class="site-overview sidebar-panel sidebar-panel-active">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.png"
@@ -542,7 +538,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">12</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -553,7 +549,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-count">11</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -564,7 +560,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-count">12</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -602,22 +598,6 @@
 
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">现场问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">查找问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">解决问题</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
