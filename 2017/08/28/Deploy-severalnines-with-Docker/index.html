@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="部署集群结构 12345678910             +------------+                               +================+             |  proxysql  |   &amp;lt;- - - - - deploy/manage - -| ClusterControl |             +------------+">
+<meta name="description" content="¶部署集群结构 12345678910             +------------+                               +================+             |  proxysql  |   &amp;lt;- - - - - deploy/manage - -| ClusterControl |             +------------">
 <meta name="keywords" content="severalnines,mysql">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Deploy ClusterControl with Docker">
 <meta property="og:url" content="http://yoursite.com/2017/08/28/Deploy-severalnines-with-Docker/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="部署集群结构 12345678910             +------------+                               +================+             |  proxysql  |   &amp;lt;- - - - - deploy/manage - -| ClusterControl |             +------------+">
+<meta property="og:description" content="¶部署集群结构 12345678910             +------------+                               +================+             |  proxysql  |   &amp;lt;- - - - - deploy/manage - -| ClusterControl |             +------------">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2017-09-14T01:09:58.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Deploy ClusterControl with Docker">
-<meta name="twitter:description" content="部署集群结构 12345678910             +------------+                               +================+             |  proxysql  |   &amp;lt;- - - - - deploy/manage - -| ClusterControl |             +------------+">
+<meta name="twitter:description" content="¶部署集群结构 12345678910             +------------+                               +================+             |  proxysql  |   &amp;lt;- - - - - deploy/manage - -| ClusterControl |             +------------">
 
 
 
@@ -381,31 +381,31 @@
       
 
       
-        <h2><span id="bu-shu-ji-qun-jie-gou">部署集群结构</span></h2>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">             +------------+                               +================+</div><div class="line">             |  proxysql  |   &lt;- - - - - deploy/manage - -| ClusterControl |</div><div class="line">             +------------+                    |          +================+</div><div class="line">                    |                          |</div><div class="line">     _______________|_________________         |</div><div class="line">    |                                 |        |</div><div class="line">+--------+                       +--------+    |</div><div class="line">| master |                       | slave  |  &lt;-</div><div class="line">+--------+                       +--------+</div></pre></td></tr></table></figure></p>
-<p>&lt;!--more--&gt;</p>
-<h2><span id="huo-qu-suo-xu-jing-xiang">获取所需镜像</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ docker pull severalnines/clustercontrol</div><div class="line">$ docker pull severalnines/centos-ssh</div></pre></td></tr></table></figure></p>
-<h2><span id="chuang-jian-network">创建Network</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker network create --subnet=192.168.10.0/24 db-cluster</div></pre></td></tr></table></figure></p>
-<h2><span id="chuang-jian-clustercontrol-rong-qi">创建clustercontrol容器</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name clustercontrol \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.10 \</div><div class="line">-h clustercontrol \</div><div class="line">-p 5000:80 \</div><div class="line">-p 5001:443 \</div><div class="line">severalnines/clustercontrol</div></pre></td></tr></table></figure></p>
-<h2><span id="chuang-jian-master-amp-slave-rong-qi">创建master&amp;slave容器</span></h2>
-<h3><span id="chuang-jian-master-rong-qi">创建master容器</span></h3>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name master \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.100 \</div><div class="line">-h master \</div><div class="line">-p 6000:3306 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure></p>
-<h3><span id="chuang-jian-slave-rong-qi">创建slave容器</span></h3>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name slave \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.101 \</div><div class="line">-h slave \</div><div class="line">-p 6001:3306 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure></p>
-<h2><span id="tong-guo-clustercontrol-bu-shu-master-amp-slave">通过clustercontrol部署master&amp;slave</span></h2>
+        <h2><span id="pbu-shu-ji-qun-jie-gou">部署集群结构</span></h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">             +------------+                               +================+</div><div class="line">             |  proxysql  |   &lt;- - - - - deploy/manage - -| ClusterControl |</div><div class="line">             +------------+                    |          +================+</div><div class="line">                    |                          |</div><div class="line">     _______________|_________________         |</div><div class="line">    |                                 |        |</div><div class="line">+--------+                       +--------+    |</div><div class="line">| master |                       | slave  |  &lt;-</div><div class="line">+--------+                       +--------+</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2><span id="phuo-qu-suo-xu-jing-xiang">获取所需镜像</span></h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ docker pull severalnines/clustercontrol</div><div class="line">$ docker pull severalnines/centos-ssh</div></pre></td></tr></table></figure>
+<h2><span id="pchuang-jian-network">创建Network</span></h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker network create --subnet=192.168.10.0/24 db-cluster</div></pre></td></tr></table></figure>
+<h2><span id="pchuang-jian-clustercontrol-rong-qi">创建clustercontrol容器</span></h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name clustercontrol \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.10 \</div><div class="line">-h clustercontrol \</div><div class="line">-p 5000:80 \</div><div class="line">-p 5001:443 \</div><div class="line">severalnines/clustercontrol</div></pre></td></tr></table></figure>
+<h2><span id="pchuang-jian-master-amp-slave-rong-qi">创建master&amp;slave容器</span></h2>
+<h3><span id="pchuang-jian-master-rong-qi">创建master容器</span></h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name master \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.100 \</div><div class="line">-h master \</div><div class="line">-p 6000:3306 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure>
+<h3><span id="pchuang-jian-slave-rong-qi">创建slave容器</span></h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name slave \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.101 \</div><div class="line">-h slave \</div><div class="line">-p 6001:3306 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure>
+<h2><span id="ptong-guo-clustercontrol-bu-shu-master-amp-slave">通过clustercontrol部署master&amp;slave</span></h2>
 <ul>
-<li>SSH User: 'root'</li>
-<li>SSH Key Path: '/root/.ssh/id_rsa'</li>
+<li>SSH User: ‘root’</li>
+<li>SSH Key Path: ‘/root/.ssh/id_rsa’</li>
 <li>SSH Port: 22</li>
 </ul>
-<h2><span id="chuang-jian-proxysql-rong-qi">创建proxysql容器</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name proxysql \</div><div class="line">-p 6033:3306 \</div><div class="line">--network db-cluster \</div><div class="line">-h proxysql \</div><div class="line">--ip 192.168.10.205 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure></p>
-<h2><span id="wei-ji-qun-tian-jia-proxysql-guan-li">为集群添加proxysql管理</span></h2>
+<h2><span id="pchuang-jian-proxysql-rong-qi">创建proxysql容器</span></h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name proxysql \</div><div class="line">-p 6033:3306 \</div><div class="line">--network db-cluster \</div><div class="line">-h proxysql \</div><div class="line">--ip 192.168.10.205 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure>
+<h2><span id="pwei-ji-qun-tian-jia-proxysql-guan-li">为集群添加proxysql管理</span></h2>
 <p>ClusterControl -&gt; choose the cluster -&gt; Manage -&gt; Load Balancers -&gt; ProxySQL -&gt; Deploy ProxySQL.</p>
-<h2><span id="can-kao-wen-dang">参考文档</span></h2>
+<h2><span id="pcan-kao-wen-dang">参考文档</span></h2>
 <p><a href="https://github.com/severalnines/docker/tree/master/examples/docker" target="_blank" rel="external">Example Deployment on Standalone Docker</a></p>
 
       

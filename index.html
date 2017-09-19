@@ -373,78 +373,15 @@
 
       
         
-          
-            <h2><span id="zhai-yao">摘要</span></h2>
+          <h2 id="摘要"><a class="header-anchor" href="#摘要">¶</a>摘要</h2>
 <p>MapReduce是用于大规模数据的新的编程模型，map对KV数据进行处理，生成中间KV结果，reduce对中间结果按照KEY进行分组操作。</p>
-<p>&lt;!--more--&gt;</p>
-<h2><span id="jian-jie">简介</span></h2>
-<p>随着互联网的发展，数据量出现了迸发式的增长，如何对如此大规模的数据进行分布式存储？如何基于这些数据进行并行计算？如何处理计算过程中的故障问题？</p>
-<p>为了解决基于大数据量、普通PC机器的大规模计算问题，可以将所有的计算单元抽象为map和reduce连个原子操作的集合。通过用户自定义的map和reduce的函数模型，我们可以实现执行单元的并发执行，以及良好的容错机制。</p>
-<h2><span id="bian-cheng-mo-xing">编程模型</span></h2>
-<p>计算的操作对象都是KV模型，用户只需要编写map和reduce函数即可实现编程。</p>
-<h3><span id="shi-li">示例</span></h3>
-<ul>
-<li>
-<p><strong><em>map函数</em></strong>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">map</span>(String key, String value):</div><div class="line">    <span class="comment">// key: document name </span></div><div class="line">    <span class="comment">// value: document contents </span></div><div class="line">    <span class="keyword">for</span> each word w in value:</div><div class="line">        EmitIntermediate(w, <span class="string">"1"</span>);</div></pre></td></tr></table></figure></p>
-</li>
-<li>
-<p><strong><em>reduce函数</em></strong>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">reduce(String key, Iterator values):</div><div class="line">    <span class="comment">// key: a word</span></div><div class="line">    <span class="comment">// values: a list of counts </span></div><div class="line">    <span class="keyword">int</span> result = <span class="number">0</span>;</div><div class="line">    <span class="keyword">for</span> each v in values:</div><div class="line">        result += ParseInt(v);</div><div class="line">    Emit(AsString(result));</div></pre></td></tr></table></figure></p>
-</li>
-</ul>
-<h2><span id="shi-xian">实现</span></h2>
-<h3><span id="zhi-xing-liu-cheng">执行流程</span></h3>
-<p><img src="/images/paper/mapreduce_execute_flow.png" alt="执行流程"></p>
-<ol>
-<li>讲输入进行分片，分片的基本单位是64MB</li>
-<li>程序fork出一个master和几个worker,master分配任务给worker,master挑选空闲的worker，分配map或者reduce任务进行执行</li>
-<li>执行map的worker读取分片的输入，应用用户的map程序，生成的中间KV结果集缓存在内存中。</li>
-<li>内存中的中间结果定期的按照HASH KEY的分区写到本地磁盘。</li>
-<li>master唤醒reduce的worker，通过RPC读取map相应位置的中间结果;reduce会首先对中间结果进行排序操作，如果内存不足，会导致外排。</li>
-<li>reduce worker遍历中间结果，应用用户的reduce函数。</li>
-<li>所有的map和reduce tasks执行结束，master将控制权交给用户程序。</li>
-</ol>
-<h3><span id="master-shu-ju-jie-gou">Master数据结构</span></h3>
-<p>master管理map和reduce task的状态，以及worker machine的状态。</p>
-<p>master将map产生的中间结果的位置，传递给reduce worker。</p>
-<h3><span id="rong-cuo">容错</span></h3>
-<h4><span id="worker-failure">worker failure</span></h4>
-<p>master定期ping各个worker机器，如果在规定时间内不返回的话，认为此机器宕机了。</p>
-<ul>
-<li>任何执行完成的map task会重置为idle状态，被重新执行。</li>
-<li>任何在执行中的map和reduce task会被重置为idle状态。</li>
-<li>已经执行完成的reduce task不会被重新执行。</li>
-</ul>
-<h4><span id="master-failure">master failure</span></h4>
-<p>可以通过周期性的做检查点，来恢复master故障，但是考虑到master只有一个，很少出现故障，因此如果master宕机，这里选择放弃当前任务的策略。</p>
-<h4><span id="chu-cuo-de-chu-li">出错的处理</span></h4>
-<p>如果用户的map和reduce函数是确定性函数，则其结果集也是确定的。</p>
-<p>不会存在map的中间结果被重复执行的情况。master会忽略相同的map输出结果。</p>
-<p>也不会存在多个相同的reduce操作同时进行，因为reduce的结果会先生成临时文件，然后执行rename操作，rename操作是原子的，如果多个相同的reduce执行rename操作，只有一个会成功。依赖的GFS底层的原子rename操作。</p>
-<h3><span id="ben-di-ji-suan">本地计算</span></h3>
-<p>带宽是mapreduce集群非常重要的一个因素，尽量讲map下放到和其分片数据在一台机器上的worker。尽量减少数据在网络的传输。GFS中的数据存在3个副本，master会尽可能利用副本所在的机器分配worker。</p>
-<h3><span id="ren-wu-li-du">任务粒度</span></h3>
-<p>已经将map分为M片，reduce分为R片。应该让M和R远远大于worker机器，这样每个worker可以分配更多的任务，任务粒度更低，任务调度更加准确，更有利于集群机器的负载均衡。</p>
-<h3><span id="bei-fen-ren-wu">备份任务</span></h3>
-<p>很多作业的最终任务集中在几个大的reduce上，而这几个大的reduce可能因为机器原因往往导致执行特别慢。</p>
-<p>我们提供备份任务的机制，当MR任务进入最后的快要结束状态，master备份各个task的状态，并利用其它worker去执行未完成的task，这样，不管是主的任务还是备份任务，只要有一个完成，整个任务就算结束了。</p>
-<p>经过我们的实际统计的数据，可以知道，关闭backup策略后，执行时间普遍增加44%.</p>
-<h2><span id="you-hua">优化</span></h2>
-<h3><span id="fen-qu-han-shu">分区函数</span></h3>
-<p>默认的分区函数是hash(key)的方式，一般来说，数据会比较均匀，当然也存在特殊情况。MR库提供特殊的分区函数，如hash(Hostname(urlkey))</p>
-<h3><span id="zhong-jian-jie-guo-pai-xu">中间结果排序</span></h3>
-<p>保证每个partiton的key按照升序排列,有利于后续需要排序的操作。</p>
-<h3><span id="combiner-han-shu">Combiner函数</span></h3>
-<p>允许每个partition进行提前合并，在map之后，在reduce之前，比如单词统计中，(&quot;the&quot;, 1)肯定有很多，可以先统计成(&quot;the&quot;, N), 再传递给reduce</p>
-<h3><span id="fu-zuo-yong">副作用</span></h3>
-<p>尽量减少手动生成临时文件，因为无法保证多个文件的原子性提交。</p>
-<h3><span id="tiao-guo-cuo-wu-ji-lu">跳过错误记录</span></h3>
-<p>由于程序或者数据问题，引起部分task异常的时候，可以选择性的忽略对这些数据的操作。</p>
-<h3><span id="ben-di-zhi-xing">本地执行</span></h3>
-<p>由于分布式系统的不确定性，提供了本地执行的方式，所有的任务在一台机器上顺序执行，并提供了类似gdb的工具进行调试。</p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/09/18/mapreduce/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -586,8 +523,7 @@
 
       
         
-          
-            <h2><span id="yi-dong-guang-biao">移动光标</span></h2>
+          <h2 id="移动光标"><a class="header-anchor" href="#移动光标">¶</a>移动光标</h2>
 <ul>
 <li><code>ctrl+b</code>: 前移一个字符(backward)</li>
 <li><code>ctrl+f</code>: 后移一个字符(forward)</li>
@@ -595,50 +531,15 @@
 <li><code>alt+f</code>: 后移一个单词</li>
 <li><code>ctrl+a</code>: 移到行首（a是首字母）</li>
 <li><code>ctrl+e</code>: 移到行尾（end）</li>
-<li><code>ctrl+x</code>: 行首到当前光标替换
-&lt;!--more--&gt;</li>
+<li><code>ctrl+x</code>: 行首到当前光标替换</li>
 </ul>
-<h2><span id="bian-ji-ming-ling">编辑命令</span></h2>
-<ul>
-<li><code>alt+.</code>: 粘帖最后一次命令最后的参数（通常用于<code>mkdir long-long-dir</code>后, <code>cd</code>配合着<code>alt+.</code>）</li>
-<li><code>alt+d</code>: 删除当前光标到临近右边单词开始(delete)</li>
-<li><code>ctrl+w</code>: 删除当前光标到临近左边单词结束(word)</li>
-<li><code>ctrl+h</code>: 删除光标前一个字符（相当于backspace）</li>
-<li><code>ctrl+d</code>: 删除光标后一个字符（相当于delete）</li>
-<li><code>ctrl+u</code>: 删除光标左边所有</li>
-<li><code>ctrl+k</code>: 删除光标右边所有</li>
-<li><code>ctrl+l</code>: 清屏</li>
-<li><code>ctrl+shift+c</code>: 复制（相当于鼠标左键拖拽）</li>
-<li><code>ctrl+shift+v</code>: 粘贴（相当于鼠标中键）</li>
-</ul>
-<h2><span id="qi-ta">其它</span></h2>
-<ul>
-<li><code>ctrl+n</code>: 下一条命令</li>
-<li><code>ctrl+p</code>: 上一条命令</li>
-<li><code>alt+n</code>: 下一条命令（例如输入<code>ls</code>, 然后按'alt+n', 就会找到历史记录下的<code>ls</code>命令）</li>
-<li><code>alt+p</code>: 上一条命令（跟<code>alt+n</code>相似）</li>
-<li><code>shift+PageUp</code>: 向上翻页</li>
-<li><code>shift+PageDown</code>: 向下翻页</li>
-<li><code>ctrl+r</code>: 进入历史查找命令记录， 输入关键字。 多次按返回下一个匹配项</li>
-</ul>
-<h2><span id="zsh">zsh</span></h2>
-<ul>
-<li><code>d</code>: 列出以前的打开的命令</li>
-<li><code>j</code>: jump到以前某个目录，模糊匹配</li>
-</ul>
-<h2><span id="vim">Vim</span></h2>
-<h3><span id="yi-dong-guang-biao">移动光标</span></h3>
-<ul>
-<li><code>b</code>: 向前移动一个单词</li>
-<li><code>w</code>: 向后移动一个单词</li>
-</ul>
-<h3><span id="shan-chu">删除</span></h3>
-<ul>
-<li><code>dw</code>: 从当前光标开始删除到下一个单词头</li>
-<li><code>de</code>: 从当前光标开始删除到单词尾</li>
-</ul>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/09/17/bash/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -791,32 +692,16 @@
 
       
         
-          
-            <h2><span id="xian-chang-wen-ti">现场问题</span></h2>
+          <h2 id="现场问题"><a class="header-anchor" href="#现场问题">¶</a>现场问题</h2>
 <p>客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。</p>
-<p><img src="/images/mysql/table_lock.jpeg" alt="">
-&lt;!--more--&gt;</p>
-<h2><span id="cha-zhao-wen-ti">查找问题</span></h2>
-<p>可以看到xtrabackup执行了FTWRL,此操作会阻塞住后续所有的操作，所以后续其它会话出现了<strong>waiting for global read lock</strong>.</p>
-<p>FTWRL也被阻塞住了，但是除了FTWRL被阻塞，还有很多时间更久的线程被阻塞住了，报的是waiting for table level lock。可以知道肯定是MyIsam表被阻塞了，但是在processlist里面没有找到最长的阻塞其它线程的语句。</p>
-<p>猜测可能是执行了LOCK TABLE操作，导致看不到会话信息，但是同样达到了阻塞其它线程的效果。</p>
-<p><strong>一般这种问题，我们把最长的那个语句找到，kill之后，集群就正常了。</strong></p>
-<p>但是目前从processlist中无法看到哪个会话是执行了LOCK TABLE操作，由于是操作的MyISAM表，故无法从innodb_lock等表中获取所信息。</p>
-<p>这时想到了<strong>mysqladmin debug</strong>操作，可以看到锁信息以及会话id.</p>
-<p><img src="/images/mysql/table_lock1.jpeg" alt=""></p>
-<h2><span id="jie-jue-wen-ti">解决问题</span></h2>
-<ol>
-<li>找到堵塞其它所有线程的那个线程，kill掉
-<ul>
-<li>通过processlist查找</li>
-<li>通过mysqladmin debug查找</li>
-</ul>
-</li>
-<li>尽量避免使用MyISAM表</li>
-<li>备份一定要在备库执行</li>
-</ol>
-
-          
+<p><img src="/images/mysql/table_lock.jpeg" alt=""></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/09/16/table-lock/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -958,21 +843,15 @@
 
       
         
-          
-            <p>宜家开业快1个月了，据说开业的时候排队要3个小时才能进店。
+          <p>宜家开业快1个月了，据说开业的时候排队要3个小时才能进店。<br>
 今天专门请了一天假，带着老婆孩子来逛逛，几个月之后就要布置新家了，正好提前看看。</p>
-<p>&lt;!--more--&gt;</p>
-<p>首先坐电梯直接到3楼，按照地上的投影箭头的方向进行前进，所有的分场会一个不漏的路过。
-宜家里面的冷气开的太低，需要自备长袖。</p>
-<p>三楼主要是卧室、书房、客厅、厨房的家具，还有一个餐厅，到了中午，人特别多，排队就要半个小时。饭菜味道一般，环境还可以。</p>
-<p>二楼主要是厨房用品以及一些装饰性用品。</p>
-<p>总体感觉宜家的风格非常简约，实用至上。各种提示非常清晰，基本不太需要服务人员，自助性非常强。体验还是不错的。过两个月就要再来大规模选购家具了~~</p>
-<p>晒娃时间：</p>
-<p><img src="/images/shell/ikea1.jpeg" alt="">
-<img src="/images/shell/ikea2.jpeg" alt="">
-<img src="/images/shell/ikea3.jpeg" alt=""></p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/09/14/ikea/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1114,29 +993,15 @@
 
       
         
-          
-            <h2><span id="an-zhuang">安装</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">$ go get github.com/cockroachdb/cockroach</div><div class="line">$ <span class="built_in">cd</span> <span class="variable">$GOPATH</span>/src/github.com/cockroachdb/cockroach</div><div class="line">$ make build</div><div class="line">$ sudo make install</div><div class="line">$ cockroach version</div><div class="line">Build Tag:    341f413</div><div class="line">Build Time:   2017/09/13 23:39:20</div><div class="line">Distribution: CCL</div><div class="line">Platform:     darwin amd64</div><div class="line">Go Version:   go1.8.1</div><div class="line">C Compiler:   4.2.1 Compatible Apple LLVM 8.1.0 (clang-802.0.42)</div><div class="line">Build SHA-1:  341f4134c1e99e9e1a404d6984f15815120af5be</div><div class="line">Build Type:   development</div></pre></td></tr></table></figure></p>
-<p>&lt;!--more--&gt;</p>
-<h2><span id="qi-dong">启动</span></h2>
-<h3><span id="qi-dong-di-yi-ge-jie-dian">启动第一个节点</span></h3>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cockroach start --insecure --store=node1</div></pre></td></tr></table></figure></p>
-<h3><span id="qi-dong-di-er-ge-jie-dian">启动第二个节点</span></h3>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">➜  cockroach cockroach start --insecure \</div><div class="line">--store=node2 \</div><div class="line">--host=localhost \</div><div class="line">--port=26258 \</div><div class="line">--http-port=8081 \</div><div class="line">--join=localhost:26257</div></pre></td></tr></table></figure></p>
-<h3><span id="qi-dong-di-san-ge-jie-dian">启动第三个节点</span></h3>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">➜  cockroach cockroach start --insecure \</div><div class="line">--store=node3 \</div><div class="line">--host=localhost \</div><div class="line">--port=26259 \</div><div class="line">--http-port=8082 \</div><div class="line">--join=localhost:26257</div></pre></td></tr></table></figure></p>
-<h2><span id="deng-lu-ke-hu-duan">登录客户端</span></h2>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ cockroach sql --insecure</div></pre></td></tr></table></figure></p>
-<h2><span id="jian-kong">监控</span></h2>
-<p><a href="http://localhost:8080/#/cluster/all/overview" target="_blank" rel="external">http://localhost:8080/#/cluster/all/overview</a></p>
-<h2><span id="can-kao-lian-jie">参考链接</span></h2>
-<ul>
-<li><a href="https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html" target="_blank" rel="external">https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html</a></li>
-<li><a href="https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html" target="_blank" rel="external">https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html</a></li>
-<li><a href="https://www.cockroachlabs.com/docs/stable/learn-cockroachdb-sql.html" target="_blank" rel="external">https://www.cockroachlabs.com/docs/stable/learn-cockroachdb-sql.html</a></li>
-</ul>
-
-          
+          <h2 id="安装"><a class="header-anchor" href="#安装">¶</a>安装</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">$ go get github.com/cockroachdb/cockroach</div><div class="line">$ <span class="built_in">cd</span> <span class="variable">$GOPATH</span>/src/github.com/cockroachdb/cockroach</div><div class="line">$ make build</div><div class="line">$ sudo make install</div><div class="line">$ cockroach version</div><div class="line">Build Tag:    341f413</div><div class="line">Build Time:   2017/09/13 23:39:20</div><div class="line">Distribution: CCL</div><div class="line">Platform:     darwin amd64</div><div class="line">Go Version:   go1.8.1</div><div class="line">C Compiler:   4.2.1 Compatible Apple LLVM 8.1.0 (clang-802.0.42)</div><div class="line">Build SHA-1:  341f4134c1e99e9e1a404d6984f15815120af5be</div><div class="line">Build Type:   development</div></pre></td></tr></table></figure>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/09/14/install-cockroachdb/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1289,26 +1154,16 @@
 
       
         
-          
-            <h2><span id="xian-chang-wen-ti">现场问题</span></h2>
+          <h2 id="现场问题"><a class="header-anchor" href="#现场问题">¶</a>现场问题</h2>
 <p>客户重库SQL线程报错如下：</p>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Last_Errno: 1030</div><div class="line">Last_Error: Error <span class="string">'Got error 122 from storage engine'</span> on query .....</div></pre></td></tr></table></figure></p>
-<p>&lt;!--more--&gt;</p>
-<h2><span id="cha-zhao-wen-ti">查找问题</span></h2>
-<p>从include/my_base.h中找到错误码定义：</p>
-<p><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> HA_ERR_INTERNAL_ERROR   122	<span class="comment">/* Internal error */</span></span></div></pre></td></tr></table></figure></p>
-<p>没什么意义，没有具体说明。接着从mysql-test里面搜索是否有类似报错：</p>
-<p>在mysql-test/suite/innodb/r/partition.result里面搜到如下信息：</p>
-<p><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"># Bug#20819189: Assert if .frm exists but no partitioned InnoDB table</div><div class="line">#</div><div class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t1 (a <span class="built_in">int</span>) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">PARTITION</span> <span class="keyword">BY</span> <span class="keyword">HASH</span> (a) <span class="keyword">PARTITIONS</span> <span class="number">2</span>;</div><div class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t2;</div><div class="line">ERROR HY000: Got error 122 from storage engine</div><div class="line"><span class="keyword">FLUSH</span> <span class="keyword">TABLE</span> t2;</div><div class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> t1;</div></pre></td></tr></table></figure></p>
-<p>对应的test文件是：</p>
-<p><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">--echo #</span></div><div class="line"><span class="comment">--echo # Bug#20819189: Assert if .frm exists but no partitioned InnoDB table</span></div><div class="line"><span class="comment">--echo #</span></div><div class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t1 (a <span class="built_in">int</span>) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">PARTITION</span> <span class="keyword">BY</span> <span class="keyword">HASH</span> (a) <span class="keyword">PARTITIONS</span> <span class="number">2</span>;</div><div class="line"><span class="comment">--copy_file $MYSQLD_DATADIR/test/t1.frm $MYSQLD_DATADIR/test/t2.frm</span></div><div class="line"><span class="comment">--error ER_GET_ERRNO</span></div><div class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t2;</div><div class="line"><span class="comment">--remove_file $MYSQLD_DATADIR/test/t2.frm</span></div><div class="line"># Flush table is needed to remove the 'orphan' t2 definition.</div><div class="line"><span class="keyword">FLUSH</span> <span class="keyword">TABLE</span> t2;</div><div class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> t1;</div></pre></td></tr></table></figure></p>
-<p>可以看到是因为表只有frm文件，而缺失ibd文件导致的。</p>
-<h2><span id="jie-jue-wen-ti">解决问题</span></h2>
-<p>这种情况一般是在建表的时候，服务器异常宕机，导致只有frm文件生成。
-对于这种问题，处理方法很简单，重建此表就行。</p>
-<p><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">rm t2.frm</div><div class="line"><span class="keyword">flush</span> <span class="keyword">table</span> t2;</div><div class="line"><span class="keyword">set</span> sql_log_bin=<span class="keyword">off</span>;</div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> t2 xxx</div><div class="line"><span class="keyword">set</span> sql_log_bin=<span class="keyword">on</span>;</div><div class="line"><span class="keyword">start</span> <span class="keyword">slave</span>;</div></pre></td></tr></table></figure></p>
-
-          
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Last_Errno: 1030</div><div class="line">Last_Error: Error <span class="string">'Got error 122 from storage engine'</span> on query .....</div></pre></td></tr></table></figure>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/09/13/mysql-error-122/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1450,122 +1305,16 @@
 
       
         
-          
-            <h2><span id="zhai-yao">摘要</span></h2>
+          <h2 id="摘要"><a class="header-anchor" href="#摘要">¶</a>摘要</h2>
 <p>NewSQL是真的优于传统的RDBMS，还是只是销售的噱头？</p>
 <p>如果是真的优于传统的RDBMS，那么其科学依据是什么？</p>
-<p>&lt;!--more--&gt;</p>
-<h2><span id="dbms-li-shi">DBMS历史</span></h2>
-<p>1960年IBM's IMS.</p>
-<p>1970年IBM SYSTEM R, INGRES, Oracle.</p>
-<p>1983年IBM DB2.</p>
-<p>1990年MySQL,PG.</p>
-<p>2000年，数据库中间件，中间件只能执行简单的操作，对于多表更新，多表连接无能为力。</p>
-<p>2000年末，NOSQL，抛弃了事务特性和关系模型，取而代之的是最终一致性和替代模型，如KV,Document等模型 典型代表:Google BigTabel &amp; Amazon Dynamo &amp; MongoDB.</p>
-<p>很多使用NOSQL的开发人员发现需要自己处理最终一致性，导致开发效率低下，NewSQL应运而生。</p>
-<h2><span id="newsql-ding-yi">NewSQL定义</span></h2>
-<p>NewSQL同时包含NOSQL的可扩展性以及传统RDBMS的事务特性，关注于OLTP场景。</p>
-<p>一些数据仓库如GP,关注于OLAP场景，不能称之为NEWSQL。</p>
-<p>NewSQL的特点:</p>
-<ol>
-<li>事务较短</li>
-<li>每个语句涉及到的数据量很少</li>
-<li>语句可重复性强</li>
-</ol>
-<p>更技术的定义是：</p>
-<ol>
-<li>使用lock-free并发控制</li>
-<li>share-nothing架构</li>
-</ol>
-<h2><span id="newsql-fen-lei">NewSQL分类</span></h2>
-<p>大概分为三类：</p>
-<ol>
-<li>采用新架构的全新系统</li>
-<li>2000s左右的中间件系统</li>
-<li>DaaS</li>
-</ol>
-<p>单节点的引擎替换不属于NEWSQL，比如TokuDB,ScaleDB等。这类系统基本都走进了衰落。</p>
-<h3><span id="xin-jia-gou">新架构</span></h3>
-<p>特点：</p>
-<ol>
-<li>新架构基于share-nothing的方式，包含多节点并发控制，复制的容错技术，流量控制，以及分布式SQL执行器。</li>
-<li>分布式执行器是此类系统的特性，各个节点可以交换数据，不用像中间件那样，所有数据必须经过中间件处理。</li>
-<li>负责后端数据的分布,而不是依赖于一些分布式存储比如HDFS. SQL ON Hadoop我们不认为是NewSQL。</li>
-</ol>
-<p>新架构的问题是：</p>
-<ol>
-<li>使用的人太少</li>
-<li>用户之前的工具和程序没法直接使用</li>
-</ol>
-<h3><span id="tou-ming-zhong-jian-jian">透明中间件</span></h3>
-<p>优点是用户应用程序兼容性好。
-缺点是每个节点后端存储使用现成的MySQL，优化程度有限。而且对于复杂查询处理难度很大。但是可以利用每个后端节点的执行器。</p>
-<h3><span id="daas">DaaS</span></h3>
-<p>大部分DaaS都是提供单点服务。这类称不上NewSQL。
-Amazon的Aurora使用LSM提升了并发IO。
-ClearDB只提供DaaS软件。
-目前DaSS做的并不是特别好。</p>
-<h2><span id="xian-jin-de-jia-gou">先进的架构</span></h2>
-<h3><span id="nei-cun-jia-gou">内存架构</span></h3>
-<p>内存性价比已经提升，大内存，价格降低，已经可以讲很大的数据量放进内存。
-基于内存的优化可以不用再考虑对数据的等待，以及不用存在buffer pool的管理和非常繁重的并发控制模式。
-目前内存数据库根据内部的内存追踪系统可以将部分内存swap到磁盘，从而达到可以处理的数据量大于实际内存容量的情况。</p>
-<h3><span id="fen-pian">分片</span></h3>
-<p>通过指定分片列，对数据进行水平切分，分散到不同的数据节点。
-尽量将相关联的数据分配到同一个切片，这样可以将执行下放到一个节点，而且不需要使用2PC来维护分布式事务的原子性。
-NUODB和MemSQL使用异构架构。
-NuoDB架构：</p>
-<ol>
-<li>Storage Manager SM 负责存储数据,将数据切分成atoms。</li>
-<li>Transaction Engine TE 是atom的内存镜像，每个atom只会出现在一个TE中。</li>
-</ol>
-<p>MemSQL架构:</p>
-<ol>
-<li>只负责执行的聚集节点</li>
-<li>只负责存储的叶子节点</li>
-</ol>
-<p>两个架构的区别在于数据的缓存。NuoDB TE会缓存atom，MemSQL的聚集节点不缓存数据，但是叶子节点会执行部分语句,
-来减少返回给聚集节点的数据。
-分片另一个方面是在线迁移功能,包括数据迁移以及数据的rebalance。
-主要两种技术手段：</p>
-<ol>
-<li>virtual partition</li>
-<li>根据range分区做更细粒度的balance.</li>
-</ol>
-<h3><span id="bing-fa-kong-zhi">并发控制</span></h3>
-<p>并发控制分为中心化和无中心化两种。
-中心化存在一个中心事务协调器。
-去中心化系统每个节点维护事务状态，需要和其它节点通信来发现事务冲突。
-去中心化系统扩展性好，但是需要一个强同步的时钟系统，保证事务的全局顺序。
-2PL两阶段锁，开销比较大，处理死锁复杂。目前大多NewSQL系统采用2PL + MVCC。修改操作加锁，读不加锁，使用基于Time Order的MVCC获取对应的版本数据即可。</p>
-<h3><span id="er-ji-suo-yin">二级索引</span></h3>
-<p>二级索引的分片方式和表的分片列不一致。
-二级索引设计要点：</p>
-<ol>
-<li>存储在什么位置</li>
-<li>在事务中如何维护他们</li>
-</ol>
-<p>所有的NewSQL系统都使用分片二级索引的方式。分片方式和复制方式的区别：</p>
-<ol>
-<li>分片方式查找的时候可能找多个节点，更新只更新一个节点。</li>
-<li>复制方式，只查找一个节点，更新的话，所有副本都要更新。</li>
-</ol>
-<h3><span id="fu-zhi">复制</span></h3>
-<p>数据库复制设计要点：保证各个节点数据的强一致性</p>
-<ul>
-<li>2PC消耗大</li>
-<li>active-active 多点写方式,很难实现，不同节点的执行顺序可能不一致。</li>
-<li>active-passive 单点写，给副本传递状态</li>
-</ul>
-<h3><span id="dang-ji-hui-fu">宕机恢复</span></h3>
-<p>传统单机的宕机恢复是找到最近的检查点，从此检查点开始重新应用WAL日志。NewSQL不能简单使用单机的策略。
-因为分布式数据库一个master宕机后，其replica会提升为master，原master重启后，不仅仅需要应用WAL，还需要与当前的master同步数据。</p>
-<h2><span id="qu-shi">趋势</span></h2>
-<p>可预见的未来，数据库的发展是朝向HTAP,即OLTP+OLAP混合型的方向发展。</p>
-<h2><span id="zong-jie">总结</span></h2>
-<p><img src="/images/paper/newsql.png" alt=""></p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/09/13/newsql/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1718,32 +1467,15 @@ NuoDB架构：</p>
 
       
         
-          
-            <h2><span id="xia-zai-yuan-ma-bao">下载源码包</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">➜  src <span class="built_in">pwd</span></div><div class="line">/home/vagrant/src</div><div class="line">➜  src wget https://cdn.mysql.com//Downloads/MySQL-5.7/mysql-boost-5.7.18.tar.gz</div><div class="line">➜  src tar -xzvf mysql-boost-5.7.18.tar.gz</div><div class="line">➜  src ln -s mysql-5.7.18 mysql</div><div class="line">➜  src <span class="built_in">cd</span> mysql</div><div class="line">➜  mysql mkdir debug</div></pre></td></tr></table></figure></p>
-<p>&lt;!--more--&gt;</p>
-<h2><span id="an-zhuang-yi-lai">安装依赖</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">➜  debug <span class="built_in">pwd</span></div><div class="line">/home/vagrant/src/mysql/debug</div><div class="line"></div><div class="line">➜  debug sudo apt-get install -y cmake bison libncurse g++ libncurses5-dev</div><div class="line"></div><div class="line">➜  debug wget https://jaist.dl.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz</div><div class="line"></div><div class="line">➜  debug tar -xzvf boost_1_59_0.tar.gz</div></pre></td></tr></table></figure></p>
-<h2><span id="bian-yi-debug-ban-ben">编译DEBUG版本</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">➜  debug <span class="built_in">pwd</span></div><div class="line">/home/vagrant/src/mysql/debug</div><div class="line"></div><div class="line">➜  debug cmake -DWITH_DEBUG=1 -DCMAKE_INSTALL_PREFIX=./mysql -DWITH_BOOST=./boost_1_59_0 -DCURSES_NEED_NCURSES=1 ..</div><div class="line"></div><div class="line">➜  debug make -j4 &amp;&amp; make install</div></pre></td></tr></table></figure></p>
-<p>需要指定<em>CURSES_NEED_NCURSES</em>,不然CMAKE会找不到curse库。</p>
-<h2><span id="chu-shi-hua-shu-ju-ku">初始化数据库</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">➜  mysql <span class="built_in">pwd</span></div><div class="line">/home/vagrant/src/mysql/debug/mysql</div><div class="line"></div><div class="line">➜  mysql bin/mysqld --initialize-insecure --datadir=./data --basedir=./ --user=mysql</div></pre></td></tr></table></figure></p>
-<h2><span id="shou-dong-sheng-cheng-pei-zhi-wen-jian">手动生成配置文件</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">➜  mysql <span class="built_in">pwd</span></div><div class="line">/home/vagrant/src/mysql/debug/mysql</div><div class="line">➜  mysql cat my.cnf</div><div class="line">[mysqld]</div><div class="line">basedir = /home/vagrant/src/mysql/debug/mysql</div><div class="line">datadir =/home/vagrant/src/mysql/debug/mysql/data</div><div class="line">gdb</div><div class="line">port=3306</div></pre></td></tr></table></figure></p>
-<h2><span id="diao-shi-mysql">调试MySQL</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">➜  mysql <span class="built_in">pwd</span></div><div class="line">/home/vagrant/src/mysql/debug/mysql</div><div class="line"></div><div class="line">➜  mysql gdb --args bin/mysqld --defaults-file=my.cnf</div><div class="line">GNU gdb (Ubuntu 7.7.1-0ubuntu5~14.04.2) 7.7.1</div><div class="line">Copyright (C) 2014 Free Software Foundation, Inc.</div><div class="line">License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;</div><div class="line">This is free software: you are free to change and redistribute it.</div><div class="line">There is NO WARRANTY, to the extent permitted by law.  Type <span class="string">"show copying"</span></div><div class="line">and <span class="string">"show warranty"</span> <span class="keyword">for</span> details.</div><div class="line">This GDB was configured as <span class="string">"x86_64-linux-gnu"</span>.</div><div class="line">Type <span class="string">"show configuration"</span> <span class="keyword">for</span> configuration details.</div><div class="line">For bug reporting instructions, please see:</div><div class="line">&lt;http://www.gnu.org/software/gdb/bugs/&gt;.</div><div class="line">Find the GDB manual and other documentation resources online at:</div><div class="line">&lt;http://www.gnu.org/software/gdb/documentation/&gt;.</div><div class="line">For <span class="built_in">help</span>, <span class="built_in">type</span> <span class="string">"help"</span>.</div><div class="line">Type <span class="string">"apropos word"</span> to search <span class="keyword">for</span> commands related to <span class="string">"word"</span>...</div><div class="line">Reading symbols from bin/mysqld...done.</div><div class="line">(gdb) b main</div><div class="line">Breakpoint 1 at 0xe8a83c: file /home/vagrant/src/mysql/sql/main.cc, line 25.</div><div class="line">(gdb) r</div><div class="line">Starting program: /home/vagrant/src/mysql-5.7.18/debug/mysql/bin/mysqld --defaults-file=my.cnf</div><div class="line">[Thread debugging using libthread_db enabled]</div><div class="line">Using host libthread_db library <span class="string">"/lib/x86_64-linux-gnu/libthread_db.so.1"</span>.</div><div class="line"></div><div class="line">Breakpoint 1, main (argc=2, argv=0x7fffffffe408) at /home/vagrant/src/mysql/sql/main.cc:25</div><div class="line">25    <span class="built_in">return</span> mysqld_main(argc, argv);</div><div class="line">(gdb)</div></pre></td></tr></table></figure></p>
-<h2><span id="can-kao-wen-dang">参考文档</span></h2>
-<ul>
-<li>
-<p><a href="https://dev.mysql.com/doc/refman/5.7/en/source-installation.html" target="_blank" rel="external">https://dev.mysql.com/doc/refman/5.7/en/source-installation.html</a></p>
-</li>
-<li>
-<p><a href="https://dev.mysql.com/doc/refman/5.7/en/data-directory-initialization-mysqld.html" target="_blank" rel="external">https://dev.mysql.com/doc/refman/5.7/en/data-directory-initialization-mysqld.html</a></p>
-</li>
-</ul>
-
-          
+          <h2 id="下载源码包"><a class="header-anchor" href="#下载源码包">¶</a>下载源码包</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">➜  src <span class="built_in">pwd</span></div><div class="line">/home/vagrant/src</div><div class="line">➜  src wget https://cdn.mysql.com//Downloads/MySQL-5.7/mysql-boost-5.7.18.tar.gz</div><div class="line">➜  src tar -xzvf mysql-boost-5.7.18.tar.gz</div><div class="line">➜  src ln -s mysql-5.7.18 mysql</div><div class="line">➜  src <span class="built_in">cd</span> mysql</div><div class="line">➜  mysql mkdir debug</div></pre></td></tr></table></figure>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/09/01/install-mysql-5-7-18/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1896,35 +1628,15 @@ NuoDB架构：</p>
 
       
         
-          
-            <h2><span id="bu-shu-ji-qun-jie-gou">部署集群结构</span></h2>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">             +------------+                               +================+</div><div class="line">             |  proxysql  |   &lt;- - - - - deploy/manage - -| ClusterControl |</div><div class="line">             +------------+                    |          +================+</div><div class="line">                    |                          |</div><div class="line">     _______________|_________________         |</div><div class="line">    |                                 |        |</div><div class="line">+--------+                       +--------+    |</div><div class="line">| master |                       | slave  |  &lt;-</div><div class="line">+--------+                       +--------+</div></pre></td></tr></table></figure></p>
-<p>&lt;!--more--&gt;</p>
-<h2><span id="huo-qu-suo-xu-jing-xiang">获取所需镜像</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ docker pull severalnines/clustercontrol</div><div class="line">$ docker pull severalnines/centos-ssh</div></pre></td></tr></table></figure></p>
-<h2><span id="chuang-jian-network">创建Network</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker network create --subnet=192.168.10.0/24 db-cluster</div></pre></td></tr></table></figure></p>
-<h2><span id="chuang-jian-clustercontrol-rong-qi">创建clustercontrol容器</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name clustercontrol \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.10 \</div><div class="line">-h clustercontrol \</div><div class="line">-p 5000:80 \</div><div class="line">-p 5001:443 \</div><div class="line">severalnines/clustercontrol</div></pre></td></tr></table></figure></p>
-<h2><span id="chuang-jian-master-amp-slave-rong-qi">创建master&amp;slave容器</span></h2>
-<h3><span id="chuang-jian-master-rong-qi">创建master容器</span></h3>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name master \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.100 \</div><div class="line">-h master \</div><div class="line">-p 6000:3306 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure></p>
-<h3><span id="chuang-jian-slave-rong-qi">创建slave容器</span></h3>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name slave \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.101 \</div><div class="line">-h slave \</div><div class="line">-p 6001:3306 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure></p>
-<h2><span id="tong-guo-clustercontrol-bu-shu-master-amp-slave">通过clustercontrol部署master&amp;slave</span></h2>
-<ul>
-<li>SSH User: 'root'</li>
-<li>SSH Key Path: '/root/.ssh/id_rsa'</li>
-<li>SSH Port: 22</li>
-</ul>
-<h2><span id="chuang-jian-proxysql-rong-qi">创建proxysql容器</span></h2>
-<p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name proxysql \</div><div class="line">-p 6033:3306 \</div><div class="line">--network db-cluster \</div><div class="line">-h proxysql \</div><div class="line">--ip 192.168.10.205 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure></p>
-<h2><span id="wei-ji-qun-tian-jia-proxysql-guan-li">为集群添加proxysql管理</span></h2>
-<p>ClusterControl -&gt; choose the cluster -&gt; Manage -&gt; Load Balancers -&gt; ProxySQL -&gt; Deploy ProxySQL.</p>
-<h2><span id="can-kao-wen-dang">参考文档</span></h2>
-<p><a href="https://github.com/severalnines/docker/tree/master/examples/docker" target="_blank" rel="external">Example Deployment on Standalone Docker</a></p>
-
-          
+          <h2 id="部署集群结构"><a class="header-anchor" href="#部署集群结构">¶</a>部署集群结构</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">             +------------+                               +================+</div><div class="line">             |  proxysql  |   &lt;- - - - - deploy/manage - -| ClusterControl |</div><div class="line">             +------------+                    |          +================+</div><div class="line">                    |                          |</div><div class="line">     _______________|_________________         |</div><div class="line">    |                                 |        |</div><div class="line">+--------+                       +--------+    |</div><div class="line">| master |                       | slave  |  &lt;-</div><div class="line">+--------+                       +--------+</div></pre></td></tr></table></figure>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/08/28/Deploy-severalnines-with-Docker/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -2066,14 +1778,15 @@ NuoDB架构：</p>
 
       
         
-          
-            <p>小贝壳最近牙牙学语, 能够发出爸爸的喊声了，心里还是挺满足的，
+          <p>小贝壳最近牙牙学语, 能够发出爸爸的喊声了，心里还是挺满足的，<br>
 麻麻心里估计要羡慕嫉妒恨了~~</p>
-<p>&lt;!--more--&gt;</p>
-<p>带娃辛苦，麻麻最辛苦了，痛并快乐着!</p>
-<p><img src="/images/%E5%B0%8F%E8%B4%9D%E5%A3%B3.jpg" alt=""></p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/08/17/小贝壳喊爸爸/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
