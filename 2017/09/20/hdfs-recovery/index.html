@@ -107,7 +107,7 @@
 <meta property="og:description" content="¶什么是lease? client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。 如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/hdfs/write_pipeline.png">
-<meta property="og:updated_time" content="2017-09-20T07:41:19.000Z">
+<meta property="og:updated_time" content="2017-09-25T06:39:06.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HDFS故障恢复技术">
 <meta name="twitter:description" content="¶什么是lease? client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。 如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.">
@@ -335,8 +335,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/HDFS/" itemprop="url" rel="index">
-                    <span itemprop="name">HDFS</span>
+                  <a href="/categories/hdfs/" itemprop="url" rel="index">
+                    <span itemprop="name">hdfs</span>
                   </a>
                 </span>
 
@@ -441,7 +441,7 @@
   <p><span>本文标题:</span><a href="/2017/09/20/hdfs-recovery/">HDFS故障恢复技术</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2017年09月20日 - 15:09</p>
-  <p><span>最后更新:</span>2017年09月20日 - 15:09</p>
+  <p><span>最后更新:</span>2017年09月25日 - 14:09</p>
   <p><span>原始链接:</span><a href="/2017/09/20/hdfs-recovery/">/2017/09/20/hdfs-recovery/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
@@ -492,6 +492,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/25/trx-test/" rel="prev" title="事务快照行为对比测试">
+                事务快照行为对比测试 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -568,7 +572,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-count">14</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -590,7 +594,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-count">22</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
