@@ -382,8 +382,6 @@
 <li>SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。</li>
 </ol>
 <p>SS隔离级别更高。</p>
-<h2 id="准备数据"><a class="header-anchor" href="#准备数据">¶</a>准备数据</h2>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">database</span> <span class="keyword">test</span>;</div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> test.t1(c1 <span class="built_in">int</span>);</div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t1 <span class="keyword">values</span>(<span class="number">1</span>);</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/09/25/trx-test/#more" rel="contents">
