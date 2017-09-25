@@ -373,7 +373,16 @@
 
       
         
-          <h2 id="准备数据"><a class="header-anchor" href="#准备数据">¶</a>准备数据</h2>
+          <h2 id="snapshot-vs-rr"><a class="header-anchor" href="#snapshot-vs-rr">¶</a>snapshot vs RR</h2>
+<p>RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。</p>
+<p>两者均通过MVCC实现快照读，读不上锁，写上锁。</p>
+<p>两者的区别是在出现冲突写的情况时：</p>
+<ol>
+<li>RR只会阻塞冲突写，待一方事务结束(commit或rollback)，等待的事务继续执行。</li>
+<li>SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。</li>
+</ol>
+<p>SS隔离级别更高。</p>
+<h2 id="准备数据"><a class="header-anchor" href="#准备数据">¶</a>准备数据</h2>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">database</span> <span class="keyword">test</span>;</div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> test.t1(c1 <span class="built_in">int</span>);</div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t1 <span class="keyword">values</span>(<span class="number">1</span>);</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">

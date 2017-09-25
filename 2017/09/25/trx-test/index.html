@@ -82,7 +82,7 @@
 <link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="mysql,cockroachdb,transaction,isolation,snapshot,pg," />
+  <meta name="keywords" content="cockroachdb,mysql,transaction,isolation,snapshot,pg," />
 
 
 
@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="¶准备数据 123create database test;create table test.t1(c1 int);insert into t1 values(1);">
-<meta name="keywords" content="mysql,cockroachdb,transaction,isolation,snapshot,pg">
+<meta name="description" content="¶snapshot vs RR RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。 两者均通过MVCC实现快照读，读不上锁，写上锁。 两者的区别是在出现冲突写的情况时：  RR只会阻塞冲突写，待一方事务结束(commit或rollback)，等待的事务继续执行。 SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。  SS隔离级别更高。 ¶准备数据 12">
+<meta name="keywords" content="cockroachdb,mysql,transaction,isolation,snapshot,pg">
 <meta property="og:type" content="article">
 <meta property="og:title" content="事务快照行为对比测试">
 <meta property="og:url" content="http://yoursite.com/2017/09/25/trx-test/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶准备数据 123create database test;create table test.t1(c1 int);insert into t1 values(1);">
+<meta property="og:description" content="¶snapshot vs RR RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。 两者均通过MVCC实现快照读，读不上锁，写上锁。 两者的区别是在出现冲突写的情况时：  RR只会阻塞冲突写，待一方事务结束(commit或rollback)，等待的事务继续执行。 SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。  SS隔离级别更高。 ¶准备数据 12">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-09-25T06:55:47.000Z">
+<meta property="og:updated_time" content="2017-09-25T07:37:59.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="事务快照行为对比测试">
-<meta name="twitter:description" content="¶准备数据 123create database test;create table test.t1(c1 int);insert into t1 values(1);">
+<meta name="twitter:description" content="¶snapshot vs RR RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。 两者均通过MVCC实现快照读，读不上锁，写上锁。 两者的区别是在出现冲突写的情况时：  RR只会阻塞冲突写，待一方事务结束(commit或rollback)，等待的事务继续执行。 SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。  SS隔离级别更高。 ¶准备数据 12">
 
 
 
@@ -370,7 +370,16 @@
       
 
       
-        <h2><span id="pzhun-bei-shu-ju">准备数据</span></h2>
+        <h2><span id="psnapshot-vs-rr">snapshot vs RR</span></h2>
+<p>RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。</p>
+<p>两者均通过MVCC实现快照读，读不上锁，写上锁。</p>
+<p>两者的区别是在出现冲突写的情况时：</p>
+<ol>
+<li>RR只会阻塞冲突写，待一方事务结束(commit或rollback)，等待的事务继续执行。</li>
+<li>SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。</li>
+</ol>
+<p>SS隔离级别更高。</p>
+<h2><span id="pzhun-bei-shu-ju">准备数据</span></h2>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">database</span> <span class="keyword">test</span>;</div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> test.t1(c1 <span class="built_in">int</span>);</div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t1 <span class="keyword">values</span>(<span class="number">1</span>);</div></pre></td></tr></table></figure>
 <a id="more"></a>
 <p>针对mysql、pg、cockroachdb进行行为测试。</p>
@@ -447,7 +456,7 @@
   <p><span>本文标题:</span><a href="/2017/09/25/trx-test/">事务快照行为对比测试</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2017年09月25日 - 14:09</p>
-  <p><span>最后更新:</span>2017年09月25日 - 14:09</p>
+  <p><span>最后更新:</span>2017年09月25日 - 15:09</p>
   <p><span>原始链接:</span><a href="/2017/09/25/trx-test/">/2017/09/25/trx-test/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
@@ -466,9 +475,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/mysql/" rel="tag"># mysql</a>
-          
             <a href="/tags/cockroachdb/" rel="tag"># cockroachdb</a>
+          
+            <a href="/tags/mysql/" rel="tag"># mysql</a>
           
             <a href="/tags/transaction/" rel="tag"># transaction</a>
           
@@ -644,7 +653,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">准备数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">测试用例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">测试结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">测试脚本</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">snapshot vs RR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">准备数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">测试用例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">测试结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">测试脚本</span></a></li></ol></div>
             
 
           </div>
