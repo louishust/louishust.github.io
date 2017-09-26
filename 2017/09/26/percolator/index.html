@@ -82,7 +82,7 @@
 <link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="mysql," />
+  <meta name="keywords" content="paper,percolator,distributed transaction," />
 
 
 
@@ -98,21 +98,25 @@
 
 
 
-<meta name="description" content="¶现场问题 客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。">
-<meta name="keywords" content="mysql">
+<meta name="description" content="¶引入原因 Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。">
+<meta name="keywords" content="paper,percolator,distributed transaction">
 <meta property="og:type" content="article">
-<meta property="og:title" content="查找MySQL Table Lock">
-<meta property="og:url" content="http://yoursite.com/2017/09/16/table-lock/index.html">
+<meta property="og:title" content="Percolator">
+<meta property="og:url" content="http://yoursite.com/2017/09/26/percolator/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶现场问题 客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。">
+<meta property="og:description" content="¶引入原因 Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/images/mysql/table_lock.jpeg">
-<meta property="og:image" content="http://yoursite.com/images/mysql/table_lock1.jpeg">
-<meta property="og:updated_time" content="2017-09-25T06:39:39.000Z">
+<meta property="og:image" content="http://yoursite.com/images/paper/percolator.png">
+<meta property="og:image" content="http://yoursite.com/images/paper/percolator1.png">
+<meta property="og:image" content="http://yoursite.com/images/paper/percolator2.png">
+<meta property="og:image" content="http://yoursite.com/images/paper/percolator3.png">
+<meta property="og:image" content="http://yoursite.com/images/paper/percolator4.png">
+<meta property="og:image" content="http://yoursite.com/images/paper/percolator5.png">
+<meta property="og:updated_time" content="2017-09-26T03:31:06.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="查找MySQL Table Lock">
-<meta name="twitter:description" content="¶现场问题 客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。">
-<meta name="twitter:image" content="http://yoursite.com/images/mysql/table_lock.jpeg">
+<meta name="twitter:title" content="Percolator">
+<meta name="twitter:description" content="¶引入原因 Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。">
+<meta name="twitter:image" content="http://yoursite.com/images/paper/percolator.png">
 
 
 
@@ -141,13 +145,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/09/16/table-lock/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/09/26/percolator/"/>
 
 
 
 
 
-  <title>查找MySQL Table Lock | 小贝壳爸爸</title>
+  <title>Percolator | 小贝壳爸爸</title>
   
 
 
@@ -284,7 +288,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/16/table-lock/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/26/percolator/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -301,7 +305,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">查找MySQL Table Lock</h1>
+          <h1 class="post-title" itemprop="name headline">Percolator</h1>
         
 
         <div class="post-meta">
@@ -313,8 +317,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-16T10:13:13+08:00">
-                2017-09-16
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-26T10:19:25+08:00">
+                2017-09-26
               </time>
             
 
@@ -336,19 +340,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/mysql/" itemprop="url" rel="index">
-                    <span itemprop="name">mysql</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/mysql/mysql运维/" itemprop="url" rel="index">
-                    <span itemprop="name">mysql运维</span>
+                  <a href="/categories/paper/" itemprop="url" rel="index">
+                    <span itemprop="name">paper</span>
                   </a>
                 </span>
 
@@ -384,29 +377,85 @@
       
 
       
-        <h2><span id="pxian-chang-wen-ti">现场问题</span></h2>
-<p>客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。</p>
-<p><img src="/images/mysql/table_lock.jpeg" alt=""></p>
+        <h2><span id="pyin-ru-yuan-yin">引入原因</span></h2>
+<p>Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。</p>
 <a id="more"></a>
-<h2><span id="pcha-zhao-wen-ti">查找问题</span></h2>
-<p>可以看到xtrabackup执行了FTWRL,此操作会阻塞住后续所有的操作，所以后续其它会话出现了<strong>waiting for global read lock</strong>.</p>
-<p>FTWRL也被阻塞住了，但是除了FTWRL被阻塞，还有很多时间更久的线程被阻塞住了，报的是waiting for table level lock。可以知道肯定是MyIsam表被阻塞了，但是在processlist里面没有找到最长的阻塞其它线程的语句。</p>
-<p>猜测可能是执行了LOCK TABLE操作，导致看不到会话信息，但是同样达到了阻塞其它线程的效果。</p>
-<p><strong>一般这种问题，我们把最长的那个语句找到，kill之后，集群就正常了。</strong></p>
-<p>但是目前从processlist中无法看到哪个会话是执行了LOCK TABLE操作，由于是操作的MyISAM表，故无法从innodb_lock等表中获取所信息。</p>
-<p>这时想到了<strong>mysqladmin debug</strong>操作，可以看到锁信息以及会话id.</p>
-<p><img src="/images/mysql/table_lock1.jpeg" alt=""></p>
-<h2><span id="pjie-jue-wen-ti">解决问题</span></h2>
+<h2><span id="pjia-gou">架构</span></h2>
+<p><img src="/images/paper/percolator.png" alt="架构"></p>
+<p>主要组成部分</p>
 <ol>
-<li>找到堵塞其它所有线程的那个线程，kill掉
-<ul>
-<li>通过processlist查找</li>
-<li>通过mysqladmin debug查找</li>
-</ul>
-</li>
-<li>尽量避免使用MyISAM表</li>
-<li>备份一定要在备库执行</li>
+<li>Percolator library: 以第三方动态库的形式提供给app，</li>
+<li>Oracle Timestamp Server: 提供全局递增唯一的时间戳</li>
+<li>BigTable TabletServer: 底层逻辑存储,类似HBase</li>
 </ol>
+<p>Percolator的特点：</p>
+<ol>
+<li>提供跨行跨表的分布式事务</li>
+<li>提供OB框架</li>
+</ol>
+<h2><span id="pfen-bu-shi-shi-wu">分布式事务</span></h2>
+<ol>
+<li>实现了Snapshot的隔离级别</li>
+<li>使用2PL+MVCC技术</li>
+<li>存在并发写冲突时，最多一个提交，也可能存在全部回滚的可能</li>
+<li>读不上锁，根据时间戳读取历史版本。</li>
+<li>2PC，首先prepare，然后commit</li>
+<li>缓冲写。写都缓存在client端，只有提交的时候才真正和bigtable交互。</li>
+</ol>
+<h3><span id="pmvcc-ji-ben-luo-ji">MVCC基本逻辑</span></h3>
+<p><img src="/images/paper/percolator1.png" alt="MVCC"></p>
+<h3><span id="pxie-ru-ju-li">写入举例</span></h3>
+<p>每行数据引入新的列：lock和write.</p>
+<ol>
+<li>lock用于写入新数据之前的上锁</li>
+<li>write用于表示事务提交，write的value记录了本次写入的时间戳</li>
+</ol>
+<p><strong>Note</strong>: bal:data表示真是数据，bal:lock表示锁，bal:write表示最后提交的数据对应的版本号。</p>
+<p>以Bob给Joe转账$7为例进行说明</p>
+<ol>
+<li>初始状态, Bob的bal:lock为空，bal:write为@5，表示数据的版本是@5，故Bob的钱是5:$10。<br>
+<img src="/images/paper/percolator2.png" alt="init"></li>
+<li>对bob账户执行扣款操作，首先锁定，并将data减少为$3.<br>
+<img src="/images/paper/percolator3.png" alt="init"></li>
+<li>对Joe账户执行加钱操作，首先锁定，并讲data增加为$9, lock里面记录的值为第一个lock的位置,便于将锁串联起来<br>
+<img src="/images/paper/percolator4.png" alt="init"></li>
+<li>此时达到了commit阶段，写入新的记录bal:write列表示commit结束，之后清理所有的lock。<br>
+<img src="/images/paper/percolator5.png" alt="init"></li>
+</ol>
+<h3><span id="pxie-ru-luo-ji">写入逻辑</span></h3>
+<h4><span id="pprepare">Prepare</span></h4>
+<ol>
+<li>检查自startts之后是否有新的write值，如果存在，表示有其它事务已经提交，故回滚本事务</li>
+<li>检查是否有lock，如果有，表示其它事务已经上锁，回滚,故存在两个事务同时发现互相被锁的情况，导致两个事务都被回滚</li>
+<li>对数据上锁lock字段，并写入data字段。</li>
+</ol>
+<h4><span id="pcommit">Commit</span></h4>
+<ol>
+<li>对所有的数据写入write字段</li>
+<li>清理所有的lock数据</li>
+</ol>
+<h3><span id="pdu-qu-luo-ji">读取逻辑</span></h3>
+<ol>
+<li>查看是否存在lock，存在则等待lock释放</li>
+<li>获取[0,startts]的write</li>
+</ol>
+<h3><span id="pyi-ge-shi-wu-zhong-de-liang-ge-get-ru-he-bao-zheng-du-qu-de-shu-ju-shi-yi-zhi-de">一个事务中的两个GET如何保证读取的数据是一致的？</span></h3>
+<p>TRX1 GET1 GET2<br>
+TRX2 SET1 SET2</p>
+<ol>
+<li>如果TRX1和TRX2不相交，串行的话，数据是一致的。</li>
+<li>如果GET1在LOCK1之前，读取老的数据，GET2在LOCK2之后，GET2被阻塞，但是SET2和SET1的committs必然大于TRX1，故GET2结束阻塞后，读取到的是老数据，和GET1版本一致。</li>
+<li>如果GET1被LOCK1阻塞，则等待LOCK1结束，数据的可见性就取决于TRX2的committs的取值，但是数据也是一致的。</li>
+</ol>
+<p>故读取必然一致。</p>
+<h2><span id="pge-ren-guan-dian">个人观点</span></h2>
+<ol start="0">
+<li>与其说Percolator是一个分布式事务系统，不如说Percolator是一个应用程序。</li>
+<li>Percolator在bigtable的基础之上，以第三方库的形式提供服务，这就注定了其分布式事务无法很好的和bigtable原有事务融合，而是建立在bigtable的row transaction的基础之上。</li>
+<li>Percolator的锁的获取与释放，都需要真实的在bigtable上写入具体的数值，如此开销无法接受, 如果改成内存锁性能会有不少提升，但是无法保证故障的时候锁信息的保留。</li>
+<li>读取看似是不上锁，但是会被lock阻塞，如果存在lock则需要等待lock消失。优化点是可以提交确定committs，然后lock上面带上committs的值，就不用被阻塞了。</li>
+</ol>
+<p>综上所述，Percolator确实是更贴近其特定应用的一个半通用系统，如果在分布式DBMS上采用此策略，性能可能会出现瓶颈。更好的改进方向是和底层的逻辑存储进行深入融合，将上锁和多版本放到bigtable内部层面, 而不是真实的写入数据。</p>
 
       
     </div>
@@ -423,11 +472,11 @@
   <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
   <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
-  <p><span>本文标题:</span><a href="/2017/09/16/table-lock/">查找MySQL Table Lock</a></p>
+  <p><span>本文标题:</span><a href="/2017/09/26/percolator/">Percolator</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
-  <p><span>发布时间:</span>2017年09月16日 - 10:09</p>
-  <p><span>最后更新:</span>2017年09月25日 - 14:09</p>
-  <p><span>原始链接:</span><a href="/2017/09/16/table-lock/">/2017/09/16/table-lock/</a></p>
+  <p><span>发布时间:</span>2017年09月26日 - 10:09</p>
+  <p><span>最后更新:</span>2017年09月26日 - 11:09</p>
+  <p><span>原始链接:</span><a href="/2017/09/26/percolator/">/2017/09/26/percolator/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
 
@@ -445,7 +494,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/mysql/" rel="tag"># mysql</a>
+            <a href="/tags/paper/" rel="tag"># paper</a>
+          
+            <a href="/tags/percolator/" rel="tag"># percolator</a>
+          
+            <a href="/tags/distributed-transaction/" rel="tag"># distributed transaction</a>
           
         </div>
       
@@ -458,8 +511,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/09/14/ikea/" rel="next" title="宜家体验日">
-                <i class="fa fa-chevron-left"></i> 宜家体验日
+              <a href="/2017/09/25/trx-test/" rel="next" title="事务快照行为对比测试">
+                <i class="fa fa-chevron-left"></i> 事务快照行为对比测试
               </a>
             
           </div>
@@ -467,10 +520,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/09/17/bash/" rel="prev" title="Bash Shell常用快捷键">
-                Bash Shell常用快捷键 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -617,7 +666,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">现场问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">查找问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">解决问题</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">引入原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">分布式事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">MVCC基本逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text">写入举例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text">写入逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.1.</span> <span class="nav-text">Prepare</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.</span> <span class="nav-text">Commit</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.4.</span> <span class="nav-text">读取逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.5.</span> <span class="nav-text">一个事务中的两个GET如何保证读取的数据是一致的？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">个人观点</span></a></li></ol></div>
             
 
           </div>
