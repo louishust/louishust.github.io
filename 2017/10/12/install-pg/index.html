@@ -82,7 +82,7 @@
 <link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="abc," />
+  <meta name="keywords" content="install,pg,pg10,postgresql," />
 
 
 
@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="Here comes hexo, Here comes me!">
-<meta name="keywords" content="abc">
+<meta name="description" content="¶安装 123456yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpmyum install postgresql10yum install postgresql10-server/usr/pgsql-10/bin/postgr">
+<meta name="keywords" content="install,pg,pg10,postgresql">
 <meta property="og:type" content="article">
-<meta property="og:title" content="HelloWorld">
-<meta property="og:url" content="http://yoursite.com/2017/08/17/HelloWorld/index.html">
+<meta property="og:title" content="centos7安装pg10">
+<meta property="og:url" content="http://yoursite.com/2017/10/12/install-pg/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="Here comes hexo, Here comes me!">
+<meta property="og:description" content="¶安装 123456yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpmyum install postgresql10yum install postgresql10-server/usr/pgsql-10/bin/postgr">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-09-25T06:39:10.000Z">
+<meta property="og:updated_time" content="2017-10-12T04:26:35.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HelloWorld">
-<meta name="twitter:description" content="Here comes hexo, Here comes me!">
+<meta name="twitter:title" content="centos7安装pg10">
+<meta name="twitter:description" content="¶安装 123456yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpmyum install postgresql10yum install postgresql10-server/usr/pgsql-10/bin/postgr">
 
 
 
@@ -138,13 +138,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/08/17/HelloWorld/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/10/12/install-pg/"/>
 
 
 
 
 
-  <title>HelloWorld | 小贝壳爸爸</title>
+  <title>centos7安装pg10 | 小贝壳爸爸</title>
   
 
 
@@ -281,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/17/HelloWorld/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/12/install-pg/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -298,7 +298,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">HelloWorld</h1>
+          <h1 class="post-title" itemprop="name headline">centos7安装pg10</h1>
         
 
         <div class="post-meta">
@@ -310,8 +310,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-17T17:09:15+08:00">
-                2017-08-17
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-12T12:20:34+08:00">
+                2017-10-12
               </time>
             
 
@@ -333,8 +333,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/diary/" itemprop="url" rel="index">
-                    <span itemprop="name">diary</span>
+                  <a href="/categories/postgresql/" itemprop="url" rel="index">
+                    <span itemprop="name">postgresql</span>
                   </a>
                 </span>
 
@@ -370,7 +370,13 @@
       
 
       
-        <h1><span id="here-comes-hexo-here-comes-me">Here comes hexo, Here comes me!</span></h1>
+        <h2><span id="pan-zhuang">安装</span></h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpm</div><div class="line">yum install postgresql10</div><div class="line">yum install postgresql10-server</div><div class="line">/usr/pgsql-10/bin/postgresql10-setup initdb</div><div class="line">systemctl <span class="built_in">enable</span> postgresql-10</div><div class="line">systemctl start postgresql-10</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2><span id="pxiu-gai-pei-zhi-wen-jian">修改配置文件</span></h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">/var/lib/pgsql/10/data/postgresql.conf</div><div class="line">listen_addresses = <span class="string">'*'</span></div><div class="line"></div><div class="line"></div><div class="line">/var/lib/pgsql/10/data/pg_hba.conf</div><div class="line"><span class="comment"># IPv4 local connections:</span></div><div class="line">host    all             all             0.0.0.0/0            trust</div><div class="line"></div><div class="line"></div><div class="line">systemctl restart postgresql-10</div></pre></td></tr></table></figure>
+<h2><span id="pchuang-jian-yong-hu">创建用户</span></h2>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">su - postgres</div><div class="line">psql</div><div class="line"></div><div class="line">postgres=# CREATE USER benchmarksql WITH ENCRYPTED PASSWORD 'changeme';</div><div class="line"><span class="keyword">CREATE</span> <span class="keyword">ROLE</span></div><div class="line">postgres=# <span class="keyword">CREATE</span> <span class="keyword">DATABASE</span> benchmarksql OWNER benchmarksql;</div><div class="line"><span class="keyword">CREATE</span> <span class="keyword">DATABASE</span></div></pre></td></tr></table></figure>
 
       
     </div>
@@ -380,6 +386,21 @@
     <div>
       
         
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/10/12/install-pg/">centos7安装pg10</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年10月12日 - 12:10</p>
+  <p><span>最后更新:</span>2017年10月12日 - 12:10</p>
+  <p><span>原始链接:</span><a href="/2017/10/12/install-pg/">/2017/10/12/install-pg/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
 
       
     </div>
@@ -394,7 +415,13 @@
       
         <div class="post-tags">
           
-            <a href="/tags/abc/" rel="tag"># abc</a>
+            <a href="/tags/install/" rel="tag"># install</a>
+          
+            <a href="/tags/pg/" rel="tag"># pg</a>
+          
+            <a href="/tags/pg10/" rel="tag"># pg10</a>
+          
+            <a href="/tags/postgresql/" rel="tag"># postgresql</a>
           
         </div>
       
@@ -407,15 +434,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2017/10/11/cock-ntp/" rel="next" title="cockroachdb配置ntp服务">
+                <i class="fa fa-chevron-left"></i> cockroachdb配置ntp服务
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/08/17/setup-hexo/" rel="prev" title="Set up blog with hexo & next">
-                Set up blog with hexo & next <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -562,7 +589,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">Here comes hexo, Here comes me!</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">创建用户</span></a></li></ol></div>
             
 
           </div>
