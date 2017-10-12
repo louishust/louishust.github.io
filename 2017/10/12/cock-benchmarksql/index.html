@@ -82,7 +82,7 @@
 <link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="cockroachdb,benchmarksql,tpcc," />
 
 
 
@@ -98,16 +98,18 @@
 
 
 
-<meta name="description" content="记录工作和生活点滴">
-<meta property="og:type" content="website">
-<meta property="og:title" content="小贝壳爸爸">
-<meta property="og:url" content="http://yoursite.com/tags/postgresql/index.html">
+<meta name="description" content="目前cockroachdb没有专门的TPC-C测试工具，开发人员正在开发过程中：  @louishust there’s a work-in-progress program here: http://github.com/cockroachdb/loadgen - however there are several strong caveats that you should know abou">
+<meta name="keywords" content="cockroachdb,benchmarksql,tpcc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TPCC测试cockroachdb方法">
+<meta property="og:url" content="http://yoursite.com/2017/10/12/cock-benchmarksql/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="记录工作和生活点滴">
+<meta property="og:description" content="目前cockroachdb没有专门的TPC-C测试工具，开发人员正在开发过程中：  @louishust there’s a work-in-progress program here: http://github.com/cockroachdb/loadgen - however there are several strong caveats that you should know abou">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-10-12T07:27:57.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="小贝壳爸爸">
-<meta name="twitter:description" content="记录工作和生活点滴">
+<meta name="twitter:title" content="TPCC测试cockroachdb方法">
+<meta name="twitter:description" content="目前cockroachdb没有专门的TPC-C测试工具，开发人员正在开发过程中：  @louishust there’s a work-in-progress program here: http://github.com/cockroachdb/loadgen - however there are several strong caveats that you should know abou">
 
 
 
@@ -136,13 +138,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/tags/postgresql/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/10/12/cock-benchmarksql/"/>
 
 
 
 
 
-  <title>标签: postgresql | 小贝壳爸爸</title>
+  <title>TPCC测试cockroachdb方法 | 小贝壳爸爸</title>
   
 
 
@@ -161,7 +163,7 @@
     
   
 
-  <div class="container sidebar-position-right  ">
+  <div class="container sidebar-position-right page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -265,54 +267,210 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block tag">
+  <div id="posts" class="posts-expand">
+    
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>postgresql<small>标签</small>
-        </h1>
-      </div>
+  
 
-      
-        
+  
+  
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/12/cock-benchmarksql/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2017/10/12/install-pg/" itemprop="url">
-              
-                <span itemprop="name">centos7安装pg10</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">TPCC测试cockroachdb方法</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2017-10-12T12:20:34+08:00"
-              content="2017-10-12" >
-          10-12
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-12T15:20:43+08:00">
+                2017-10-12
+              </time>
+            
 
-    </header>
-  </article>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>目前cockroachdb没有专门的TPC-C测试工具，开发人员正在开发过程中：</p>
+<blockquote>
+<p>@louishust there’s a work-in-progress program here: <a href="http://github.com/cockroachdb/loadgen" target="_blank" rel="external">http://github.com/cockroachdb/loadgen</a> - however there are several strong caveats that you should know about. it doesn’t implement think-time or wait-time yet, nor does it cap the number of workers per warehouse, so it’s not really quite tpc-c. you can think of it as “tpcc at maximum concurrency”, or a benchmark that stresses contention more than scalability.<br>
+If you’re really looking to check how CockroachDB performs on tpc-c as the world understands it, you’ll need to wait a little bit until we finish up the work of making the benchmark accurate<br>
+we’re actively working on improving the benchmark so it shouldn’t be too long - maybe a week or two</p>
+</blockquote>
+<a id="more"></a>
+<p>cockroachdb走的是pg协议，故可以尝试使用benchmarksql进行TPC-C测试。</p>
+<p>由于cockroachdb不完全兼容pg，故可以通过如下方法进行数据初始化：</p>
+<ol>
+<li>通过PG生成数据</li>
+<li><code>pg_dump</code>导出数据为COPY语句</li>
+<li>cockroachdb导入COPY语句</li>
+</ol>
+<p>测试过程有些语句不兼容，比如<code>select for update</code>。虽然cockroachdb不支持这个语句，<br>
+但是cockroachdb的SSI隔离级别可以达到同等效果，故只需要去掉测试中的<code>for update</code>语句即可。</p>
+<p><a href="https://github.com/louishust/benchmarksql-cockroachdb" target="_blank" rel="external">修改的benchmarksql for cockroachdb</a></p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/10/12/cock-benchmarksql/">TPCC测试cockroachdb方法</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年10月12日 - 15:10</p>
+  <p><span>最后更新:</span>2017年10月12日 - 15:10</p>
+  <p><span>原始链接:</span><a href="/2017/10/12/cock-benchmarksql/">/2017/10/12/cock-benchmarksql/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
 
 
       
     </div>
 
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/cockroachdb/" rel="tag"># cockroachdb</a>
+          
+            <a href="/tags/benchmarksql/" rel="tag"># benchmarksql</a>
+          
+            <a href="/tags/tpcc/" rel="tag"># tpcc</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/12/install-pg/" rel="next" title="centos7安装pg10">
+                <i class="fa fa-chevron-left"></i> centos7安装pg10
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -320,6 +478,10 @@
 
 
           
+  <div class="comments" id="comments">
+    
+  </div>
+
 
         </div>
         
@@ -541,10 +703,10 @@
   
 
   
-    <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
 <script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
 
-  
+
 
   
 
