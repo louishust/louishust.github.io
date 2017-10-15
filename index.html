@@ -373,21 +373,16 @@
 
       
         
-          
-            <ul>
-<li>Download Caddy with http.upload module</li>
-</ul>
-<p><a href="https://caddyserver.com/download" target="_blank" rel="external">download</a></p>
-<ul>
-<li>start caddy http file server</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mkdir -p /mnt/cockroach-exports</div><div class="line">./caddy -root /mnt/cockroach-exports <span class="string">"upload / &#123;"</span> <span class="string">'to "/mnt/cockroach-exports"'</span> <span class="string">'yes_without_tls'</span> <span class="string">"&#125;"</span></div></pre></td></tr></table></figure>
-<ul>
-<li>use caddy for crdb import</li>
-</ul>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">import table bmsql_config <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_config.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/config.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_warehouse <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_warehouse.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/warehouse.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_district <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_district.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/district.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_customer <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_customer.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/customer.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_history <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_history.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/cust-hist.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_new_order <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_new_order.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/new-order.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_oorder <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_oorder.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/order.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_order_line <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_order_line.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/order-line-nonull.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_item <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_item.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/item.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_stock <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_stock.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/stock.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div></pre></td></tr></table></figure>
-
-          
+          <h2 id="download-caddy-with-http-upload-module"><a class="header-anchor" href="#download-caddy-with-http-upload-module">¶</a>Download Caddy with http.upload module</h2>
+<pre><code>[download here](https://caddyserver.com/download)
+</code></pre>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/10/15/cock-caddy/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
