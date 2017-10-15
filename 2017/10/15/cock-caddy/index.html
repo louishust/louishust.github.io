@@ -82,7 +82,7 @@
 <link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="severalnines,mysql," />
+  <meta name="keywords" content="cockroachdb,caddy,http file server," />
 
 
 
@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="¶部署集群结构 12345678910             +------------+                               +================+             |  proxysql  |   &amp;lt;- - - - - deploy/manage - -| ClusterControl |             +------------">
-<meta name="keywords" content="severalnines,mysql">
+<meta name="description" content="Download Caddy with http.upload module  download  start caddy http file server  12mkdir -p /mnt/cockroach-exports./caddy -root /mnt/cockroach-exports &quot;upload / &amp;#123;&quot; &apos;to &quot;/mnt/cockroach-exports&quot;&apos; &apos;">
+<meta name="keywords" content="cockroachdb,caddy,http file server">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Deploy ClusterControl with Docker">
-<meta property="og:url" content="http://yoursite.com/2017/08/28/Deploy-severalnines-with-Docker/index.html">
+<meta property="og:title" content="使用Caddy导入csv文件到cockroachdb">
+<meta property="og:url" content="http://yoursite.com/2017/10/15/cock-caddy/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶部署集群结构 12345678910             +------------+                               +================+             |  proxysql  |   &amp;lt;- - - - - deploy/manage - -| ClusterControl |             +------------">
+<meta property="og:description" content="Download Caddy with http.upload module  download  start caddy http file server  12mkdir -p /mnt/cockroach-exports./caddy -root /mnt/cockroach-exports &quot;upload / &amp;#123;&quot; &apos;to &quot;/mnt/cockroach-exports&quot;&apos; &apos;">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-09-25T06:39:02.000Z">
+<meta property="og:updated_time" content="2017-10-15T03:51:04.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Deploy ClusterControl with Docker">
-<meta name="twitter:description" content="¶部署集群结构 12345678910             +------------+                               +================+             |  proxysql  |   &amp;lt;- - - - - deploy/manage - -| ClusterControl |             +------------">
+<meta name="twitter:title" content="使用Caddy导入csv文件到cockroachdb">
+<meta name="twitter:description" content="Download Caddy with http.upload module  download  start caddy http file server  12mkdir -p /mnt/cockroach-exports./caddy -root /mnt/cockroach-exports &quot;upload / &amp;#123;&quot; &apos;to &quot;/mnt/cockroach-exports&quot;&apos; &apos;">
 
 
 
@@ -138,13 +138,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/08/28/Deploy-severalnines-with-Docker/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/10/15/cock-caddy/"/>
 
 
 
 
 
-  <title>Deploy ClusterControl with Docker | 小贝壳爸爸</title>
+  <title>使用Caddy导入csv文件到cockroachdb | 小贝壳爸爸</title>
   
 
 
@@ -281,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/28/Deploy-severalnines-with-Docker/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/15/cock-caddy/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -298,7 +298,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Deploy ClusterControl with Docker</h1>
+          <h1 class="post-title" itemprop="name headline">使用Caddy导入csv文件到cockroachdb</h1>
         
 
         <div class="post-meta">
@@ -310,8 +310,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-28T14:51:56+08:00">
-                2017-08-28
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-15T11:20:44+08:00">
+                2017-10-15
               </time>
             
 
@@ -333,19 +333,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/mysql/" itemprop="url" rel="index">
-                    <span itemprop="name">mysql</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/mysql/severalnines/" itemprop="url" rel="index">
-                    <span itemprop="name">severalnines</span>
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
                   </a>
                 </span>
 
@@ -381,32 +370,18 @@
       
 
       
-        <h2><span id="pbu-shu-ji-qun-jie-gou">部署集群结构</span></h2>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">             +------------+                               +================+</div><div class="line">             |  proxysql  |   &lt;- - - - - deploy/manage - -| ClusterControl |</div><div class="line">             +------------+                    |          +================+</div><div class="line">                    |                          |</div><div class="line">     _______________|_________________         |</div><div class="line">    |                                 |        |</div><div class="line">+--------+                       +--------+    |</div><div class="line">| master |                       | slave  |  &lt;-</div><div class="line">+--------+                       +--------+</div></pre></td></tr></table></figure>
-<a id="more"></a>
-<h2><span id="phuo-qu-suo-xu-jing-xiang">获取所需镜像</span></h2>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ docker pull severalnines/clustercontrol</div><div class="line">$ docker pull severalnines/centos-ssh</div></pre></td></tr></table></figure>
-<h2><span id="pchuang-jian-network">创建Network</span></h2>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker network create --subnet=192.168.10.0/24 db-cluster</div></pre></td></tr></table></figure>
-<h2><span id="pchuang-jian-clustercontrol-rong-qi">创建clustercontrol容器</span></h2>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name clustercontrol \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.10 \</div><div class="line">-h clustercontrol \</div><div class="line">-p 5000:80 \</div><div class="line">-p 5001:443 \</div><div class="line">severalnines/clustercontrol</div></pre></td></tr></table></figure>
-<h2><span id="pchuang-jian-master-amp-slave-rong-qi">创建master&amp;slave容器</span></h2>
-<h3><span id="pchuang-jian-master-rong-qi">创建master容器</span></h3>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name master \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.100 \</div><div class="line">-h master \</div><div class="line">-p 6000:3306 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure>
-<h3><span id="pchuang-jian-slave-rong-qi">创建slave容器</span></h3>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name slave \</div><div class="line">--network db-cluster \</div><div class="line">--ip 192.168.10.101 \</div><div class="line">-h slave \</div><div class="line">-p 6001:3306 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure>
-<h2><span id="ptong-guo-clustercontrol-bu-shu-master-amp-slave">通过clustercontrol部署master&amp;slave</span></h2>
-<ul>
-<li>SSH User: ‘root’</li>
-<li>SSH Key Path: ‘/root/.ssh/id_rsa’</li>
-<li>SSH Port: 22</li>
+        <ul>
+<li>Download Caddy with http.upload module</li>
 </ul>
-<h2><span id="pchuang-jian-proxysql-rong-qi">创建proxysql容器</span></h2>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ docker run -d --name proxysql \</div><div class="line">-p 6033:3306 \</div><div class="line">--network db-cluster \</div><div class="line">-h proxysql \</div><div class="line">--ip 192.168.10.205 \</div><div class="line">-e AUTO_DEPLOYMENT=0 \</div><div class="line">-e CC_HOST=192.168.10.10 \</div><div class="line">severalnines/centos-ssh</div></pre></td></tr></table></figure>
-<h2><span id="pwei-ji-qun-tian-jia-proxysql-guan-li">为集群添加proxysql管理</span></h2>
-<p>ClusterControl -&gt; choose the cluster -&gt; Manage -&gt; Load Balancers -&gt; ProxySQL -&gt; Deploy ProxySQL.</p>
-<h2><span id="pcan-kao-wen-dang">参考文档</span></h2>
-<p><a href="https://github.com/severalnines/docker/tree/master/examples/docker" target="_blank" rel="external">Example Deployment on Standalone Docker</a></p>
+<p><a href="https://caddyserver.com/download" target="_blank" rel="external">download</a></p>
+<ul>
+<li>start caddy http file server</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mkdir -p /mnt/cockroach-exports</div><div class="line">./caddy -root /mnt/cockroach-exports <span class="string">"upload / &#123;"</span> <span class="string">'to "/mnt/cockroach-exports"'</span> <span class="string">'yes_without_tls'</span> <span class="string">"&#125;"</span></div></pre></td></tr></table></figure>
+<ul>
+<li>use caddy for crdb import</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">import table bmsql_config <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_config.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/config.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_warehouse <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_warehouse.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/warehouse.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_district <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_district.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/district.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_customer <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_customer.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/customer.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_history <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_history.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/cust-hist.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_new_order <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_new_order.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/new-order.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_oorder <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_oorder.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/order.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_order_line <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_order_line.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/order-line-nonull.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_item <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_item.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/item.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div><div class="line"></div><div class="line">import table bmsql_stock <span class="keyword">create</span> <span class="keyword">using</span> <span class="string">'http://a1:2015/bmsql_stock.sql'</span> csv <span class="keyword">data</span> (<span class="string">'http://a1:2015/stock.csv'</span>) <span class="keyword">with</span> temp=<span class="string">'http://a1:2015/tmp/'</span>;</div></pre></td></tr></table></figure>
 
       
     </div>
@@ -423,11 +398,11 @@
   <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
   <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
-  <p><span>本文标题:</span><a href="/2017/08/28/Deploy-severalnines-with-Docker/">Deploy ClusterControl with Docker</a></p>
+  <p><span>本文标题:</span><a href="/2017/10/15/cock-caddy/">使用Caddy导入csv文件到cockroachdb</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
-  <p><span>发布时间:</span>2017年08月28日 - 14:08</p>
-  <p><span>最后更新:</span>2017年09月25日 - 14:09</p>
-  <p><span>原始链接:</span><a href="/2017/08/28/Deploy-severalnines-with-Docker/">/2017/08/28/Deploy-severalnines-with-Docker/</a></p>
+  <p><span>发布时间:</span>2017年10月15日 - 11:10</p>
+  <p><span>最后更新:</span>2017年10月15日 - 11:10</p>
+  <p><span>原始链接:</span><a href="/2017/10/15/cock-caddy/">/2017/10/15/cock-caddy/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
 
@@ -445,9 +420,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/severalnines/" rel="tag"># severalnines</a>
+            <a href="/tags/cockroachdb/" rel="tag"># cockroachdb</a>
           
-            <a href="/tags/mysql/" rel="tag"># mysql</a>
+            <a href="/tags/caddy/" rel="tag"># caddy</a>
+          
+            <a href="/tags/http-file-server/" rel="tag"># http file server</a>
           
         </div>
       
@@ -460,8 +437,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/08/17/小贝壳喊爸爸/" rel="next" title="小贝壳喊爸爸啦">
-                <i class="fa fa-chevron-left"></i> 小贝壳喊爸爸啦
+              <a href="/2017/10/12/cock-benchmarksql/" rel="next" title="TPCC测试cockroachdb方法">
+                <i class="fa fa-chevron-left"></i> TPCC测试cockroachdb方法
               </a>
             
           </div>
@@ -469,10 +446,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/09/01/install-mysql-5-7-18/" rel="prev" title="MySQL源码学习001--Mac下MySQL 5.7.18源码安装">
-                MySQL源码学习001--Mac下MySQL 5.7.18源码安装 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -524,17 +497,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview sidebar-panel">
+      <section class="site-overview sidebar-panel sidebar-panel-active">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.png"
@@ -609,22 +573,6 @@
 
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">部署集群结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">获取所需镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">创建Network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">创建clustercontrol容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">创建master&slave容器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text">创建master容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text">创建slave容器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">通过clustercontrol部署master&slave</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">7.</span> <span class="nav-text">创建proxysql容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">8.</span> <span class="nav-text">为集群添加proxysql管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">9.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
