@@ -106,7 +106,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="目前cockroachdb没有专门的TPC-C测试工具，开发人员正在开发过程中：  @louishust there’s a work-in-progress program here: http://github.com/cockroachdb/loadgen - however there are several strong caveats that you should know abou">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-10-12T07:27:57.000Z">
+<meta property="og:updated_time" content="2017-10-15T04:41:38.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TPCC测试cockroachdb方法">
 <meta name="twitter:description" content="目前cockroachdb没有专门的TPC-C测试工具，开发人员正在开发过程中：  @louishust there’s a work-in-progress program here: http://github.com/cockroachdb/loadgen - however there are several strong caveats that you should know abou">
@@ -386,7 +386,8 @@ we’re actively working on improving the benchmark so it shouldn’t be too lon
 </ol>
 <p>测试过程有些语句不兼容，比如<code>select for update</code>。虽然cockroachdb不支持这个语句，<br>
 但是cockroachdb的SSI隔离级别可以达到同等效果，故只需要去掉测试中的<code>for update</code>语句即可。</p>
-<p><a href="https://github.com/louishust/benchmarksql-cockroachdb" target="_blank" rel="external">修改的benchmarksql for cockroachdb</a></p>
+<p><a href="https://github.com/louishust/benchmarksql-cockroachdb" target="_blank" rel="external">修改的benchmarksql for cockroachdb</a><br>
+<a href="https://www.cockroachlabs.com/docs/stable/import-data.html" target="_blank" rel="external">cockroachdb import data</a></p>
 
       
     </div>
@@ -406,7 +407,7 @@ we’re actively working on improving the benchmark so it shouldn’t be too lon
   <p><span>本文标题:</span><a href="/2017/10/12/cock-benchmarksql/">TPCC测试cockroachdb方法</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2017年10月12日 - 15:10</p>
-  <p><span>最后更新:</span>2017年10月12日 - 15:10</p>
+  <p><span>最后更新:</span>2017年10月15日 - 12:10</p>
   <p><span>原始链接:</span><a href="/2017/10/12/cock-benchmarksql/">/2017/10/12/cock-benchmarksql/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
