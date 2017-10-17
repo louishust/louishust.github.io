@@ -106,7 +106,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="由于crdb不兼容benchmarksql，只能使用crdb官方的tpcc测试程序loadgen进行测试。 ¶安装loadgen 123go get github.com/cockroachdb/loadgencd loadgenmake">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-10-16T09:34:47.000Z">
+<meta property="og:updated_time" content="2017-10-17T00:48:13.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="crdb loadgen tpcc测试">
 <meta name="twitter:description" content="由于crdb不兼容benchmarksql，只能使用crdb官方的tpcc测试程序loadgen进行测试。 ¶安装loadgen 123go get github.com/cockroachdb/loadgencd loadgenmake">
@@ -390,6 +390,9 @@
 <h3><span id="p128-bing-fa-5-fen-zhong">128并发5分钟</span></h3>
 <p>会出现冲突回滚的事务</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">./tpcc -concurrency=128 -warehouses=100 --duration=5m  postgresql://root@a1:26257/tpcc?sslmode=disable</div><div class="line"></div><div class="line">2017/10/16 12:42:29 error in payment: driver: bad connection</div><div class="line">...</div><div class="line">2017/10/16 12:36:42 error in payment: select by last name fail: pq: restart transaction: HandledRetryableTxnError: TransactionAbortedError: txn aborted &quot;sql txn&quot; id=351d7126 key=/Table/111/1/50/0 rw=true pri=0.01763613 iso=SERIALIZABLE stat=ABORTED epo=0 ts=1508128600.475877835,0 orig=1508128600.475877835,0 max=1508128600.975877835,0 wto=false rop=false seq=7</div><div class="line">...</div><div class="line">_elapsed___newOrders___newOrder(cum)__avg(ms)__p50(ms)__p95(ms)__p99(ms)_pMax(ms)</div><div class="line">  300.0s        7564            25.2   1887.9   1208.0   6710.9  10200.5  10200.5</div><div class="line"></div><div class="line">TPCC        7564      39665007.6 ns/op</div></pre></td></tr></table></figure>
+<h2><span id="pguan-fang-hui-da">官方回答</span></h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">This is pretty much expected - like I was saying on Gitter, since we haven’t implemented think time or wait time yet in tpcc, the workload that’s currently simulated is a worst-case extremely high contention workload, which is why performance suffers with higher concurrency. It’s not representative of a normal tpcc benchmark.</div><div class="line"></div><div class="line">In a correctly implemented tpcc benchmark (which we’re working on and should have ready this or next week), per-warehouse concurrency is capped, and each concurrent connection spends a lot of its time being idle. The benchmark is not designed to measure extremely high contention - instead it’s supposed to measure a highly concurrent but low contention workload.</div><div class="line"></div><div class="line">As for the errors you’re seeing with concurrency=128, in CockroachDB sometimes the client must get involved2 to retry a transaction. The load generator doesn’t currently implement retries correctly, hence the output errors.</div></pre></td></tr></table></figure>
+<p>等待他们tpc-c测试程序的稳定。</p>
 <h2><span id="pxiang-guan-lian-jie">相关链接</span></h2>
 <ol>
 <li><a href="https://github.com/cockroachdb/loadgen" target="_blank" rel="external">loadgen</a></li>
@@ -414,7 +417,7 @@
   <p><span>本文标题:</span><a href="/2017/10/16/cock-load-gen/">crdb loadgen tpcc测试</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2017年10月16日 - 10:10</p>
-  <p><span>最后更新:</span>2017年10月16日 - 17:10</p>
+  <p><span>最后更新:</span>2017年10月17日 - 08:10</p>
   <p><span>原始链接:</span><a href="/2017/10/16/cock-load-gen/">/2017/10/16/cock-load-gen/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
@@ -605,7 +608,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">安装loadgen</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">初始化100个仓库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">32并发5分钟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text">64并发5分钟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text">128并发5分钟</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">安装loadgen</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">初始化100个仓库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">32并发5分钟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text">64并发5分钟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text">128并发5分钟</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">官方回答</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
             
 
           </div>
