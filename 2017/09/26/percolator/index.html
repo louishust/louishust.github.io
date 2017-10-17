@@ -112,7 +112,7 @@
 <meta property="og:image" content="http://yoursite.com/images/paper/percolator3.png">
 <meta property="og:image" content="http://yoursite.com/images/paper/percolator4.png">
 <meta property="og:image" content="http://yoursite.com/images/paper/percolator5.png">
-<meta property="og:updated_time" content="2017-10-17T02:00:24.000Z">
+<meta property="og:updated_time" content="2017-10-17T03:00:51.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Percolator">
 <meta name="twitter:description" content="¶引入原因 Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。">
@@ -454,8 +454,8 @@ TRX2 SET1 SET2</p>
 <li>Percolator在bigtable的基础之上，以第三方库的形式提供服务，这就注定了其分布式事务无法很好的和bigtable原有事务融合，而是建立在bigtable的row transaction的基础之上。</li>
 <li>Percolator的锁的获取与释放，都需要真实的在bigtable上写入具体的数值，如此开销无法接受, 如果改成内存锁性能会有不少提升，但是无法保证故障的时候锁信息的保留。</li>
 <li>读取看似是不上锁，但是会被lock阻塞，如果存在lock则需要等待lock消失。优化点是可以提前确定committs，然后lock上面带上committs的值，就不用被阻塞了。</li>
-<li>没有全局死锁检测</li>
-<li>事务回滚代价较大</li>
+<li>分布式锁架构，遇到写冲突直接回滚事务，而不是等待锁，规避的死锁检查，但是可能造成大量冲突回滚。</li>
+<li>由于lock写入库，造成事务回滚代价较大</li>
 </ol>
 <p>综上所述，Percolator确实是更贴近其特定应用的一个半通用系统，如果在分布式DBMS上采用此策略，性能可能会出现瓶颈。更好的改进方向是和底层的逻辑存储进行深入融合，将上锁和多版本放到bigtable内部层面, 而不是真实的写入数据。</p>
 
@@ -477,7 +477,7 @@ TRX2 SET1 SET2</p>
   <p><span>本文标题:</span><a href="/2017/09/26/percolator/">Percolator</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2017年09月26日 - 10:09</p>
-  <p><span>最后更新:</span>2017年10月17日 - 10:10</p>
+  <p><span>最后更新:</span>2017年10月17日 - 11:10</p>
   <p><span>原始链接:</span><a href="/2017/09/26/percolator/">/2017/09/26/percolator/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
