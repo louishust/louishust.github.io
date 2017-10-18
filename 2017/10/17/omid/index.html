@@ -109,7 +109,7 @@
 <meta property="og:image" content="http://yoursite.com/images/paper/omid1.png">
 <meta property="og:image" content="http://yoursite.com/images/paper/omid2.png">
 <meta property="og:image" content="http://yoursite.com/images/paper/omid3.png">
-<meta property="og:updated_time" content="2017-10-17T08:56:33.000Z">
+<meta property="og:updated_time" content="2017-10-18T01:14:01.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Lock-free Transactional Support for Distributed Data Stores">
 <meta name="twitter:description" content="¶引言 DBMS的本质是事务，缺少事务支持的只能成为data stores，比如hbase,bigtable等。Google的bigtable缺少跨行事务，导致应用开发负担很大，因此percolator系统在bigtable的基础上实现了分布式事务。">
@@ -377,7 +377,7 @@
         <h2><span id="pyin-yan">引言</span></h2>
 <p>DBMS的本质是事务，缺少事务支持的只能成为<code>data stores</code>，比如hbase,bigtable等。Google的bigtable缺少跨行事务，导致应用开发负担很大，因此percolator系统在bigtable的基础上实现了分布式事务。</p>
 <a id="more"></a>
-<p>目前的大部分系统都以支持SI为最基本的需求，SI需要检测write-write冲突，检测这种冲突需要事务的元数据信息，比如<code>commit time</code>。事务元数据量很大，可能需要分布式存储，同时使用2PC协议。</p>
+<p>目前的大部分系统都以支持SI为最基本的需求，SI需要检测write-write冲突，检测这种冲突需要事务的元数据信息，比如<code>commit time</code>。事务元数据量很大，可能需要分布式存储，同时使用2PC协议协调涉及到的各个datanode，保证提交的原子性。</p>
 <p>为了避免专门处理事务元数据信息的开销，percolator讲lock、write、commit信息直接写入数据节点。这种方式加重了data node的开销, percolator为了减缓这种开销，使用了客户端缓存写操作，批量提交的方式，但是这又使事务提交延迟时间达到了秒级别，对于OLTP系统来说，是灾难性的。另一方面，对于一个失败事务，回滚清理锁需要时间，在这个期间，会影响其它事务进行操作。</p>
 <p>另外一种方式是lock-free的方式，使用<code>centralized transaction status oracle (SO)</code>, SO维护事务的元数据，检查WW冲突，这样就不需要分布式锁，但是受限于SO单点性能:</p>
 <ol>
@@ -402,7 +402,7 @@
 <p>实现SI的两种方式：</p>
 <h3><span id="pdistributed-implementations">Distributed Implementations</span></h3>
 <p>原生的实现是在client端维护事务元数据，WW冲突检查需要使用2PC协议与所有客户端进行。2PC的性能不会随着client数量增加下降明显。而且客户端需要有容错机制。必须所有的客户端相互通信，整个集群才是可用状态，一旦一个client出问题，或者存在网络分区，则无法进行WW检查。</p>
-<p>为了解决这些问题，事务元数据可以不在client端而是在一些专门的nodes中维护，2PC协议只在做了修改的节点进行。</p>
+<p>为了解决这些问题，事务元数据可以不在client端而是在一些专门的nodes中维护，2PC协议通过在datanode中的数据写入达到两截断提交的目的, <a href="https://louishust.github.io/2017/09/26/percolator/" target="_blank" rel="external">参考文章</a></p>
 <p>Percolator就是这么实现的，事务元数据直接存放在datanode。</p>
 <ol>
 <li>未提交事务直接写入datanode，</li>
@@ -442,6 +442,8 @@
 <p>算法三：Commit request</p>
 <p><img src="/images/paper/omid3.png" alt="commit request"></p>
 <p>由于Tmax是个最大值，可能存在回滚一些不冲突事务的可能性！！所以淘汰算法可以进行改进，根据当前活跃的最小的事务号进行淘汰。</p>
+<h2><span id="pxiang-guan-lian-jie">相关链接</span></h2>
+<p><a href="https://louishust.github.io/2017/09/26/percolator/" target="_blank" rel="external">percolator解读</a></p>
 
       
     </div>
@@ -461,7 +463,7 @@
   <p><span>本文标题:</span><a href="/2017/10/17/omid/">Lock-free Transactional Support for Distributed Data Stores</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2017年10月17日 - 14:10</p>
-  <p><span>最后更新:</span>2017年10月17日 - 16:10</p>
+  <p><span>最后更新:</span>2017年10月18日 - 09:10</p>
   <p><span>原始链接:</span><a href="/2017/10/17/omid/">/2017/10/17/omid/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
@@ -660,7 +662,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text">snapshot isolation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text">Distributed Implementations</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text">Transaction Status Oracle</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.1.</span> <span class="nav-text">算法一：commit request</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.2.</span> <span class="nav-text">算法二：inSnapshot</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">OMID设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">Memory Limited Capacity</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text">snapshot isolation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text">Distributed Implementations</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text">Transaction Status Oracle</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.1.</span> <span class="nav-text">算法一：commit request</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.2.</span> <span class="nav-text">算法二：inSnapshot</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">OMID设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">Memory Limited Capacity</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
             
 
           </div>
