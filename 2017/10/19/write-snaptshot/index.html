@@ -106,7 +106,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="正常所说的snapshot isolation只对冲突写进行约束，由于会有write skew一些问题，到不了serialization级别。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-10-19T07:45:17.000Z">
+<meta property="og:updated_time" content="2017-10-19T07:49:30.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="A Critique of Snapshot Isolation">
 <meta name="twitter:description" content="正常所说的snapshot isolation只对冲突写进行约束，由于会有write skew一些问题，到不了serialization级别。">
@@ -380,6 +380,11 @@
 </ol>
 <p>也就是说，两个时间上并行的非只读事务，如果先提交的事务修改了后提交事务中读取的数据，那么两个事务必须回滚一个。回滚哪个事务？应该回滚后提交的事务，因为后提交的事务可能执行时间很长。</p>
 <p><code>write snapshot isolation</code>能够达到<code>serialization</code>隔离级别的效果</p>
+<p>观点：</p>
+<ol>
+<li>所有写事务需要将读的数据全部缓存起来，进行比对，消耗必然非常大。</li>
+<li>事务回滚率必然很多，与其造成大量回滚，可能效率不如直接串行化。</li>
+</ol>
 
       
     </div>
