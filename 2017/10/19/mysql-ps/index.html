@@ -82,7 +82,7 @@
 <link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="cockroachdb,benchmarksql,tpcc,import," />
+  <meta name="keywords" content="mysql,ps," />
 
 
 
@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="¶导入方法 两种方式导入100warehouse数据到crdbv1.1.0：  首先通过benchmarksql导入pg，然后pg_dump导出copy语句，crdb执行copy语句 首先通过benchmarksql生成csv文件，">
-<meta name="keywords" content="cockroachdb,benchmarksql,tpcc,import">
+<meta name="description" content="针对memory/sql/TABLE进行举例。 首先从all_server_memory找到对应的NAME名称&amp;quot;TABLE&amp;quot;， 1&amp;#123; &amp;amp;key_memory_TABLE, &quot;TABLE&quot;, PSI_FLAG_GLOBAL&amp;#125;, /* Table cache */">
+<meta name="keywords" content="mysql,ps">
 <meta property="og:type" content="article">
-<meta property="og:title" content="crdb1.1.0数据导入性能比较">
-<meta property="og:url" content="http://yoursite.com/2017/10/16/crdb-import-data-performance/index.html">
+<meta property="og:title" content="根据setup\_instrument的NAME列找到对应意义">
+<meta property="og:url" content="http://yoursite.com/2017/10/19/mysql-ps/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶导入方法 两种方式导入100warehouse数据到crdbv1.1.0：  首先通过benchmarksql导入pg，然后pg_dump导出copy语句，crdb执行copy语句 首先通过benchmarksql生成csv文件，">
+<meta property="og:description" content="针对memory/sql/TABLE进行举例。 首先从all_server_memory找到对应的NAME名称&amp;quot;TABLE&amp;quot;， 1&amp;#123; &amp;amp;key_memory_TABLE, &quot;TABLE&quot;, PSI_FLAG_GLOBAL&amp;#125;, /* Table cache */">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-10-16T02:08:02.000Z">
+<meta property="og:updated_time" content="2017-10-19T15:58:24.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="crdb1.1.0数据导入性能比较">
-<meta name="twitter:description" content="¶导入方法 两种方式导入100warehouse数据到crdbv1.1.0：  首先通过benchmarksql导入pg，然后pg_dump导出copy语句，crdb执行copy语句 首先通过benchmarksql生成csv文件，">
+<meta name="twitter:title" content="根据setup\_instrument的NAME列找到对应意义">
+<meta name="twitter:description" content="针对memory/sql/TABLE进行举例。 首先从all_server_memory找到对应的NAME名称&amp;quot;TABLE&amp;quot;， 1&amp;#123; &amp;amp;key_memory_TABLE, &quot;TABLE&quot;, PSI_FLAG_GLOBAL&amp;#125;, /* Table cache */">
 
 
 
@@ -138,13 +138,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/10/16/crdb-import-data-performance/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/10/19/mysql-ps/"/>
 
 
 
 
 
-  <title>crdb1.1.0数据导入性能比较 | 小贝壳爸爸</title>
+  <title>根据setup\_instrument的NAME列找到对应意义 | 小贝壳爸爸</title>
   
 
 
@@ -281,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/16/crdb-import-data-performance/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/19/mysql-ps/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -298,7 +298,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">crdb1.1.0数据导入性能比较</h1>
+          <h1 class="post-title" itemprop="name headline">根据setup\_instrument的NAME列找到对应意义</h1>
         
 
         <div class="post-meta">
@@ -310,8 +310,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-16T09:55:29+08:00">
-                2017-10-16
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-19T23:50:32+08:00">
+                2017-10-19
               </time>
             
 
@@ -333,8 +333,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
-                    <span itemprop="name">cockroachdb</span>
+                  <a href="/categories/mysql/" itemprop="url" rel="index">
+                    <span itemprop="name">mysql</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/mysql/mysql运维/" itemprop="url" rel="index">
+                    <span itemprop="name">mysql运维</span>
                   </a>
                 </span>
 
@@ -370,54 +381,14 @@
       
 
       
-        <h2><span id="pdao-ru-fang-fa">导入方法</span></h2>
-<p>两种方式导入100warehouse数据到crdbv1.1.0：</p>
-<ol>
-<li>首先通过benchmarksql导入pg，然后<code>pg_dump</code>导出copy语句，crdb执行copy语句</li>
-<li>首先通过benchmarksql生成csv文件，</li>
-</ol>
+        <p>针对<code>memory/sql/TABLE</code>进行举例。</p>
+<p>首先从<code>all_server_memory</code>找到对应的NAME名称&quot;TABLE&quot;，</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123; &amp;key_memory_TABLE, <span class="string">"TABLE"</span>, PSI_FLAG_GLOBAL&#125;, <span class="comment">/* Table cache */</span></div></pre></td></tr></table></figure>
 <a id="more"></a>
-<h2><span id="pxing-neng-bi-jiao">性能比较</span></h2>
-<ol>
-<li>
-<p>单线程导入<code>pg_dump</code>的文件，耗时132min</p>
-</li>
-<li>
-<p>导入csv文件</p>
-<ol>
-<li>单线程顺序导入
-<ol>
-<li>2.1G order-line-nonull.csv 12m3.865125123s</li>
-<li>2.9G stock 5m31.318018087s</li>
-<li>1.7G customer 3m3.289160325s</li>
-</ol>
-</li>
-<li>并发执行大文件（都在a1上执行）
-<ol>
-<li>并发导入上面三个大文件 a1节点挂了</li>
-</ol>
-</li>
-<li>并发执行大文件(分别在a1,a2,a3上执行)
-<ol>
-<li>customer 2m53.384404436s</li>
-<li>stock 6m8.894480399s</li>
-<li>bmsql_order_line 12m20.354396959s</li>
-</ol>
-</li>
-</ol>
-</li>
-<li>
-<p>pg10通过benchmarksql，10线程导入</p>
-</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@a1 run]# time ./runDatabaseBuild.sh props.pg</div><div class="line">real    7m27.513s</div></pre></td></tr></table></figure>
-<p>由此可见，crdb通过import语法直接导入csv文件效率最高，但是与pg10相比较，性能有差距。</p>
-<h2><span id="pcan-kao-lian-jie">参考链接</span></h2>
-<ol>
-<li><a href="https://louishust.github.io/2017/10/15/cock-caddy/" target="_blank" rel="external">caddy导入csv文件</a></li>
-<li><a href="https://www.cockroachlabs.com/docs/stable/import.html" target="_blank" rel="external">crdb import csv</a></li>
-<li><a href="https://www.cockroachlabs.com/docs/stable/import-data.html" target="_blank" rel="external">cockroachdb import pg_dump data</a></li>
-</ol>
+<p>然后找<code>key_memory_TABLE</code>的使用的地方：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* make a new table */</span></div><div class="line"><span class="keyword">if</span> (!(table= (TABLE*) my_malloc(key_memory_TABLE,</div><div class="line">                                <span class="keyword">sizeof</span>(*table), MYF(MY_WME))))</div></pre></td></tr></table></figure>
+<p>这就很清楚了，是针对TABLE申请的内存容量。</p>
+<p><code>init_server_psi_keys</code>是注册key的函数, catogary是<strong>sql</strong>.</p>
 
       
     </div>
@@ -434,11 +405,11 @@
   <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
   <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
-  <p><span>本文标题:</span><a href="/2017/10/16/crdb-import-data-performance/">crdb1.1.0数据导入性能比较</a></p>
+  <p><span>本文标题:</span><a href="/2017/10/19/mysql-ps/">根据setup\_instrument的NAME列找到对应意义</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
-  <p><span>发布时间:</span>2017年10月16日 - 09:10</p>
-  <p><span>最后更新:</span>2017年10月16日 - 10:10</p>
-  <p><span>原始链接:</span><a href="/2017/10/16/crdb-import-data-performance/">/2017/10/16/crdb-import-data-performance/</a></p>
+  <p><span>发布时间:</span>2017年10月19日 - 23:10</p>
+  <p><span>最后更新:</span>2017年10月19日 - 23:10</p>
+  <p><span>原始链接:</span><a href="/2017/10/19/mysql-ps/">/2017/10/19/mysql-ps/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
 
@@ -456,13 +427,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/cockroachdb/" rel="tag"># cockroachdb</a>
+            <a href="/tags/mysql/" rel="tag"># mysql</a>
           
-            <a href="/tags/benchmarksql/" rel="tag"># benchmarksql</a>
-          
-            <a href="/tags/tpcc/" rel="tag"># tpcc</a>
-          
-            <a href="/tags/import/" rel="tag"># import</a>
+            <a href="/tags/ps/" rel="tag"># ps</a>
           
         </div>
       
@@ -475,8 +442,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/10/16/cock-benchmarksql-error/" rel="next" title="benchmarksql测试crdb的问题">
-                <i class="fa fa-chevron-left"></i> benchmarksql测试crdb的问题
+              <a href="/2017/10/19/write-snaptshot/" rel="next" title="A Critique of Snapshot Isolation">
+                <i class="fa fa-chevron-left"></i> A Critique of Snapshot Isolation
               </a>
             
           </div>
@@ -484,10 +451,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/10/16/pg-benchmarksql/" rel="prev" title="pg10 benchmarksql性能测试结果">
-                pg10 benchmarksql性能测试结果 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -539,17 +502,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview sidebar-panel">
+      <section class="site-overview sidebar-panel sidebar-panel-active">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.png"
@@ -624,22 +578,6 @@
 
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">导入方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">性能比较</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
