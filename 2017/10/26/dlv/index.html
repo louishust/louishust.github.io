@@ -98,19 +98,19 @@
 
 
 
-<meta name="description" content="安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install 实例程序 123456789101112131415161718package mainimport (    &quot;fmt&quot;    &quot;time&quot;)func say(s string) &amp;#123;">
+<meta name="description" content="¶安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install">
 <meta name="keywords" content="go,delve,dlv">
 <meta property="og:type" content="article">
 <meta property="og:title" content="delve调试go程序">
 <meta property="og:url" content="http://yoursite.com/2017/10/26/dlv/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install 实例程序 123456789101112131415161718package mainimport (    &quot;fmt&quot;    &quot;time&quot;)func say(s string) &amp;#123;">
+<meta property="og:description" content="¶安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/go/dlv.gif">
-<meta property="og:updated_time" content="2017-10-26T09:06:03.000Z">
+<meta property="og:updated_time" content="2017-10-26T09:35:24.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="delve调试go程序">
-<meta name="twitter:description" content="安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install 实例程序 123456789101112131415161718package mainimport (    &quot;fmt&quot;    &quot;time&quot;)func say(s string) &amp;#123;">
+<meta name="twitter:description" content="¶安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install">
 <meta name="twitter:image" content="http://yoursite.com/images/go/dlv.gif">
 
 
@@ -375,6 +375,7 @@
         <h2><span id="pan-zhuang-delve">安装delve</span></h2>
 <p><code>Mac</code>: <code>xcode-select --install</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ go get -u github.com/derekparker/delve/cmd/dlv</div><div class="line">$ make install</div></pre></td></tr></table></figure>
+<a id="more"></a>
 <h2><span id="pshi-li-cheng-xu">实例程序</span></h2>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">    <span class="string">"fmt"</span></div><div class="line">    <span class="string">"time"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">say</span><span class="params">(s <span class="keyword">string</span>)</span></span> &#123;</div><div class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</div><div class="line">        time.Sleep(<span class="number">100</span> * time.Millisecond)</div><div class="line">        fmt.Println(s)</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">    <span class="keyword">go</span> say(<span class="string">"world"</span>)</div><div class="line">    say(<span class="string">"hello"</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>生成测试程序：</p>

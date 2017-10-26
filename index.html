@@ -373,49 +373,16 @@
 
       
         
-          
-            <h2><span id="pan-zhuang-delve">安装delve</span></h2>
+          <h2 id="安装delve"><a class="header-anchor" href="#安装delve">¶</a>安装delve</h2>
 <p><code>Mac</code>: <code>xcode-select --install</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ go get -u github.com/derekparker/delve/cmd/dlv</div><div class="line">$ make install</div></pre></td></tr></table></figure>
-<h2><span id="pshi-li-cheng-xu">实例程序</span></h2>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">    <span class="string">"fmt"</span></div><div class="line">    <span class="string">"time"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">say</span><span class="params">(s <span class="keyword">string</span>)</span></span> &#123;</div><div class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</div><div class="line">        time.Sleep(<span class="number">100</span> * time.Millisecond)</div><div class="line">        fmt.Println(s)</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">    <span class="keyword">go</span> say(<span class="string">"world"</span>)</div><div class="line">    say(<span class="string">"hello"</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>生成测试程序：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">go build test.go</div></pre></td></tr></table></figure>
-<h2><span id="pqi-dong-delve">启动delve</span></h2>
-<h3><span id="pqi-dong-yi-jing-sheng-cheng-de-zhi-xing-wen-jian">启动已经生成的执行文件</span></h3>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">dlv start <span class="built_in">test</span></div></pre></td></tr></table></figure>
-<h3><span id="pgen-ju-wen-jian-jin-xing-qi-dong">根据文件进行启动</span></h3>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">dlv debug test.go</div></pre></td></tr></table></figure>
-<h3><span id="pattach-dao-zheng-zai-zhi-xing-de-cheng-xu">attach到正在执行的程序</span></h3>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">dlv attach pid <span class="built_in">test</span></div></pre></td></tr></table></figure>
-<h2><span id="pdiao-shi-ming-ling">调试命令</span></h2>
-<h3><span id="pduan-dian-she-zhi">断点设置</span></h3>
-<p><img src="/images/go/dlv.gif" alt="dlv debug"></p>
-<ul>
-<li><code>b main.main</code>: breakpoint on package.function</li>
-<li><code>b test.go:16</code>: breakpoint on lineno</li>
-<li><code>bp</code>: list all breakpoints</li>
-<li><code>clearall</code>: clear all breakpoints</li>
-<li><code>clear id</code>: clear id breakpoint</li>
-</ul>
-<h3><span id="pdiao-shi">调试</span></h3>
-<ul>
-<li><code>c</code>: continue</li>
-<li><code>s</code>: step in</li>
-<li><code>stepout</code>: step out</li>
-<li><code>bt</code>: print stack trace</li>
-<li><code>threads</code>: list threads</li>
-<li><code>thread xxxx</code>: switch to xxxx thread</li>
-</ul>
-<h2><span id="pcan-kao-lian-jie">参考链接</span></h2>
-<ol>
-<li><a href="https://github.com/derekparker/delve" target="_blank" rel="external">delve github</a></li>
-<li><a href="https://github.com/derekparker/delve/tree/master/Documentation/installation" target="_blank" rel="external">delve install</a></li>
-<li><a href="https://github.com/derekparker/delve/blob/master/Documentation/usage/dlv.md" target="_blank" rel="external">delve usage</a></li>
-<li><a href="https://github.com/derekparker/delve/tree/master/Documentation/cli" target="_blank" rel="external">delve commands</a></li>
-</ol>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/10/26/dlv/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
