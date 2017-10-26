@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link href="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+  
+
+<link href="//cdn.staticfile.org/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="cockroachdb,architecture," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="Overview crdb内部分为五层架构.   SQL Layer: 负责SQL的语法解析,计划的生成与执行。 Transaction Layer: 负责实现分布式事务，提供SI和SSI两种隔离级别。 Distribution Layer: 实现全局排序的map，负责数据的分布规则。 Replication Layer: 通过raft实现数据副本的强一致性。 Storage Layer: 使用R">
+<meta name="keywords" content="cockroachdb,architecture">
+<meta property="og:type" content="article">
+<meta property="og:title" content="crdb五层架构">
+<meta property="og:url" content="http://yoursite.com/2017/10/25/cock-architecture/index.html">
+<meta property="og:site_name" content="小贝壳爸爸">
+<meta property="og:description" content="Overview crdb内部分为五层架构.   SQL Layer: 负责SQL的语法解析,计划的生成与执行。 Transaction Layer: 负责实现分布式事务，提供SI和SSI两种隔离级别。 Distribution Layer: 实现全局排序的map，负责数据的分布规则。 Replication Layer: 通过raft实现数据副本的强一致性。 Storage Layer: 使用R">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/images/crdb/crdb_arch0.png">
+<meta property="og:updated_time" content="2017-10-26T08:06:04.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="crdb五层架构">
+<meta name="twitter:description" content="Overview crdb内部分为五层架构.   SQL Layer: 负责SQL的语法解析,计划的生成与执行。 Transaction Layer: 负责实现分布式事务，提供SI和SSI两种隔离级别。 Distribution Layer: 实现全局排序的map，负责数据的分布规则。 Replication Layer: 通过raft实现数据副本的强一致性。 Storage Layer: 使用R">
+<meta name="twitter:image" content="http://yoursite.com/images/crdb/crdb_arch0.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/10/25/cock-architecture/"/>
+
+
+
+
+
+  <title>crdb五层架构 | 小贝壳爸爸</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小贝壳爸爸</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">天桥扛把子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/25/cock-architecture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">crdb五层架构</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-25T13:51:57+08:00">
+                2017-10-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2><span id="poverview">Overview</span></h2>
+<p>crdb内部分为五层架构.</p>
+<p><img src="/images/crdb/crdb_arch0.png" alt="crdb arch"></p>
+<ol>
+<li>SQL Layer: 负责SQL的语法解析,计划的生成与执行。</li>
+<li>Transaction Layer: 负责实现分布式事务，提供SI和SSI两种隔离级别。</li>
+<li>Distribution Layer: 实现全局排序的map，负责数据的分布规则。</li>
+<li>Replication Layer: 通过raft实现数据副本的强一致性。</li>
+<li>Storage Layer: 使用RocksDB作为底层存储，包括raft log以及user data的存储。</li>
+</ol>
+<h2><span id="psql-layer">SQL Layer</span></h2>
+<p>将用户提交的SQL语句转化为底层存储的KV操作。</p>
+<h3><span id="poverview">Overview</span></h3>
+<p>开发者使用一个连接串即可进行关系操作。crdb节点是对等关系，可以选择任意一个节点进行连接，此节点程为<code>gateway node</code>. 用户发送的SQL语句在这一层需要转换成对KV的操作，然后传递到Transaction Layer。</p>
+<h3><span id="pcomponents">Components</span></h3>
+<h4><span id="prelational-structure">Relational Structure</span></h4>
+<p>crdb给用户展现的是关系型结构，对象有表、行、列等。同时还支持一些关系特性，如外键约束。</p>
+<h4><span id="psql-api">SQL API</span></h4>
+<p>crdb实现了大部分的ANSI SQL语法以及事务相关的语法，如<code>BEGIN</code>, <code>END</code>, <code>ISOLATION LEVELS</code></p>
+<h4><span id="ppostgresql-wire-protocol">PostgreSQL Wire Protocol</span></h4>
+<p>通信协议兼容PG协议</p>
+<h4><span id="psql-parser-planner-executor">SQL Parser, Planner, Executor</span></h4>
+<p>接收到SQL后，crdb解析sql，生成执行计划，并执行。</p>
+<h5><span id="pparsing">Parsing</span></h5>
+<p>通过解析yacc文件<code>pkg/sql/parser/sql.y</code>, 生成抽象语法树AST.</p>
+<h5><span id="pplanning">Planning</span></h5>
+<p>根据AST, 生成树形的执行计划planNodes，每个planNode节点是对KV的一组操作。<br>
+可以通过EXPLAIN查看执行计划。</p>
+<h5><span id="pexecuting">Executing</span></h5>
+<p>planNodes的执行会直接和Transaction Layer进行交互，此阶段包括消息的encoding和decoding。</p>
+<h4><span id="pencoding">Encoding</span></h4>
+<p>虽然SQL语句是可读的字符流，但是KV是按照字节流进行存储，所以在和Transaction Layer交互的时候，需要将字符流转化为字节流，然后传递给Transaction Layer, 而Transaction Layer返回的数据是字节流，在返回给client端的时候，需要转换成用户可识别的字符流。</p>
+<h4><span id="pdistsql">DistSQL</span></h4>
+<p>Distributed SQL.</p>
+<p><code>non-distributed</code>SQL, <code>coordinating node</code>接受所有的数据，单点进行后续的计算处理。</p>
+<p>DistSQL将计算推给多个节点进行，<code>coordinating node</code>聚集多个执行节点的结果集。</p>
+<p>DistSQL可以降低传递给<code>coordinating node</code>的数据量，同时利用并行计算的能力，可以大大降低执行时间。</p>
+<h3><span id="ptechnical-interactions-with-other-layers">Technical Interactions with Other Layers</span></h3>
+<p><code>planNodes</code>中的kv操作传递给Transaction Layer.</p>
+<h2><span id="ptransaction-layer">Transaction Layer</span></h2>
+<p>事务层负责实现分布式事务，保证事务的ACID特性。</p>
+<h3><span id="poverview">Overview</span></h3>
+<h4><span id="pwrites-amp-reads-phase-1">Writes &amp; Reads (Phase 1)</span></h4>
+<h5><span id="pwriting">Writing</span></h5>
+<p>执行写操作时，不直接将数据落盘:</p>
+<ol>
+<li>先写<strong>Transaction Record</strong>，写到事务中第一条write语句涉及的range。状态有<code>PENDING</code>, <code>COMMITTED</code>, <code>ABORTED</code>。</li>
+<li>所有write操作会写<strong>Write Intents</strong>, 表示临时的未提交状态，同时数据中包含了指向<code>Transaction Record</code>的值。</li>
+</ol>
+<h5><span id="preading">Reading</span></h5>
+<p>如果读到正常数据，OK,如果读到<code>write intents</code>，需要进入<code>transaction conflict</code>处理流程。</p>
+<h4><span id="pcommits-phase-2">Commits (Phase 2)</span></h4>
+<p>检查<code>Transaction Record</code>, 如果发现<code>ABORTED</code>状态，restart事务。</p>
+<h4><span id="pcleanup-asynchronous-phase-3">Cleanup (Asynchronous Phase 3)</span></h4>
+<p>异步清理状态, <code>Transaction Record</code>状态设为<code>COMMIT</code>后，需要异步清理<code>write intents</code>.</p>
+<p>存在专门的<code>coordinating node</code>，做异步清理工作：</p>
+<ol>
+<li>清理<code>write intent</code>指向<code>Transaction Record</code>的指针数据。</li>
+<li>删除<code>write intent</code>, 修改原记录</li>
+</ol>
+<p><a href="https://www.cockroachlabs.com/blog/how-cockroachdb-distributes-atomic-transactions/" target="_blank" rel="external">How CockroachDB Does Distributed, Atomic Transactions</a></p>
+<h3><span id="ptechnical-details-amp-components">Technical Details &amp; Components</span></h3>
+<h4><span id="ptime-amp-hybrid-logical-clocks">Time &amp; Hybrid Logical Clocks</span></h4>
+<p>分布式系统中，顺序和因果非常重要，但是很难解决。虽然raft可以实现全局排序，但是效率非常低下。crdb实现了<code>hybrid-logical clocks</code> (<code>HLC</code>),有物理部分和逻辑部分组成。物理部分由本地时钟决定，逻辑部分用于区分相同本地时钟的事件。</p>
+<p>事务执行时，通过HLC获取时间戳。当节点向其它节点发送请求时，会带上本地时间戳，当其它节点收到请求后，会根据收到的时间戳调整本地的HLC，保证下一个时间戳一定大于收到的时间戳。</p>
+<h4><span id="pmax-clock-offset-enforcement">Max Clock Offset Enforcement</span></h4>
+<p>为了协调不同节点之间的时间，可以指定最大的时钟偏差。如果节点的时钟偏差超过设定的值，则此节点会自杀。</p>
+<p><a href="https://www.cockroachlabs.com/docs/stable/operational-faqs.html#what-happens-when-node-clocks-are-not-properly-synchronized" target="_blank" rel="external">时钟偏差过大可能导致事务一致性出现问题</a></p>
+<h4><span id="ptimestamp-cache">Timestamp Cache</span></h4>
+<p>时间戳缓存用于缓存本地读操作对应的时间戳，如果写操作小于cache中对应的最新的读时间戳，则写操作的事务会以新的时间戳进行重试。</p>
+<h4><span id="ptransaction-records">Transaction Records</span></h4>
+<p>在事务修改第一个kv之前，需要先在此key所在的rang上生成一个transaction记录。</p>
+<p>Transaction Record的状态：</p>
+<ol>
+<li><code>PENDING</code>: 初始状态，事务写入还在进行状态</li>
+<li><code>COMMITTED</code>: 提交状态，其它事务可见。</li>
+<li><code>ABORTED</code>: 事务失败或者回滚。</li>
+</ol>
+<p>此为switch状态，PENDING===OFF,COMMIT=ON</p>
+<h4><span id="pwrite-intents">Write Intents</span></h4>
+<ol start="0">
+<li><code>Switch</code>: Transaction Records设置为off状态,此值不允许并发读写。</li>
+<li><code>Stage</code>: 写入的值不直接修改key，而是新做一个临时key0，紧挨着原key, key0包行指向Transaction record的指针。</li>
+<li><code>Filter</code>: 其它线程读取时，如果碰到staged状态的可以，需要检查switch状态，如果为OFF,则返回原始VALUE,如果为ON，则返回staged value</li>
+<li><code>Flip</code>: 写入结束后，commit阶段，把Transaction Records设置为ON状态。</li>
+<li><code>Unstage</code>: commit结束后，需要清理staged value，把key的value替换为key0的value，删除key0</li>
+</ol>
+<h5><span id="presolving-write-intent">Resolving Write Intent</span></h5>
+<p>当一个操作读到<code>write intent</code>后，根据<code>Transaction record</code>的状态可以有如下处理：</p>
+<ol>
+<li><code>COMMITTED</code>: 删除staged value的指针。</li>
+<li><code>ABORTED</code>: 删除staged value。</li>
+<li><code>PENDING</code>: 需要进行Transaction Conflicts</li>
+</ol>
+<h4><span id="pisolation-levels">Isolation Levels</span></h4>
+<ol>
+<li>Serializable Snapshot Isolation  需要检查读写冲突</li>
+<li>Snapshot Isolation 只检查写写冲突, 存在<code>write skew</code>写倾斜的问题</li>
+</ol>
+<h4><span id="ptransaction-conflicts">Transaction Conflicts</span></h4>
+<p>两种冲突：</p>
+<ol>
+<li><em>Write/Write</em> : 两个<code>PENDING</code>的事务对同一个key进行write intent.</li>
+<li><em>Write/Read</em> : 读遇到了比自己时间戳小的write intent。</li>
+</ol>
+<p>三种处理方式：</p>
+<ol>
+<li>看优先级：如果优先级不一样，则优先级低的事务aborted.</li>
+<li>第二个事务将第一个事务的timestamp提升(TxnA必须是SI,TxnB是读操作)</li>
+<li>TxnB进入等待，等待TxnA完成。</li>
+</ol>
+<h3><span id="ptechnical-interactions-with-other-layers">Technical Interactions with Other Layers</span></h3>
+<h4><span id="ptransaction-amp-sql-layer">Transaction &amp; SQL Layer</span></h4>
+<p>SQL Layer发送<code>planNodes</code>给Transaction Layer</p>
+<h4><span id="ptransaction-amp-distribution-layer">Transaction &amp; Distribution Layer</span></h4>
+<p><code>TxnCoordSender</code>发送KV请求给Distribution Layer的<code>DistSender</code>.</p>
+<h2><span id="psql-layer">SQL Layer</span></h2>
+<h3><span id="poverview">Overview</span></h3>
+<p>crdb以全局排序进行数据存储用来：</p>
+<ol>
+<li>Simple lookups:</li>
+</ol>
+<h2><span id="pcan-kao-lian-jie">参考链接</span></h2>
+<ol>
+<li><a href="https://www.cockroachlabs.com/docs/stable/architecture/overview.html" target="_blank" rel="external">cockroachdb doc</a></li>
+<li><a href="https://www.cockroachlabs.com/blog/how-cockroachdb-distributes-atomic-transactions/" target="_blank" rel="external">How CockroachDB Does Distributed, Atomic Transactions</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/10/25/cock-architecture/">crdb五层架构</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年10月25日 - 13:10</p>
+  <p><span>最后更新:</span>2017年10月26日 - 16:10</p>
+  <p><span>原始链接:</span><a href="/2017/10/25/cock-architecture/">/2017/10/25/cock-architecture/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/cockroachdb/" rel="tag"># cockroachdb</a>
+          
+            <a href="/tags/architecture/" rel="tag"># architecture</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/20/mysql-processlist-state/" rel="next" title="MySQL Processlist state状态查询">
+                <i class="fa fa-chevron-left"></i> MySQL Processlist state状态查询
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/26/dlv/" rel="prev" title="delve调试go程序">
+                delve调试go程序 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Louis" />
+          <p class="site-author-name" itemprop="name">Louis</p>
+           
+              <p class="site-description motion-element" itemprop="description">记录工作和生活点滴</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">36</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">58</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/louishust" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">SQL Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text">Components</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.1.</span> <span class="nav-text">Relational Structure</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.2.</span> <span class="nav-text">SQL API</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.3.</span> <span class="nav-text">PostgreSQL Wire Protocol</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.4.</span> <span class="nav-text">SQL Parser, Planner, Executor</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.4.1.</span> <span class="nav-text">Parsing</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.4.2.</span> <span class="nav-text">Planning</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.4.3.</span> <span class="nav-text">Executing</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.5.</span> <span class="nav-text">Encoding</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.6.</span> <span class="nav-text">DistSQL</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text">Technical Interactions with Other Layers</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">Transaction Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">Overview</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.1.</span> <span class="nav-text">Writes & Reads (Phase 1)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.1.1.</span> <span class="nav-text">Writing</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.1.2.</span> <span class="nav-text">Reading</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.2.</span> <span class="nav-text">Commits (Phase 2)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.3.</span> <span class="nav-text">Cleanup (Asynchronous Phase 3)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text">Technical Details & Components</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.1.</span> <span class="nav-text">Time & Hybrid Logical Clocks</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.2.</span> <span class="nav-text">Max Clock Offset Enforcement</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.3.</span> <span class="nav-text">Timestamp Cache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.4.</span> <span class="nav-text">Transaction Records</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.5.</span> <span class="nav-text">Write Intents</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.5.1.</span> <span class="nav-text">Resolving Write Intent</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.6.</span> <span class="nav-text">Isolation Levels</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.7.</span> <span class="nav-text">Transaction Conflicts</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text">Technical Interactions with Other Layers</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.1.</span> <span class="nav-text">Transaction & SQL Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.</span> <span class="nav-text">Transaction & Distribution Layer</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">SQL Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text">Overview</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Louis</span>
+
+  
+</div>
+
+
+  <div class="powered-by">
+    由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+  </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">
+    主题 &mdash;
+    <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+      NexT.Mist
+    </a>
+  </div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/jquery/2.1.3/jquery.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/fastclick/1.0.6/fastclick.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.ui.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
