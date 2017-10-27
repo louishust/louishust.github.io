@@ -98,19 +98,19 @@
 
 
 
-<meta name="description" content="Overview crdb内部分为五层架构.   SQL Layer: 负责SQL的语法解析,计划的生成与执行。 Transaction Layer: 负责实现分布式事务，提供SI和SSI两种隔离级别。 Distribution Layer: 实现全局排序的map，负责数据的分布规则。 Replication Layer: 通过raft实现数据副本的强一致性。 Storage Layer: 使用R">
+<meta name="description" content="¶Overview crdb内部分为五层架构.   SQL Layer: 负责SQL的语法解析,计划的生成与执行。 Transaction Layer: 负责实现分布式事务，提供SI和SSI两种隔离级别。 Distribution Layer: 实现全局排序的map，负责数据的分布规则。 Replication Layer: 通过raft实现数据副本的强一致性。 Storage Layer: 使用">
 <meta name="keywords" content="cockroachdb,architecture">
 <meta property="og:type" content="article">
 <meta property="og:title" content="crdb五层架构">
 <meta property="og:url" content="http://yoursite.com/2017/10/25/cock-architecture/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="Overview crdb内部分为五层架构.   SQL Layer: 负责SQL的语法解析,计划的生成与执行。 Transaction Layer: 负责实现分布式事务，提供SI和SSI两种隔离级别。 Distribution Layer: 实现全局排序的map，负责数据的分布规则。 Replication Layer: 通过raft实现数据副本的强一致性。 Storage Layer: 使用R">
+<meta property="og:description" content="¶Overview crdb内部分为五层架构.   SQL Layer: 负责SQL的语法解析,计划的生成与执行。 Transaction Layer: 负责实现分布式事务，提供SI和SSI两种隔离级别。 Distribution Layer: 实现全局排序的map，负责数据的分布规则。 Replication Layer: 通过raft实现数据副本的强一致性。 Storage Layer: 使用">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/crdb/crdb_arch0.png">
-<meta property="og:updated_time" content="2017-10-26T09:06:24.000Z">
+<meta property="og:updated_time" content="2017-10-27T01:22:55.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="crdb五层架构">
-<meta name="twitter:description" content="Overview crdb内部分为五层架构.   SQL Layer: 负责SQL的语法解析,计划的生成与执行。 Transaction Layer: 负责实现分布式事务，提供SI和SSI两种隔离级别。 Distribution Layer: 实现全局排序的map，负责数据的分布规则。 Replication Layer: 通过raft实现数据副本的强一致性。 Storage Layer: 使用R">
+<meta name="twitter:description" content="¶Overview crdb内部分为五层架构.   SQL Layer: 负责SQL的语法解析,计划的生成与执行。 Transaction Layer: 负责实现分布式事务，提供SI和SSI两种隔离级别。 Distribution Layer: 实现全局排序的map，负责数据的分布规则。 Replication Layer: 通过raft实现数据副本的强一致性。 Storage Layer: 使用">
 <meta name="twitter:image" content="http://yoursite.com/images/crdb/crdb_arch0.png">
 
 
@@ -382,6 +382,7 @@
 <li>Replication Layer: 通过raft实现数据副本的强一致性。</li>
 <li>Storage Layer: 使用RocksDB作为底层存储，包括raft log以及user data的存储。</li>
 </ol>
+<a id="more"></a>
 <h2><span id="psql-layer">SQL Layer</span></h2>
 <p>将用户提交的SQL语句转化为底层存储的KV操作。</p>
 <h3><span id="poverview">Overview</span></h3>
@@ -488,12 +489,130 @@
 <p>SQL Layer发送<code>planNodes</code>给Transaction Layer</p>
 <h4><span id="ptransaction-amp-distribution-layer">Transaction &amp; Distribution Layer</span></h4>
 <p><code>TxnCoordSender</code>发送KV请求给Distribution Layer的<code>DistSender</code>.</p>
-<h2><span id="psql-layer">SQL Layer</span></h2>
+<h2><span id="pdistribution-layer">Distribution Layer</span></h2>
 <h3><span id="poverview">Overview</span></h3>
 <p>crdb以全局排序进行数据存储用来：</p>
 <ol>
-<li>Simple lookups:</li>
+<li>Simple lookups: 很容易知道数据存住在哪个节点，定位数据很简单。</li>
+<li>Efficient scans: 通过指定数据的顺序，高效扫描数据</li>
 </ol>
+<h4><span id="pmonolithic-sorted-map-structure">Monolithic Sorted Map Structure</span></h4>
+<p>全局排序map包含两种数据：</p>
+<ol>
+<li>System data : meta ranges</li>
+<li>User data</li>
+</ol>
+<h5><span id="pmeta-ranges">Meta Ranges</span></h5>
+<p>二级索引：<code>meta1</code>和<code>meta2</code>. 首先查询meta1，然后查询meta2，最后定位到具体的key所在的range。 每个节点都有<code>meta1</code> range所在的位置，此range不会分裂。所有node都会缓存已经查询的meta2的记录。</p>
+<h5><span id="ptable-data">Table Data</span></h5>
+<p>data按照range为最小单位，每个range默认是64MB。range也是副本同步的基本单元。</p>
+<h4><span id="pusing-the-monolithic-sorted-map">Using the Monolithic Sorted Map</span></h4>
+<p>当节点接收到用户请求时，查询meta range，找到key对应的rang所在的node。通过meta2，找到具体range的<code>Leaseholder</code>, 然后将请求发给Leaseholder. Leaseholder是三个副本中负责接收读写请求的副本。</p>
+<h3><span id="ptechnical-details-amp-components">Technical Details &amp; Components</span></h3>
+<h4><span id="pgrpc">gRPC</span></h4>
+<p>Distribution Layer是第一个与其它node通信的Layer, crdb使用gRPC进行节点间通信。</p>
+<p>gRPC的消息通过protobufs进行打包和解包。crdb实现了基于pb的API<code>api.proto</code>.</p>
+<h4><span id="pbatchrequest">BatchRequest</span></h4>
+<p>KV请求打包到一起，批量进行传递，减少RPC的调用。</p>
+<h4><span id="pdistsender">DistSender</span></h4>
+<p>gateway节点的<code>DistSender</code>接受本地<code>TxnCoordSender</code>传递的BatchRequests,<code>DistSender</code>将所有请求按照需要发送到的不同的node进行分类。</p>
+<h4><span id="pmeta-range-kv-structure">Meta Range KV Structure</span></h4>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">metaX/successorKey -&gt; LeaseholderAddress, [list of other nodes containing data]</div></pre></td></tr></table></figure>
+<ol>
+<li><code>meta1</code> contains the address for the nodes containing the <code>meta2</code> replicas.</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"># Points to meta2 range for keys [A-M)</div><div class="line">meta1/M -&gt; node1:26257, node2:26257, node3:26257</div><div class="line"></div><div class="line"># Points to meta2 range for keys [M-Z]</div><div class="line">meta1/maxKey -&gt; node4:26257, node5:26257, node6:26257</div></pre></td></tr></table></figure>
+<ol start="2">
+<li><code>meta2</code> contains addresses for the nodes containing the replicas of each range in the cluster, the first of which is the Leaseholder.</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"># Contains [A-G)</div><div class="line">meta2/G -&gt; node1:26257, node2:26257, node3:26257</div><div class="line"></div><div class="line"># Contains [G-M)</div><div class="line">meta2/M -&gt; node1:26257, node2:26257, node3:26257</div><div class="line"></div><div class="line">#Contains [M-Z)</div><div class="line">meta2/Z -&gt; node4:26257, node5:26257, node6:26257</div><div class="line"></div><div class="line">#Contains [Z-maxKey)</div><div class="line">meta2/maxKey-&gt;  node4:26257, node5:26257, node6:26257</div></pre></td></tr></table></figure>
+<h4><span id="ptable-data-kv-structure">Table Data KV Structure</span></h4>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/&lt;table Id&gt;/&lt;index id&gt;/&lt;indexed column values&gt; -&gt; &lt;non-indexed/STORING column values&gt;</div></pre></td></tr></table></figure>
+<h4><span id="prange-descriptors">Range Descriptors</span></h4>
+<p>每个range都有元数据，成为<code>Range Descriptors</code>,包含如下：</p>
+<ol>
+<li>顺序递增的RangeID</li>
+<li>keyspace: 本range包含的minkey和maxkey</li>
+<li>其它副本所在的node的地址。</li>
+</ol>
+<p>range描述信息会存储在meta2中。</p>
+<h4><span id="prange-splits">Range Splits</span></h4>
+<p>当range达到了64MB后，分裂成两个32MB的range。</p>
+<h3><span id="ptechnical-interactions-with-other-layers">Technical Interactions with Other Layers</span></h3>
+<h4><span id="pdistribution-amp-transaction-layer">Distribution &amp; Transaction Layer</span></h4>
+<p>Distribution Layer的DistSender，接收BatchRequests.</p>
+<h4><span id="pdistribution-amp-replication-layer">Distribution &amp; Replication Layer</span></h4>
+<p>Distribution Layer将<code>BatchRequests</code>发送给Replication Layer的<code>Raft group leader</code> or <code>Leaseholder</code>。</p>
+<h2><span id="preplication-layer">Replication Layer</span></h2>
+<h3><span id="poverview">Overview</span></h3>
+<p>高可用和数据完全一致是数据库系统的一个挑战，为了解决这个问题，crdb使用了一致性协议保证任何修改必须得到多数节点的同意才能完成。</p>
+<p>当某个节点挂了之后，crdb会将数据重新分布，达到最大副本数。当新节点加入集群后，数据rebalance.</p>
+<h3><span id="pcomponents">Components</span></h3>
+<h4><span id="praft">Raft</span></h4>
+<p>将一个range的所有副本组织一个raft group，每个raft group有一个<code>leader</code>，其它的为<code>follower</code>，<code>leader</code>由raft group进行选举，协调raft group中所有节点的写入。</p>
+<p><code>BatchRequest</code>首先传递给Leaseholder,然后KV操作映射为对应的raft command发给<code>raft group leader</code>。(<code>Leaseholder</code>是接受read，write的节点，记录在meta2中;<code>raft leader</code>是raft协议选出的group leader,负责raft节点的协调，最好的情况是<code>Leaseholder</code>和<code>raft leader</code>是一个节点)</p>
+<h5><span id="praft-logs">Raft Logs</span></h5>
+<p>当写入请求达到多数支持，被raft group leader提交后，此操作记入raft log。raft log是序列化的操作记录，可以replay。</p>
+<h4><span id="psnapshots">Snapshots</span></h4>
+<p>每个副本都可以进行快照，根据MVCC实现快照。使用快照恢复的时候，配合raft group log，进行增量恢复。</p>
+<h4><span id="pleases">Leases</span></h4>
+<p>Raft group中的一个节点作为Leaseholder，接受读请求，同事讲写请求提交给raft group leader.</p>
+<p>读请求可以不用管raft.</p>
+<blockquote>
+<p>When serving reads, Leaseholders bypass Raft; for the Leaseholder’s writes to have been committed in the first place, they must have already achieved consensus, so a second consensus on the same data is unnecessary.</p>
+</blockquote>
+<h4><span id="pco-location-with-raft-leadership">Co-location with Raft Leadership</span></h4>
+<p>Leaseholder在lease过期之后，会进行renew，或者将leaseholder转让给其它节点，目的是让leaseholder与raft group leader是同一个节点。</p>
+<h4><span id="pepoch-based-leases-table-data">Epoch-Based Leases (Table Data)</span></h4>
+<p>表数据也有租约，使用<code>epochs</code>进行实现，在一个node加入集群和离开集群成为一个epoch，如果node脱离集群，则epoch进行变化，此node就会失去所有相关的lease。</p>
+<p>这避免了跟踪每个range的lease，这里假设所有的lease都不会过期，直到node脱离集群。</p>
+<h4><span id="pexpiration-based-leases-meta-amp-system-ranges">Expiration-Based Leases (Meta &amp; System Ranges)</span></h4>
+<p>meta range也有租约，不是epoch，而是<code>expiration-based lease</code>。定期重新选leaseholder。</p>
+<h3><span id="pmembership-changes-rebalance-repair">Membership Changes: Rebalance/Repair</span></h3>
+<p>集群的节点数出现变化后，raft group的成员也会变化，range副本需要rebalance。</p>
+<ol>
+<li>Nodes added: 新节点与其它节点通信，表示自己空闲，集群便转移一部分replica过去。</li>
+<li>Nodes going offline: 如果一个raft group中的成员长时间不响应，超过5分钟，则集群开始进行rebalance操作，复制数据到其它节点，以达到约定的副本数。</li>
+</ol>
+<h4><span id="prebalancing-replicas">Rebalancing Replicas</span></h4>
+<p>集群检查到节点变化后，会进行replica的迁移。</p>
+<p>这是通过在Leaseholder上进行snapshot，然后通过gRPC传递快照到其它节点。快照传递完成后，新的节点加入到raft group中来, 此间会通过raft log同步增量数据。</p>
+<h3><span id="pinteractions-with-other-layers">Interactions with Other Layers</span></h3>
+<h4><span id="preplication-amp-distribution-layers">Replication &amp; Distribution Layers</span></h4>
+<ol>
+<li>Distribution Layer的DistSender发送kv请求给replication层。</li>
+<li>Replication layer 发送<code>BatchResponses</code>给<code>DistSender</code></li>
+</ol>
+<h4><span id="preplication-amp-storage-layers">Replication &amp; Storage Layers</span></h4>
+<p>提交的raft command写到raft logs，最终写入到Storage Layer.</p>
+<p>Leaseholder从Storage Layer层的RocksDB读取数据。</p>
+<h2><span id="pstorage-layer">Storage Layer</span></h2>
+<h3><span id="poverview">Overview</span></h3>
+<p>每个crdb节点至少包含一个<code>store</code>, 数据按照KV存储在RocksDB上。每个<code>store</code>包含三个RocksDB实例：</p>
+<ul>
+<li>One for the Raft log</li>
+<li>One for storing temporary Distributed SQL data</li>
+<li>One for all other data on the node</li>
+</ul>
+<p>一个节点中的所有store共享一个<code>block cache</code>.</p>
+<h3><span id="pcomponents">Components</span></h3>
+<h4><span id="procksdb">RocksDB</span></h4>
+<p>crdb使用RocksDB的原因：</p>
+<ol>
+<li>KV存储，和Distribution Layer直接映射</li>
+<li>原子批量写，快照，事务</li>
+</ol>
+<p>RocksDB是Facebook基于Google的LevelDB开发的一个分支，加了一些优化措施。</p>
+<h4><span id="pmvcc">MVCC</span></h4>
+<p>crdb严重依赖MVCC机制，时间戳通过hybrid logical clock (HLC) 进行确定。所有的MVCC数据都存在RockDB。</p>
+<p>MVCC在存储层存储，被 Transaction Layer利用。</p>
+<h4><span id="ptime-travel">Time-Travel</span></h4>
+<p><code>SELECT...AS OF SYSTEM TIME</code> 获取指定时间戳的数据, 只要数据没有被GC。</p>
+<h4><span id="pgarbage-collection">Garbage Collection</span></h4>
+<p>crdb定期清理老的MVCC数据来减少磁盘数据的大小。存在一个<code>garbage collection period</code>,如果old value的时间戳距离当前时间的差值大于此值，则可以进行清除。</p>
+<h3><span id="pinteractions-with-other-layers">Interactions with Other Layers</span></h3>
+<h4><span id="pstorage-amp-replication-layers">Storage &amp; Replication Layers</span></h4>
+<p>Storage Layer通过raft log将数据写入磁盘，同时将数据返回给Replication Layer.</p>
 <h2><span id="pcan-kao-lian-jie">参考链接</span></h2>
 <ol>
 <li><a href="https://www.cockroachlabs.com/docs/stable/architecture/overview.html" target="_blank" rel="external">cockroachdb doc</a></li>
@@ -518,7 +637,7 @@
   <p><span>本文标题:</span><a href="/2017/10/25/cock-architecture/">crdb五层架构</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2017年10月25日 - 13:10</p>
-  <p><span>最后更新:</span>2017年10月26日 - 17:10</p>
+  <p><span>最后更新:</span>2017年10月27日 - 09:10</p>
   <p><span>原始链接:</span><a href="/2017/10/25/cock-architecture/">/2017/10/25/cock-architecture/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
@@ -711,7 +830,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">SQL Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text">Components</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.1.</span> <span class="nav-text">Relational Structure</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.2.</span> <span class="nav-text">SQL API</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.3.</span> <span class="nav-text">PostgreSQL Wire Protocol</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.4.</span> <span class="nav-text">SQL Parser, Planner, Executor</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.4.1.</span> <span class="nav-text">Parsing</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.4.2.</span> <span class="nav-text">Planning</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.4.3.</span> <span class="nav-text">Executing</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.5.</span> <span class="nav-text">Encoding</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.6.</span> <span class="nav-text">DistSQL</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text">Technical Interactions with Other Layers</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">Transaction Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">Overview</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.1.</span> <span class="nav-text">Writes & Reads (Phase 1)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.1.1.</span> <span class="nav-text">Writing</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.1.2.</span> <span class="nav-text">Reading</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.2.</span> <span class="nav-text">Commits (Phase 2)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.3.</span> <span class="nav-text">Cleanup (Asynchronous Phase 3)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text">Technical Details & Components</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.1.</span> <span class="nav-text">Time & Hybrid Logical Clocks</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.2.</span> <span class="nav-text">Max Clock Offset Enforcement</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.3.</span> <span class="nav-text">Timestamp Cache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.4.</span> <span class="nav-text">Transaction Records</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.5.</span> <span class="nav-text">Write Intents</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.5.1.</span> <span class="nav-text">Resolving Write Intent</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.6.</span> <span class="nav-text">Isolation Levels</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.7.</span> <span class="nav-text">Transaction Conflicts</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text">Technical Interactions with Other Layers</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.1.</span> <span class="nav-text">Transaction & SQL Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.</span> <span class="nav-text">Transaction & Distribution Layer</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">SQL Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text">Overview</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">SQL Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text">Components</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.1.</span> <span class="nav-text">Relational Structure</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.2.</span> <span class="nav-text">SQL API</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.3.</span> <span class="nav-text">PostgreSQL Wire Protocol</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.4.</span> <span class="nav-text">SQL Parser, Planner, Executor</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.4.1.</span> <span class="nav-text">Parsing</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.4.2.</span> <span class="nav-text">Planning</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.4.3.</span> <span class="nav-text">Executing</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.5.</span> <span class="nav-text">Encoding</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.6.</span> <span class="nav-text">DistSQL</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text">Technical Interactions with Other Layers</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">Transaction Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">Overview</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.1.</span> <span class="nav-text">Writes & Reads (Phase 1)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.1.1.</span> <span class="nav-text">Writing</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.1.2.</span> <span class="nav-text">Reading</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.2.</span> <span class="nav-text">Commits (Phase 2)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.3.</span> <span class="nav-text">Cleanup (Asynchronous Phase 3)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text">Technical Details & Components</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.1.</span> <span class="nav-text">Time & Hybrid Logical Clocks</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.2.</span> <span class="nav-text">Max Clock Offset Enforcement</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.3.</span> <span class="nav-text">Timestamp Cache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.4.</span> <span class="nav-text">Transaction Records</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.5.</span> <span class="nav-text">Write Intents</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.5.1.</span> <span class="nav-text">Resolving Write Intent</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.6.</span> <span class="nav-text">Isolation Levels</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.7.</span> <span class="nav-text">Transaction Conflicts</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text">Technical Interactions with Other Layers</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.1.</span> <span class="nav-text">Transaction & SQL Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.</span> <span class="nav-text">Transaction & Distribution Layer</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">Distribution Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text">Overview</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.1.</span> <span class="nav-text">Monolithic Sorted Map Structure</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.1.1.</span> <span class="nav-text">Meta Ranges</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.1.2.</span> <span class="nav-text">Table Data</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.2.</span> <span class="nav-text">Using the Monolithic Sorted Map</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text">Technical Details & Components</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.1.</span> <span class="nav-text">gRPC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.2.</span> <span class="nav-text">BatchRequest</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.3.</span> <span class="nav-text">DistSender</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.4.</span> <span class="nav-text">Meta Range KV Structure</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.5.</span> <span class="nav-text">Table Data KV Structure</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.6.</span> <span class="nav-text">Range Descriptors</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.7.</span> <span class="nav-text">Range Splits</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.</span> <span class="nav-text">Technical Interactions with Other Layers</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.1.</span> <span class="nav-text">Distribution & Transaction Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.2.</span> <span class="nav-text">Distribution & Replication Layer</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">Replication Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text">Components</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.1.</span> <span class="nav-text">Raft</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.1.1.</span> <span class="nav-text">Raft Logs</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.2.</span> <span class="nav-text">Snapshots</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.3.</span> <span class="nav-text">Leases</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.4.</span> <span class="nav-text">Co-location with Raft Leadership</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.5.</span> <span class="nav-text">Epoch-Based Leases (Table Data)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.6.</span> <span class="nav-text">Expiration-Based Leases (Meta & System Ranges)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.</span> <span class="nav-text">Membership Changes: Rebalance/Repair</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.1.</span> <span class="nav-text">Rebalancing Replicas</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.4.</span> <span class="nav-text">Interactions with Other Layers</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.4.1.</span> <span class="nav-text">Replication & Distribution Layers</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.4.2.</span> <span class="nav-text">Replication & Storage Layers</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">Storage Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">6.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">6.2.</span> <span class="nav-text">Components</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">6.2.1.</span> <span class="nav-text">RocksDB</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">6.2.2.</span> <span class="nav-text">MVCC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">6.2.3.</span> <span class="nav-text">Time-Travel</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">6.2.4.</span> <span class="nav-text">Garbage Collection</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">6.3.</span> <span class="nav-text">Interactions with Other Layers</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">6.3.1.</span> <span class="nav-text">Storage & Replication Layers</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">7.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
             
 
           </div>
