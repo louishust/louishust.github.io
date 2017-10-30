@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link href="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+  
+
+<link href="//cdn.staticfile.org/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="cockroachdb,code," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="¶connection manager 连接管理，接受用户连接。  相关文件  main.go pkg/cli/cli.go pkg/cli/start.go pkg/server/server.go">
+<meta name="keywords" content="cockroachdb,code">
+<meta property="og:type" content="article">
+<meta property="og:title" content="crdb 语句执行流程">
+<meta property="og:url" content="http://yoursite.com/2017/10/28/cock-query-life/index.html">
+<meta property="og:site_name" content="小贝壳爸爸">
+<meta property="og:description" content="¶connection manager 连接管理，接受用户连接。  相关文件  main.go pkg/cli/cli.go pkg/cli/start.go pkg/server/server.go">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-10-30T07:14:47.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="crdb 语句执行流程">
+<meta name="twitter:description" content="¶connection manager 连接管理，接受用户连接。  相关文件  main.go pkg/cli/cli.go pkg/cli/start.go pkg/server/server.go">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/10/28/cock-query-life/"/>
+
+
+
+
+
+  <title>crdb 语句执行流程 | 小贝壳爸爸</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小贝壳爸爸</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">天桥扛把子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/28/cock-query-life/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">crdb 语句执行流程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-28T10:16:20+08:00">
+                2017-10-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2><span id="pconnection-manager">connection manager</span></h2>
+<p>连接管理，接受用户连接。</p>
+<ul>
+<li>相关文件
+<ul>
+<li><code>main.go</code></li>
+<li><code>pkg/cli/cli.go</code></li>
+<li><code>pkg/cli/start.go</code></li>
+<li><code>pkg/server/server.go</code></li>
+</ul>
+</li>
+</ul>
+<a id="more"></a>
+<ul>
+<li>函数调用堆栈</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&gt;main.main                      main.go</div><div class="line">|&gt;cli.Main                      pkg/cli/cli.go</div><div class="line">| |&gt;cli.runStart                pkg/cli/start.go</div><div class="line">| | |&gt;(s *Server) Start         pkg/server/server.go</div><div class="line">| | | |&gt;(s *Server) ServeConn   pkg/sql/pgwire/server.go</div></pre></td></tr></table></figure>
+<h2><span id="ppostgres-wire-protocol">Postgres Wire Protocol</span></h2>
+<p><code>pgwire.v3Conn</code>结构体接收客户端的连接，身份验证，按照pg通信协议解析语句。<br>
+<code>v3Conn.serve()</code> 实现<code>读取SQL，执行SQL，返回结果集</code>的循环。</p>
+<ul>
+<li>
+<p>相关文件</p>
+<ul>
+<li><code>pkg/sql/pgwire/v3.go</code></li>
+</ul>
+</li>
+<li>
+<p>函数调用堆栈</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&gt;(s *Server) ServeConn              pkg/sql/pgwire/server.go</div><div class="line">|&gt;(c *v3Conn) serve                 pkg/sql/pgwire/v3.go</div><div class="line">| |&gt;(b *readBuffer) readTypedMsg    pkg/sql/pgwire/encoding.go</div><div class="line">| |&gt;(c *v3Conn) handleSimpleQuery   pkg/sql/pgwire/v3.go</div></pre></td></tr></table></figure>
+<h2><span id="psql-executor">SQL Executor</span></h2>
+<p><code>sql.Executor</code>具体负责解析SQL，执行SQL，返回结果集给<code>pgwire.v3Conn</code>。</p>
+<p>入口函数是<code>Executor.execRequest()</code>, 接收一批SQL语句，将执行交给<code>sql.Session</code>进行处理。</p>
+<h3><span id="pparsing">Parsing</span></h3>
+<p>解析是讲SQL语句根据YACC语法规则解析成抽象语法树(AST)。sql.y文件是从PG直接拷贝过来，做了一定的裁剪，然后又新增了一些语法。</p>
+<p>AST node都定义在<code>sql/parser</code>，分为两类， <code>statements</code> 和<code>expressions</code>.AST最后会经过<code>planner</code>转换为执行计划。</p>
+<ul>
+<li>
+<p>相关文件</p>
+<ul>
+<li><code>pkg/sql/parser/sql.y</code></li>
+<li><code>pkg/sql/executor.go</code></li>
+<li><code>pkg/sql/parser/parse.go</code></li>
+</ul>
+</li>
+<li>
+<p>函数调用堆栈</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&gt;pgwire.(*v3Conn).serve</div><div class="line">| &gt;pgwire.(*v3Conn).handleSimpleQuery</div><div class="line">| |&gt;sql.(*Executor).ExecuteStatements</div><div class="line">| | |&gt;sql.(*Executor).execRequest</div><div class="line">| | | |&gt;parser.Parse</div><div class="line">| | | | |&gt;parser.(*Parser).Parse</div><div class="line">| | | | | |&gt;parser.(*sqlParserImpl).Parse  //generated by goyacc from sql.y</div></pre></td></tr></table></figure>
+<h3><span id="pstatement-execution">Statement Execution</span></h3>
+<p>重点调用<code>runTxnAttempt</code>函数进入执行阶段，执行里面包含生成执行计划。</p>
+<ul>
+<li>
+<p>相关文件</p>
+<ul>
+<li><code>pkg/sql/executor.go</code></li>
+</ul>
+</li>
+<li>
+<p>函数调用堆栈</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&gt;sql.(*Executor).execRequest</div><div class="line">| &gt;sql.(*Executor).execParsed</div><div class="line">| |&gt;sql.runWithAutoRetry</div><div class="line">| | |&gt;sql.runTxnAttempt</div></pre></td></tr></table></figure>
+<h3><span id="pbuilding-execution-plans">Building execution plans</span></h3>
+<p>crdb的执行计划是<code>planNode</code>节点组成的树形结构，类似AST，但是包含了语义信息和运行状态。计划树是通过<code>planner.makePlan()</code>生成的，接收经过parsed的语句，返回<code>planNode</code>树的根节点，这个过程中会进行语义检查以及各种表达式变化。</p>
+<p><code>planner</code>查看AST根节点从而知道语句类型，根据不同的语句类型，调用不同的计划生成函数。比如<code>SELECT</code>语句的计划树是通过<code>planner.SelectClause()</code>生成。</p>
+<p><code>SELECT</code>计划树包含各种处理逻辑：<code>scanNode</code>进行全表扫描，<code>filterNode</code>进行过滤WHERE条件, <code>sortNode</code>进行ORDER BY操作。</p>
+<p>最后计划树会经过简化和优化，比如去掉不必要的节点。</p>
+<ul>
+<li>
+<p>相关文件</p>
+<ul>
+<li><code>pkg/sql/executor.go</code></li>
+<li><code>pkg/sql/plan.go</code></li>
+</ul>
+</li>
+<li>
+<p>函数调用堆栈</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&gt;sql.runTxnAttempt</div><div class="line">| &gt;sql.(*Executor).execSingleStatement</div><div class="line">| | &gt;sql.(*Executor).execStmtInOpenTxn</div><div class="line">| | |&gt;sql.(*Executor).execStmt</div><div class="line">| | | |&gt;sql.(*planner).makePlan</div></pre></td></tr></table></figure>
+<h4><span id="pexpressions">Expressions</span></h4>
+<p><code>parser.Expr</code>是AST的子集，表示各种表达式, 出现在WHERE、LIMIT、ORDER BY条件中。所有的表达式都要经过<code>planner.analyzeExpr</code>处理。每个<code>planNode</code>负责调用<code>analyzeExpr</code>分析本节点所包含的表达式。</p>
+<p><code>planner.analyzeExpr</code>执行如下流程：</p>
+<ol>
+<li><code>resolving names</code></li>
+<li><code>normalization</code></li>
+<li><code>type checking</code></li>
+<li>使用<code>sql.subquery</code>替换sub-query</li>
+</ol>
+<h3><span id="pnotable-plannodes">Notable <code>planNodes</code></span></h3>
+<p>每个<code>planNode</code>包行两个方法：</p>
+<ol>
+<li><code>Start</code>: 初始化</li>
+<li><code>Next</code>: 生成下一行数据</li>
+</ol>
+<ul>
+<li><code>renderNode</code>的start方法调用堆栈</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&gt;sql.(*Executor).execClassic</div><div class="line">| &gt;sql.(*planner).startPlan</div><div class="line">| | &gt;sql.(*renderNode).Start</div></pre></td></tr></table></figure>
+<p>有两种执行方式：</p>
+<ol>
+<li>executor.execClassic()</li>
+<li>executor.execDistSQL()</li>
+</ol>
+<ul>
+<li><code>execClassic</code>函数调用堆栈</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&gt;sql.runTxnAttempt</div><div class="line">| &gt;sql.(*Executor).execSingleStatement</div><div class="line">| | &gt;sql.(*Executor).execStmtInOpenTxn</div><div class="line">| | |&gt;sql.(*Executor).execStmt</div><div class="line">| | | |&gt;sql.(*Executor).execClassic</div></pre></td></tr></table></figure>
+<h2><span id="pkv">KV</span></h2>
+<p>crdb kv层处理请求的执行，请求和响应统一使用基于protocol buffer的API，消息格式定义在<code>pkg/roachpb/api.proto</code>。实际上，KV client发送的是批量请求<a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/roachpb/api.proto#L848" target="_blank" rel="external">BatchRequest s</a>, 所有的请求都有一个<a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/roachpb/api.proto#L788" target="_blank" rel="external">Header</a>，包含消息的目标以及事务信息。</p>
+<h3><span id="pthe-kv-client-interface">The KV client interface</span></h3>
+<p>KV client包含启动事务的接口<a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/internal/client/db.go#L452" target="_blank" rel="external">starting a (KV) transaction</a>, <a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/internal/client/txn.go#L36" target="_blank" rel="external"><code>Txn</code></a> 是事务上下文结构体。</p>
+<ul>
+<li><code>Txn.Run()</code>最终调用<a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/internal/client/txn.go#L587" target="_blank" rel="external"><code>txn.db.sender.Send(..., batch)</code></a>:</li>
+<li>请求最终会传递到需要执行的副本节点。</li>
+<li><code>Send()</code> 最终传递到最底层接口。<code>TxnCoordSender -&gt; DistSender -&gt; Node -&gt; Stores -&gt; Store -&gt; Replica</code></li>
+</ul>
+<h3><span id="ptxncoordsender">TxnCoordSender</span></h3>
+<p>TxnCoordSender是最上层的<code>client.Sender</code>. TxnCoordSender负责处理事务状态，一个事务开启后，TxnCoordSender异步发送心跳信号给<code>txn record</code>, 保持连接, 同时会记录整个事务的所有写入的key。事务提交或回滚时，会清理<code>write intents</code>。事务中所有的语句都要经过TxnCoordSender, 然后将请求传递给DistSender。</p>
+<h3><span id="pdistsender">DistSender</span></h3>
+<p><a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/kv/dist_sender.go#L133" target="_blank" rel="external"><code>DistSender</code></a><br>
+这一层任务繁重，需要处理gateway节点和range节点之间的通信，接受<code>BatchRequests</code>，将请求路由到不同的range node，然后从不同的range node接收结果集进行组装。</p>
+<ol>
+<li>DistSender.Send() 调用<code>DistSender.divideAndSendBatchToRanges()</code> 将请求按照range进行细分。</li>
+<li>每个细分的请求，调用<code>DistSender.sendPartialBatchAsync()</code> 将请求发到对应的range所在的node。</li>
+<li>将细分请求发送到对应range的正确的副本，是通过RPC请求进行的。</li>
+<li><code>sendToReplicas</code>函数用于初始化RPC请求，并发送请求。</li>
+<li>RPC的发送隐藏在<a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/kv/transport.go#L87" target="_blank" rel="external"><code>Transport interface</code></a>, <a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/kv/transport.go#L159" target="_blank" rel="external"><code>grpcTransport.SendNext()</code></a> 进行gRPC的调用。</li>
+<li>从不同副本返回的响应合并成单独的<code>BatchResponse</code>，最终返回给<code>Send()</code>方法。</li>
+</ol>
+<h3><span id="prpc-server-node-and-stores">RPC server - Node and Stores</span></h3>
+<p>RPC服务是通过<a href="https://github.com/cockroachdb/cockroach/blob/801a90b25b217e4ed5a833b15151c252bde0d1b0/pkg/server/node.go#L850" target="_blank" rel="external"><code>Node</code></a>结构体实现的。Node将请求直接传递给其成员Stores进行处理。</p>
+<p><code>Stores.Send()</code>根据确定目标副本，并将请求路由到目标副本。</p>
+<h3><span id="pstore-intent-resolution">Store - intent resolution</span></h3>
+<p>每个store代表着一个物理磁盘设备. Store除了路由请求到目标副本外，还有个重要角色，处理<code>write intents</code>记录，通过这个达到处理R-W，W-W冲突的目的。</p>
+<p>碰到<a href="https://github.com/cockroachdb/cockroach/blob/801a90b25b217e4ed5a833b15151c252bde0d1b0/pkg/storage/store.go#L2494" target="_blank" rel="external"><code>WriteIntentError</code></a>后，需要进行<a href="https://github.com/cockroachdb/cockroach/blob/801a90b25b217e4ed5a833b15151c252bde0d1b0/pkg/storage/store.go#L2522" target="_blank" rel="external">try to &quot;resolve&quot;<br>
+it</a>，使用<br>
+<a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/storage/intent_resolver.go#L43" target="_blank" rel="external"><code>intentResolver</code></a> 解决冲突.</p>
+<h3><span id="preplica-executing-reads-proposing-raft-commands">Replica - executing reads, proposing Raft commands</span></h3>
+<p><a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/storage/replica.go#L246" target="_blank" rel="external"><code>Replica</code></a>代表一个range, Replica是Sender的最后一层,其它上层的Sender最终都是将请求发送给LeaseHolder的Replica, 读请求和写请求处理逻辑不同，读直接返回数据，写请求需要通过raft一致性协议进行。</p>
+<h3><span id="pread-request-path">Read request path</span></h3>
+<p>读请求首先会检查请求是否真正发送到了LeaseHolder上，是通过<a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/storage/replica.go#L1783" target="_blank" rel="external"><code>replica.redirectOnOrAcquireLease()</code></a>函数进行检查，如果当前replica不是leaseholder，则把请求转给leaseholder，如果当前不存在leaseholder，则会发出申请当前节点为leaseholder的请求。</p>
+<p>确定leaseholder后，如果所读的key正在被其它事务写，需要进行同步等待。同步通过<br>
+<a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/storage/command_queue.go#L32" target="_blank" rel="external"><code>CommandQueue</code></a>进行</p>
+<ul>
+<li>函数调用堆栈</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&gt;storage.(*Stores).Send</div><div class="line">|&gt;storage.(*Store).Send</div><div class="line">| |&gt;storage.(*Replica).Send</div><div class="line">| | |&gt;storage.(*Replica).executeWriteBatch</div><div class="line">| | | |&gt;storage.(*Replica).tryExecuteWriteBatch</div><div class="line">| | | | |&gt;storage.(*Replica).redirectOnOrAcquireLease</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&gt;storage.(*Stores).Send</div><div class="line">|&gt;storage.(*Store).Send</div><div class="line">| |&gt;storage.(*Replica).Send</div><div class="line">| | |&gt;storage.(*Replica).executeReadOnlyBatch</div><div class="line">| | | |&gt;storage.evaluateBatch</div><div class="line">| | | | |&gt;storage.evaluateCommand</div><div class="line">| | | | | |&gt;storage.evalScan</div><div class="line">| | | | | | |&gt;engine.MVCCScan</div></pre></td></tr></table></figure>
+<h3><span id="pengine">Engine</span></h3>
+<p>Engine是crdb技术堆栈的最底层，负责物理存储。<a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/storage/engine/engine.go#L159" target="_blank" rel="external"><code>Engine</code></a>是接口层，底部实现目前只有<a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/storage/engine/rocksdb.go#L265" target="_blank" rel="external"><code>RocksDB</code></a>, 是基于RocksDB C<ins>库的一个封装，使用了cgo与C</ins>进行交互。尽管RocksDB是crdb非常重要的组成部分，crdb并没有去修改RocksDB。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">&gt;storage.(*Stores).Send</div><div class="line">|&gt;storage.(*Store).Send</div><div class="line">| |&gt;storage.(*Replica).Send</div><div class="line">| | |&gt;storage.(*Replica).executeReadOnlyBatch</div><div class="line">| | | |&gt;storage.evaluateBatch</div><div class="line">| | | | |&gt;storage.evaluateCommand</div><div class="line">| | | | | |&gt;storage.evalScan</div><div class="line">| | | | | | |&gt;engine.MVCCScan</div><div class="line">| | | | | | | |&gt;engine.mvccScanInternal</div><div class="line">| | | | | | | | |&gt;engine.MVCCIterate</div><div class="line">| | | | | | | | | |&gt;engine.mvccGetInternal</div></pre></td></tr></table></figure>
+<h3><span id="pwrite-request-path">Write request path</span></h3>
+<p>写请求比读更加复杂，开始于<a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/storage/replica.go#L1857" target="_blank" rel="external"><code>replica.addWriteCmd()</code></a>.这个函数会不断调用<a href="https://github.com/cockroachdb/cockroach/blob/33c18ad1bcdb37ed6ed428b7527148977a8c566a/pkg/storage/replica.go#L1872" target="_blank" rel="external"><code>replica.tryAddWriteCmd</code></a>. 其主要做如下事情：</p>
+<ol>
+<li>等待当前其它正在修改的请求结束，将自己放到CommandQueue。</li>
+<li>调用redirectOnOrAcquireLease检查leaseholder</li>
+<li>与timestamp cache比较，如果不合格，写的时间戳需要提升。</li>
+<li>将请求转换为raft command, 调用<code>replica.propose</code>，将代码权交给raft机制进行处理</li>
+<li>等待<code>replica.propose</code>返回</li>
+<li>调用返回，将写请求命令清除出CommandQueue。</li>
+</ol>
+<h4><span id="pevaluation-of-requests-and-application-of-raft-commands">Evaluation of requests and application of Raft commands</span></h4>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">&gt;storage.(*Replica).propose</div><div class="line">| &gt;storage.(*Replica).requestToProposal</div><div class="line">| | &gt;storage.(*Replica).evaluateProposal</div><div class="line">| | | &gt;storage.(*Replica).evaluateProposalInner</div><div class="line">| | | | &gt;storage.(*Replica).evaluateTxnWriteBatch</div><div class="line">| | | | | &gt;storage.evaluateBatch</div><div class="line">| | | | | | &gt;storage.evaluateCommand</div><div class="line">| | | | | | | &gt;storage.evalPut</div><div class="line">| | | | | | | | &gt;engine.MVCCPut</div></pre></td></tr></table></figure>
+<h4><span id="praft-command-application">Raft command application</span></h4>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/10/28/cock-query-life/">crdb 语句执行流程</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年10月28日 - 10:10</p>
+  <p><span>最后更新:</span>2017年10月30日 - 15:10</p>
+  <p><span>原始链接:</span><a href="/2017/10/28/cock-query-life/">/2017/10/28/cock-query-life/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/cockroachdb/" rel="tag"># cockroachdb</a>
+          
+            <a href="/tags/code/" rel="tag"># code</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/26/mac-gif/" rel="next" title="mac下生成gif">
+                <i class="fa fa-chevron-left"></i> mac下生成gif
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Louis" />
+          <p class="site-author-name" itemprop="name">Louis</p>
+           
+              <p class="site-description motion-element" itemprop="description">记录工作和生活点滴</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">38</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">60</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/louishust" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">connection manager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">Postgres Wire Protocol</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">SQL Executor</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">Parsing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text">Statement Execution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text">Building execution plans</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.1.</span> <span class="nav-text">Expressions</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.4.</span> <span class="nav-text">Notable planNodes</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">KV</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text">The KV client interface</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text">TxnCoordSender</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.</span> <span class="nav-text">DistSender</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.4.</span> <span class="nav-text">RPC server - Node and Stores</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.5.</span> <span class="nav-text">Store - intent resolution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.6.</span> <span class="nav-text">Replica - executing reads, proposing Raft commands</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.7.</span> <span class="nav-text">Read request path</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.8.</span> <span class="nav-text">Engine</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.9.</span> <span class="nav-text">Write request path</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.9.1.</span> <span class="nav-text">Evaluation of requests and application of Raft commands</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.9.2.</span> <span class="nav-text">Raft command application</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Louis</span>
+
+  
+</div>
+
+
+  <div class="powered-by">
+    由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+  </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">
+    主题 &mdash;
+    <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+      NexT.Mist
+    </a>
+  </div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/jquery/2.1.3/jquery.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/fastclick/1.0.6/fastclick.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.ui.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

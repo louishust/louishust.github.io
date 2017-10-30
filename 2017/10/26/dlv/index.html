@@ -107,7 +107,7 @@
 <meta property="og:description" content="¶安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/go/dlv.gif">
-<meta property="og:updated_time" content="2017-10-26T09:35:24.000Z">
+<meta property="og:updated_time" content="2017-10-28T06:57:40.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="delve调试go程序">
 <meta name="twitter:description" content="¶安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install">
@@ -382,9 +382,9 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">go build test.go</div></pre></td></tr></table></figure>
 <h2><span id="pqi-dong-delve">启动delve</span></h2>
 <h3><span id="pqi-dong-yi-jing-sheng-cheng-de-zhi-xing-wen-jian">启动已经生成的执行文件</span></h3>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">dlv start <span class="built_in">test</span></div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">dlv <span class="built_in">exec</span> <span class="built_in">test</span></div><div class="line">dlv <span class="built_in">exec</span> ./cockroach -- start --insecure --store=node1 --host=localhost</div></pre></td></tr></table></figure>
 <h3><span id="pgen-ju-wen-jian-jin-xing-qi-dong">根据文件进行启动</span></h3>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">dlv debug test.go</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">dlv debug test.go</div><div class="line"></div><div class="line">dlv debug main.go -- start --insecure --store=node1 --host=localhost</div></pre></td></tr></table></figure>
 <h3><span id="pattach-dao-zheng-zai-zhi-xing-de-cheng-xu">attach到正在执行的程序</span></h3>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">dlv attach pid <span class="built_in">test</span></div></pre></td></tr></table></figure>
 <h2><span id="pdiao-shi-ming-ling">调试命令</span></h2>
@@ -432,7 +432,7 @@
   <p><span>本文标题:</span><a href="/2017/10/26/dlv/">delve调试go程序</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2017年10月26日 - 16:10</p>
-  <p><span>最后更新:</span>2017年10月26日 - 17:10</p>
+  <p><span>最后更新:</span>2017年10月28日 - 14:10</p>
   <p><span>原始链接:</span><a href="/2017/10/26/dlv/">/2017/10/26/dlv/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
@@ -557,7 +557,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">37</span>
+                <span class="site-state-item-count">38</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -579,7 +579,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">59</span>
+                <span class="site-state-item-count">60</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
