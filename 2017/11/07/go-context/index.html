@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="¶gRPC简介 grpc是google remote procedure call, 远程过程调用。多用于分布式服务。服务端定义服务的具体实现，客户端直接调用服务端的实现，得到对应的返回。gRPC以protocol buffer作为消息序列化工具，封装了客户端与服务器之间的消息通信，">
+<meta name="description" content="¶context context是go并发模式，用户处理goroutines和其父亲之间逻辑。比如接受一个用户的请求后，针对这个请求可能需要开启多个并发的goroutine，如何把这些goroutine和这个client进行关联？就是通过context，如果用户取消请求，所有的goroutine应该能感知，并自动结束。同时可以将共用的变量存储在context之中，供不同的goroutine使用。">
 <meta name="keywords" content="grpc">
 <meta property="og:type" content="article">
-<meta property="og:title" content="gRPC使用">
-<meta property="og:url" content="http://yoursite.com/2017/11/06/grpc/index.html">
+<meta property="og:title" content="golang context使用">
+<meta property="og:url" content="http://yoursite.com/2017/11/07/go-context/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶gRPC简介 grpc是google remote procedure call, 远程过程调用。多用于分布式服务。服务端定义服务的具体实现，客户端直接调用服务端的实现，得到对应的返回。gRPC以protocol buffer作为消息序列化工具，封装了客户端与服务器之间的消息通信，">
+<meta property="og:description" content="¶context context是go并发模式，用户处理goroutines和其父亲之间逻辑。比如接受一个用户的请求后，针对这个请求可能需要开启多个并发的goroutine，如何把这些goroutine和这个client进行关联？就是通过context，如果用户取消请求，所有的goroutine应该能感知，并自动结束。同时可以将共用的变量存储在context之中，供不同的goroutine使用。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-11-06T11:28:23.000Z">
+<meta property="og:updated_time" content="2017-11-07T06:13:20.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="gRPC使用">
-<meta name="twitter:description" content="¶gRPC简介 grpc是google remote procedure call, 远程过程调用。多用于分布式服务。服务端定义服务的具体实现，客户端直接调用服务端的实现，得到对应的返回。gRPC以protocol buffer作为消息序列化工具，封装了客户端与服务器之间的消息通信，">
+<meta name="twitter:title" content="golang context使用">
+<meta name="twitter:description" content="¶context context是go并发模式，用户处理goroutines和其父亲之间逻辑。比如接受一个用户的请求后，针对这个请求可能需要开启多个并发的goroutine，如何把这些goroutine和这个client进行关联？就是通过context，如果用户取消请求，所有的goroutine应该能感知，并自动结束。同时可以将共用的变量存储在context之中，供不同的goroutine使用。">
 
 
 
@@ -138,13 +138,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/11/06/grpc/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/11/07/go-context/"/>
 
 
 
 
 
-  <title>gRPC使用 | 小贝壳爸爸</title>
+  <title>golang context使用 | 小贝壳爸爸</title>
   
 
 
@@ -281,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/06/grpc/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/07/go-context/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -298,7 +298,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">gRPC使用</h1>
+          <h1 class="post-title" itemprop="name headline">golang context使用</h1>
         
 
         <div class="post-meta">
@@ -310,8 +310,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-06T19:01:05+08:00">
-                2017-11-06
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-07T13:49:17+08:00">
+                2017-11-07
               </time>
             
 
@@ -370,38 +370,25 @@
       
 
       
-        <h2><span id="pgrpc-jian-jie">gRPC简介</span></h2>
-<p>grpc是google remote procedure call, 远程过程调用。多用于分布式服务。服务端定义服务的具体实现，客户端直接调用服务端的实现，得到对应的返回。gRPC以protocol buffer作为消息序列化工具，封装了客户端与服务器之间的消息通信，</p>
+        <h2><span id="pcontext">context</span></h2>
+<p>context是go并发模式，用户处理goroutines和其父亲之间逻辑。比如接受一个用户的请求后，针对这个请求可能需要开启多个并发的goroutine，如何把这些goroutine和这个client进行关联？就是通过context，如果用户取消请求，所有的goroutine应该能感知，并自动结束。同时可以将共用的变量存储在context之中，供不同的goroutine使用。</p>
 <a id="more"></a>
-<h2><span id="pfu-wu-ding-yi">服务定义</span></h2>
-<p>服务定义是直接写在proto文件中，如下所示：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// The greeting service definition.</span></div><div class="line">service Greeter &#123;</div><div class="line">  <span class="comment">// Sends a greeting</span></div><div class="line">  rpc SayHello (HelloRequest) returns (HelloReply) &#123;&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// The request message containing the user's name.</span></div><div class="line">message HelloRequest &#123;</div><div class="line">  <span class="keyword">string</span> name = <span class="number">1</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// The response message containing the greetings</span></div><div class="line">message HelloReply &#123;</div><div class="line">  <span class="keyword">string</span> message = <span class="number">1</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>service定义服务名称，rpc定义远程函数调用名称。</p>
-<h2><span id="pjiang-proto-wen-jian-zhuan-hua-wei-go-dai-ma">将proto文件转化为go代码</span></h2>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">protoc hello.proto --go_out=plugins=grpc:./</div></pre></td></tr></table></figure>
-<p>生成hellp.pb.go文件，可以被go程序调用。</p>
-<h2><span id="pbian-xie-fu-wu-qi">编写服务器</span></h2>
-<h3><span id="pshi-xian-rpc-fang-fa">实现rpc方法</span></h3>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> server <span class="keyword">struct</span>&#123;&#125;</div><div class="line"><span class="comment">// SayHello implements helloworld.GreeterServer</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *server)</span> <span class="title">SayHello</span><span class="params">(ctx context.Context, in *pb.HelloRequest)</span> <span class="params">(*pb.HelloReply, error)</span></span> &#123;</div><div class="line">    <span class="keyword">return</span> &amp;pb.HelloReply&#123;Message: <span class="string">"Hello "</span> + in.Name&#125;, <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3><span id="pjian-ting-duan-kou-amp-kai-qi-fu-wu">监听端口&amp;开启服务</span></h3>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">    lis, err := net.Listen(<span class="string">"tcp"</span>, port)</div><div class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">        log.Fatalf(<span class="string">"failed to listen: %v"</span>, err)</div><div class="line">    &#125;</div><div class="line">    s := grpc.NewServer()</div><div class="line">    pb.RegisterGreeterServer(s, &amp;server&#123;&#125;)</div><div class="line">    <span class="comment">// Register reflection service on gRPC server.</span></div><div class="line">    reflection.Register(s)</div><div class="line">    <span class="keyword">if</span> err := s.Serve(lis); err != <span class="literal">nil</span> &#123;</div><div class="line">        log.Fatalf(<span class="string">"failed to serve: %v"</span>, err)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2><span id="psheng-cheng-context-chu-li-yong-hu-qing-qiu">生成context处理用户请求</span></h2>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">handleSearch</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</div><div class="line">	<span class="comment">// ctx is the Context for this handler. Calling cancel closes the</span></div><div class="line">	<span class="comment">// ctx.Done channel, which is the cancellation signal for requests</span></div><div class="line">	<span class="comment">// started by this handler.</span></div><div class="line">	<span class="keyword">var</span> (</div><div class="line">		ctx    context.Context</div><div class="line">		cancel context.CancelFunc</div><div class="line">	)</div><div class="line">	timeout, err := time.ParseDuration(req.FormValue(<span class="string">"timeout"</span>))</div><div class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</div><div class="line">		<span class="comment">// The request has a timeout, so create a context that is</span></div><div class="line">		<span class="comment">// canceled automatically when the timeout expires.</span></div><div class="line">		ctx, cancel = context.WithTimeout(context.Background(), timeout)</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		ctx, cancel = context.WithCancel(context.Background())</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">defer</span> cancel() <span class="comment">// Cancel ctx as soon as handleSearch returns.</span></div><div class="line"></div><div class="line">	<span class="comment">// Check the search query.</span></div><div class="line">	query := req.FormValue(<span class="string">"q"</span>)</div><div class="line">	<span class="keyword">if</span> query == <span class="string">""</span> &#123;</div><div class="line">		http.Error(w, <span class="string">"no query"</span>, http.StatusBadRequest)</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// Store the user IP in ctx for use by code in other packages.</span></div><div class="line">	userIP, err := userip.FromRequest(req)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		http.Error(w, err.Error(), http.StatusBadRequest)</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line">	ctx = userip.NewContext(ctx, userIP)</div><div class="line"></div><div class="line">	<span class="comment">// Run the Google search and print the results.</span></div><div class="line">	start := time.Now()</div><div class="line">	results, err := google.Search(ctx, query)</div><div class="line">	elapsed := time.Since(start)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		http.Error(w, err.Error(), http.StatusInternalServerError)</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> err := resultsTemplate.Execute(w, <span class="keyword">struct</span> &#123;</div><div class="line">		Results          google.Results</div><div class="line">		Timeout, Elapsed time.Duration</div><div class="line">	&#125;&#123;</div><div class="line">		Results: results,</div><div class="line">		Timeout: timeout,</div><div class="line">		Elapsed: elapsed,</div><div class="line">	&#125;); err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Print(err)</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <ol>
-<li>设置监听端口</li>
-<li>注册服务</li>
-<li>开始服务</li>
+<li>使用<code>context.WithTimeout</code>或者<code>context.WithCancel</code>生成context</li>
+<li>将变量存储到ctx中</li>
+<li>将ctx传到goroutine中</li>
 </ol>
-<h2><span id="pbian-xie-ke-hu-duan">编写客户端</span></h2>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">    <span class="comment">// Set up a connection to the server.</span></div><div class="line">    conn, err := grpc.Dial(address, grpc.WithInsecure())</div><div class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">        log.Fatalf(<span class="string">"did not connect: %v"</span>, err)</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">defer</span> conn.Close()</div><div class="line"></div><div class="line">    c := pb.NewGreeterClient(conn)</div><div class="line">    r, err := c.SayHello(context.Background(), &amp;pb.HelloRequest&#123;Name: <span class="string">"world"</span>&#125;)</div><div class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">        log.Fatalf(<span class="string">"could not greet: %v"</span>, err)</div><div class="line">    &#125;</div><div class="line">    log.Printf(<span class="string">"Greeting: %s"</span>, r.Message)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ol>
-<li>连接服务器端口</li>
-<li>创建服务对应的客户端</li>
-<li>调用服务的方法</li>
-</ol>
+<h2><span id="pcun-chu-bian-liang-dao-context">存储变量到context</span></h2>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// NewContext returns a new Context carrying userIP.</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewContext</span><span class="params">(ctx context.Context, userIP net.IP)</span> <span class="title">context</span>.<span class="title">Context</span></span> &#123;</div><div class="line">    <span class="keyword">return</span> context.WithValue(ctx, userIPKey, userIP)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// FromContext extracts the user IP address from ctx, if present.</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">FromContext</span><span class="params">(ctx context.Context)</span> <span class="params">(net.IP, <span class="keyword">bool</span>)</span></span> &#123;</div><div class="line">    <span class="comment">// ctx.Value returns nil if ctx has no value for the key;</span></div><div class="line">    <span class="comment">// the net.IP type assertion returns ok=false for nil.</span></div><div class="line">    userIP, ok := ctx.Value(userIPKey).(net.IP)</div><div class="line">    <span class="keyword">return</span> userIP, ok</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>通过<code>WithValue</code>将用户IP存储到ctx中, 通过<code>Value</code>获取ctx中的变量。</p>
+<h2><span id="pzi-goroutine-chu-li-context-xin-hao">子goroutine处理context信号</span></h2>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">httpDo</span><span class="params">(ctx context.Context, req *http.Request, f <span class="keyword">func</span>(*http.Response, error)</span> <span class="title">error</span>) <span class="title">error</span></span> &#123;</div><div class="line">    <span class="comment">// Run the HTTP request in a goroutine and pass the response to f.</span></div><div class="line">    tr := &amp;http.Transport&#123;&#125;</div><div class="line">    client := &amp;http.Client&#123;Transport: tr&#125;</div><div class="line">    c := <span class="built_in">make</span>(<span class="keyword">chan</span> error, <span class="number">1</span>)</div><div class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; c &lt;- f(client.Do(req)) &#125;()</div><div class="line">    <span class="keyword">select</span> &#123;</div><div class="line">    <span class="keyword">case</span> &lt;-ctx.Done():</div><div class="line">        tr.CancelRequest(req)</div><div class="line">        &lt;-c <span class="comment">// Wait for f to return.</span></div><div class="line">        <span class="keyword">return</span> ctx.Err()</div><div class="line">    <span class="keyword">case</span> err := &lt;-c:</div><div class="line">        <span class="keyword">return</span> err</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>监听ctx.Done()，如果用户取消了，或者超时了，自动取消后台处理函数。</p>
 <h2><span id="pxiang-guan-lian-jie">相关链接</span></h2>
 <ol>
-<li><a href="https://grpc.io/docs/guides/" target="_blank" rel="external">What is gRPC?</a></li>
-<li><a href="https://grpc.io/docs/quickstart/go.html" target="_blank" rel="external">Go Quick Start</a></li>
-<li><a href="https://github.com/louishust/grpc-example" target="_blank" rel="external">Example</a></li>
+<li><a href="https://blog.golang.org/context" target="_blank" rel="external">golang context blog</a></li>
 </ol>
 
       
@@ -419,11 +406,11 @@
   <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
   <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
-  <p><span>本文标题:</span><a href="/2017/11/06/grpc/">gRPC使用</a></p>
+  <p><span>本文标题:</span><a href="/2017/11/07/go-context/">golang context使用</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
-  <p><span>发布时间:</span>2017年11月06日 - 19:11</p>
-  <p><span>最后更新:</span>2017年11月06日 - 19:11</p>
-  <p><span>原始链接:</span><a href="/2017/11/06/grpc/">/2017/11/06/grpc/</a></p>
+  <p><span>发布时间:</span>2017年11月07日 - 13:11</p>
+  <p><span>最后更新:</span>2017年11月07日 - 14:11</p>
+  <p><span>原始链接:</span><a href="/2017/11/07/go-context/">/2017/11/07/go-context/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
 
@@ -454,8 +441,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/11/02/makefile/" rel="next" title="makefile笔记">
-                <i class="fa fa-chevron-left"></i> makefile笔记
+              <a href="/2017/11/06/grpc/" rel="next" title="gRPC使用">
+                <i class="fa fa-chevron-left"></i> gRPC使用
               </a>
             
           </div>
@@ -463,10 +450,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/11/07/go-context/" rel="prev" title="golang context使用">
-                golang context使用 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -613,7 +596,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">gRPC简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">服务定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">将proto文件转化为go代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">编写服务器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text">实现rpc方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text">监听端口&开启服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">编写客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">context</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">生成context处理用户请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">存储变量到context</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">子goroutine处理context信号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
             
 
           </div>
