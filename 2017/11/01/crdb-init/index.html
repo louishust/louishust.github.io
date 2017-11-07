@@ -105,7 +105,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="zcgo_flags_x86_64_apple_darwin16.7.0.go 动态库位置 /Users/loushuai/workspace/go/native/x86_64-apple-darwin16.7.0 创建RocksDB Engine server.go: 创建temp rocksdb tempEngine, err := engine.NewTempEngine(s.cfg.Tem">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-11-02T07:36:36.000Z">
+<meta property="og:updated_time" content="2017-11-07T11:24:12.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="crdb_init">
 <meta name="twitter:description" content="zcgo_flags_x86_64_apple_darwin16.7.0.go 动态库位置 /Users/loushuai/workspace/go/native/x86_64-apple-darwin16.7.0 创建RocksDB Engine server.go: 创建temp rocksdb tempEngine, err := engine.NewTempEngine(s.cfg.Tem">
@@ -357,6 +357,13 @@ tempEngine, err := engine.NewTempEngine(s.cfg.TempStorageConfig)</p>
 <pre><code>创建data rocksdb
 s.engines, err = s.cfg.CreateEngines(ctx)
 </code></pre>
+<h2><span id="pflag">flag</span></h2>
+<p><code>pkg/cli/cli.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">cockroachCmd.AddCommand(</div><div class="line">        startCmd,</div><div class="line">        initCmd,</div><div class="line">        certCmd,</div><div class="line">        quitCmd,</div><div class="line"></div><div class="line">        sqlShellCmd,</div><div class="line">        userCmd,</div><div class="line">        zoneCmd,</div><div class="line">        nodeCmd,</div><div class="line">        dumpCmd,</div><div class="line"></div><div class="line">        <span class="comment">// Miscellaneous commands.</span></div><div class="line">        <span class="comment">// TODO(pmattis): stats</span></div><div class="line">        genCmd,</div><div class="line">        versionCmd,</div><div class="line">        debugCmd,</div><div class="line">    )</div></pre></td></tr></table></figure>
+<p><code>pkg/cli/start.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> startCmd = &amp;cobra.Command&#123;</div><div class="line">    Use:   <span class="string">"start"</span>,</div><div class="line">    Short: <span class="string">"start a node"</span>,</div><div class="line">    Long: <span class="string">`</span></div><div class="line"><span class="string">Start a CockroachDB node, which will export data from one or more</span></div><div class="line"><span class="string">storage devices, specified via --store flags.</span></div><div class="line"><span class="string"></span></div><div class="line"><span class="string">If no cluster exists yet and this is the first node, no additional</span></div><div class="line"><span class="string">flags are required. If the cluster already exists, and this node is</span></div><div class="line"><span class="string">uninitialized, specify the --join flag to point to any healthy node</span></div><div class="line"><span class="string">(or list of nodes) already part of the cluster.</span></div><div class="line"><span class="string">`</span>,</div><div class="line">    Example: <span class="string">`  cockroach start --insecure --store=attrs=ssd,path=/mnt/ssd1 [--join=host:port,[host:port]]`</span>,</div><div class="line">    RunE:    MaybeShoutError(MaybeDecorateGRPCError(runStart)),</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>pkg/cli/flags.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">f := startCmd.Flags()</div><div class="line"></div><div class="line"><span class="comment">// Server flags.</span></div><div class="line">stringFlag(f, &amp;serverConnHost, cliflags.ServerHost, <span class="string">""</span>)</div><div class="line">stringFlag(f, &amp;serverConnPort, cliflags.ServerPort, base.DefaultPort)</div></pre></td></tr></table></figure>
 
       
     </div>
@@ -476,7 +483,7 @@ s.engines, err = s.cfg.CreateEngines(ctx)
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">42</span>
+                <span class="site-state-item-count">43</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -498,7 +505,7 @@ s.engines, err = s.cfg.CreateEngines(ctx)
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">62</span>
+                <span class="site-state-item-count">63</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -546,7 +553,7 @@ s.engines, err = s.cfg.CreateEngines(ctx)
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">创建RocksDB Engine</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">创建RocksDB Engine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">flag</span></a></li></ol></div>
             
 
           </div>
