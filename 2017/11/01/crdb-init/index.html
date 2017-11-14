@@ -82,7 +82,7 @@
 <link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="cockroachdb," />
 
 
 
@@ -98,17 +98,18 @@
 
 
 
-<meta name="description" content="命令行参数解析 pkg/cli/cli.go 123456789101112131415161718cockroachCmd.AddCommand(        startCmd,        initCmd,        certCmd,        quitCmd,        sqlShellCmd,        userCmd,        zoneCmd,        n">
+<meta name="description" content="¶命令行参数解析 pkg/cli/cli.go 123456789101112131415161718cockroachCmd.AddCommand(        startCmd,        initCmd,        certCmd,        quitCmd,        sqlShellCmd,        userCmd,        zoneCmd,">
+<meta name="keywords" content="cockroachdb">
 <meta property="og:type" content="article">
-<meta property="og:title" content="crdb_init">
+<meta property="og:title" content="cockroachdb初始化流程">
 <meta property="og:url" content="http://yoursite.com/2017/11/01/crdb-init/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="命令行参数解析 pkg/cli/cli.go 123456789101112131415161718cockroachCmd.AddCommand(        startCmd,        initCmd,        certCmd,        quitCmd,        sqlShellCmd,        userCmd,        zoneCmd,        n">
+<meta property="og:description" content="¶命令行参数解析 pkg/cli/cli.go 123456789101112131415161718cockroachCmd.AddCommand(        startCmd,        initCmd,        certCmd,        quitCmd,        sqlShellCmd,        userCmd,        zoneCmd,">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-11-08T11:41:06.000Z">
+<meta property="og:updated_time" content="2017-11-13T02:13:38.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="crdb_init">
-<meta name="twitter:description" content="命令行参数解析 pkg/cli/cli.go 123456789101112131415161718cockroachCmd.AddCommand(        startCmd,        initCmd,        certCmd,        quitCmd,        sqlShellCmd,        userCmd,        zoneCmd,        n">
+<meta name="twitter:title" content="cockroachdb初始化流程">
+<meta name="twitter:description" content="¶命令行参数解析 pkg/cli/cli.go 123456789101112131415161718cockroachCmd.AddCommand(        startCmd,        initCmd,        certCmd,        quitCmd,        sqlShellCmd,        userCmd,        zoneCmd,">
 
 
 
@@ -143,7 +144,7 @@
 
 
 
-  <title>crdb_init | 小贝壳爸爸</title>
+  <title>cockroachdb初始化流程 | 小贝壳爸爸</title>
   
 
 
@@ -297,7 +298,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">crdb_init</h1>
+          <h1 class="post-title" itemprop="name headline">cockroachdb初始化流程</h1>
         
 
         <div class="post-meta">
@@ -319,6 +320,28 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -350,6 +373,7 @@
         <h2><span id="pming-ling-xing-can-shu-jie-xi">命令行参数解析</span></h2>
 <p><code>pkg/cli/cli.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">cockroachCmd.AddCommand(</div><div class="line">        startCmd,</div><div class="line">        initCmd,</div><div class="line">        certCmd,</div><div class="line">        quitCmd,</div><div class="line"></div><div class="line">        sqlShellCmd,</div><div class="line">        userCmd,</div><div class="line">        zoneCmd,</div><div class="line">        nodeCmd,</div><div class="line">        dumpCmd,</div><div class="line"></div><div class="line">        <span class="comment">// Miscellaneous commands.</span></div><div class="line">        <span class="comment">// TODO(pmattis): stats</span></div><div class="line">        genCmd,</div><div class="line">        versionCmd,</div><div class="line">        debugCmd,</div><div class="line">    )</div></pre></td></tr></table></figure>
+<a id="more"></a>
 <p><code>pkg/cli/start.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> startCmd = &amp;cobra.Command&#123;</div><div class="line">    Use:   <span class="string">"start"</span>,</div><div class="line">    Short: <span class="string">"start a node"</span>,</div><div class="line">    Long: <span class="string">`</span></div><div class="line"><span class="string">Start a CockroachDB node, which will export data from one or more</span></div><div class="line"><span class="string">storage devices, specified via --store flags.</span></div><div class="line"><span class="string"></span></div><div class="line"><span class="string">If no cluster exists yet and this is the first node, no additional</span></div><div class="line"><span class="string">flags are required. If the cluster already exists, and this node is</span></div><div class="line"><span class="string">uninitialized, specify the --join flag to point to any healthy node</span></div><div class="line"><span class="string">(or list of nodes) already part of the cluster.</span></div><div class="line"><span class="string">`</span>,</div><div class="line">    Example: <span class="string">`  cockroach start --insecure --store=attrs=ssd,path=/mnt/ssd1 [--join=host:port,[host:port]]`</span>,</div><div class="line">    RunE:    MaybeShoutError(MaybeDecorateGRPCError(runStart)),</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p><code>pkg/cli/flags.go</code></p>
@@ -364,7 +388,7 @@
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">signalCh := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">1</span>)</div><div class="line">signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)</div></pre></td></tr></table></figure>
 <h2><span id="pchuang-jian-logs-he-profile">创建logs和profile</span></h2>
 <h3><span id="plog-wen-jian-chu-shi-hua-zai-di-yi-ci-shu-chu-de-shi-hou-zi-dong-chu-shi-hua">log文件初始化, 在第一次输出的时候自动初始化</span></h3>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">setupAndInitializeLoggingAndProfiling</div><div class="line">&gt; log.Shout</div><div class="line"></div><div class="line"> 0  0x0000000004827112 in github.com/cockroachdb/cockroach/pkg/util/log.(*syncBuffer).rotateFile</div><div class="line">    at ./pkg/util/log/clog.go:935</div><div class="line"> 1  0x0000000004827dfe in github.com/cockroachdb/cockroach/pkg/util/log.(*loggingT).createFile</div><div class="line">    at ./pkg/util/log/clog.go:992</div><div class="line"> 2  0x0000000004825d49 in github.com/cockroachdb/cockroach/pkg/util/log.(*loggingT).outputLogEntry</div><div class="line">    at ./pkg/util/log/clog.go:754</div><div class="line"> 3  0x000000000483de75 in github.com/cockroachdb/cockroach/pkg/util/log.addStructured</div><div class="line">    at ./pkg/util/log/structured.go:153</div><div class="line"> 4  0x000000000483273c in github.com/cockroachdb/cockroach/pkg/util/log.logDepth</div><div class="line">    at ./pkg/util/log/log.go:56</div><div class="line"> 5  0x00000000048327ea in github.com/cockroachdb/cockroach/pkg/util/log.Shout</div><div class="line">    at ./pkg/util/log/log.go:62</div><div class="line"> 6  0x00000000059a7126 in github.com/cockroachdb/cockroach/pkg/cli.setupAndInitializeLoggingAndProfiling</div><div class="line">    at ./pkg/cli/start.go:837</div><div class="line"> 7  0x00000000059a530b in github.com/cockroachdb/cockroach/pkg/cli.runStart</div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">setupAndInitializeLoggingAndProfiling</div><div class="line">&gt; log.Shout</div><div class="line"></div><div class="line"> <span class="number">0</span>  <span class="number">0x0000000004827112</span> in github.com/cockroachdb/cockroach/pkg/util/log.(*syncBuffer).rotateFile</div><div class="line">    at ./pkg/util/log/clog.<span class="keyword">go</span>:<span class="number">935</span></div><div class="line"> <span class="number">1</span>  <span class="number">0x0000000004827df</span>e in github.com/cockroachdb/cockroach/pkg/util/log.(*loggingT).createFile</div><div class="line">    at ./pkg/util/log/clog.<span class="keyword">go</span>:<span class="number">992</span></div><div class="line"> <span class="number">2</span>  <span class="number">0x0000000004825d</span>49 in github.com/cockroachdb/cockroach/pkg/util/log.(*loggingT).outputLogEntry</div><div class="line">    at ./pkg/util/log/clog.<span class="keyword">go</span>:<span class="number">754</span></div><div class="line"> <span class="number">3</span>  <span class="number">0x000000000483d</span>e75 in github.com/cockroachdb/cockroach/pkg/util/log.addStructured</div><div class="line">    at ./pkg/util/log/structured.<span class="keyword">go</span>:<span class="number">153</span></div><div class="line"> <span class="number">4</span>  <span class="number">0x000000000483273c</span> in github.com/cockroachdb/cockroach/pkg/util/log.logDepth</div><div class="line">    at ./pkg/util/log/log.<span class="keyword">go</span>:<span class="number">56</span></div><div class="line"> <span class="number">5</span>  <span class="number">0x00000000048327ea</span> in github.com/cockroachdb/cockroach/pkg/util/log.Shout</div><div class="line">    at ./pkg/util/log/log.<span class="keyword">go</span>:<span class="number">62</span></div><div class="line"> <span class="number">6</span>  <span class="number">0x00000000059a7126</span> in github.com/cockroachdb/cockroach/pkg/cli.setupAndInitializeLoggingAndProfiling</div><div class="line">    at ./pkg/cli/start.<span class="keyword">go</span>:<span class="number">837</span></div><div class="line"> <span class="number">7</span>  <span class="number">0x00000000059a530b</span> in github.com/cockroachdb/cockroach/pkg/cli.runStart</div></pre></td></tr></table></figure>
 <h3><span id="pprofile-wen-jian-chu-shi-hua">profile文件初始化</span></h3>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">setupAndInitializeLoggingAndProfiling</div><div class="line">initMemProfile(ctx, outputDirectory)</div><div class="line">initCPUProfile(ctx, outputDirectory)</div><div class="line">initBlockProfile()</div></pre></td></tr></table></figure>
 <p>logs下存放log以及profile输出文件, profile文件包括jeprof,memprof, cpuprof<br>
@@ -379,15 +403,67 @@ initBlockProfile, initCPUProfile, initMemProfile<br>
 <h4><span id="pzhu-ce-rpc-fu-wu">注册RPC服务</span></h4>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">pkg/rpc/context.<span class="keyword">go</span></div><div class="line">	s := grpc.NewServer(opts...)</div><div class="line">	RegisterHeartbeatServer(s, &amp;HeartbeatService&#123;</div><div class="line">		clock:              ctx.LocalClock,</div><div class="line">		remoteClockMonitor: ctx.RemoteClocks,</div><div class="line">	&#125;)</div><div class="line"></div><div class="line"></div><div class="line">pkg/rpc/heartbeat.proto</div><div class="line">service Heartbeat &#123;</div><div class="line">  rpc Ping (PingRequest) returns (PingResponse) &#123;&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <h4><span id="pgossip-fu-wu">gossip服务</span></h4>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">s.gossip = gossip.New(</div><div class="line">    s.cfg.AmbientCtx,</div><div class="line">    &amp;s.nodeIDContainer,</div><div class="line">    s.rpcContext,</div><div class="line">    s.grpc,</div><div class="line">    s.stopper,</div><div class="line">    s.registry,</div><div class="line">)</div></pre></td></tr></table></figure>
-<h4><span id="pchuang-jian-rocksdb-engine">创建RocksDB Engine</span></h4>
-<p>server.go:<br>
-创建temp rocksdb<br>
-tempEngine, err := engine.NewTempEngine(s.cfg.TempStorageConfig)</p>
-<pre><code>创建data rocksdb
-s.engines, err = s.cfg.CreateEngines(ctx)
-</code></pre>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">s.gossip = gossip.New(</div><div class="line">    s.cfg.AmbientCtx,</div><div class="line">    &amp;s.nodeIDContainer,</div><div class="line">    s.rpcContext,</div><div class="line">    s.grpc,</div><div class="line">    s.stopper,</div><div class="line">    s.registry,</div><div class="line">)</div></pre></td></tr></table></figure>
+<h4><span id="pdistsender">DistSender</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">distSenderCfg := kv.DistSenderConfig&#123;</div><div class="line">	AmbientCtx:      s.cfg.AmbientCtx,</div><div class="line">	Settings:        st,</div><div class="line">	Clock:           s.clock,</div><div class="line">	RPCContext:      s.rpcContext,</div><div class="line">	RPCRetryOptions: &amp;retryOpts,</div><div class="line">&#125;</div><div class="line"></div><div class="line">s.distSender = kv.NewDistSender(distSenderCfg, s.gossip)</div></pre></td></tr></table></figure>
+<h4><span id="ptxncoordsender">TxnCoordSender</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">s.txnCoordSender = kv.NewTxnCoordSender(</div><div class="line">	s.cfg.AmbientCtx,</div><div class="line">	st,</div><div class="line">	s.distSender,</div><div class="line">	s.clock,</div><div class="line">	s.cfg.Linearizable,</div><div class="line">	s.stopper,</div><div class="line">	txnMetrics,</div><div class="line">)</div></pre></td></tr></table></figure>
+<h4><span id="pdb">DB</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">s.db = client.NewDB(s.txnCoordSender, s.clock)</div></pre></td></tr></table></figure>
+<h4><span id="pnodeliveness">NodeLiveness</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">s.nodeLiveness = storage.NewNodeLiveness(</div><div class="line">    s.cfg.AmbientCtx, s.clock, s.db, s.gossip, nlActive, nlRenewal,</div><div class="line">)</div></pre></td></tr></table></figure>
+<h4><span id="pstorepool">StorePool</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">s.storePool = storage.NewStorePool(</div><div class="line">	s.cfg.AmbientCtx,</div><div class="line">	s.st,</div><div class="line">	s.gossip,</div><div class="line">	s.clock,</div><div class="line">	storage.MakeStorePoolNodeLivenessFunc(s.nodeLiveness),</div><div class="line">	<span class="comment">/* deterministic */</span> <span class="literal">false</span>,</div><div class="line">)</div></pre></td></tr></table></figure>
+<h4><span id="prafttransport">RaftTransport</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">s.raftTransport = storage.NewRaftTransport(</div><div class="line">	s.cfg.AmbientCtx, st, storage.GossipAddressResolver(s.gossip), s.grpc, s.rpcContext,</div><div class="line">)</div></pre></td></tr></table></figure>
+<h4><span id="pnewdbserver">NewDBServer</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">s.kvDB = kv.NewDBServer(s.cfg.Config, s.txnCoordSender, s.stopper)</div></pre></td></tr></table></figure>
+<h4><span id="pleasemanager">LeaseManager</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">s.leaseMgr = sql.NewLeaseManager(</div><div class="line">		s.cfg.AmbientCtx,</div><div class="line">		&amp;s.nodeIDContainer,</div><div class="line">		*s.db,</div><div class="line">		s.clock,</div><div class="line">		lmKnobs,</div><div class="line">		s.stopper,</div><div class="line">		&amp;s.internalMemMetrics,</div><div class="line">		s.cfg.LeaseManagerConfig,</div><div class="line">	)</div></pre></td></tr></table></figure>
+<h4><span id="ptmp-rocksdb-engine">TMP RocksDB Engine</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tempEngine, err := engine.NewTempEngine(s.cfg.TempStorageConfig)</div></pre></td></tr></table></figure>
+<h4><span id="ptsserver">tsServer</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">s.tsDB = ts.NewDB(s.db, s.cfg.Settings)</div><div class="line">s.tsServer = ts.MakeServer(s.cfg.AmbientCtx, s.tsDB, s.cfg.TimeSeriesServerConfig, s.stopper)</div></pre></td></tr></table></figure>
+<h4><span id="pnew-node">new node</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">s.node = NewNode(storeCfg, s.recorder, s.registry, s.stopper, txnMetrics, sql.MakeEventLogger(s.leaseMgr))</div></pre></td></tr></table></figure>
+<h4><span id="pdistsql-server">distsql server</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">s.distSQLServer = distsqlrun.NewServer(ctx, distSQLCfg)</div></pre></td></tr></table></figure>
+<h4><span id="padmin-server">Admin server</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">s.admin = newAdminServer(s)</div></pre></td></tr></table></figure>
+<h4><span id="pauthentication-server">Authentication server</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">s.authentication = newAuthenticationServer(s)</div></pre></td></tr></table></figure>
+<h4><span id="pexecutor">Executor</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">s.sqlExecutor = sql.NewExecutor(execCfg, s.stopper)</div></pre></td></tr></table></figure>
+<h4><span id="ppgwire">pgwire</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">s.pgServer = pgwire.MakeServer(</div><div class="line">	s.cfg.AmbientCtx,</div><div class="line">	s.cfg.Config,</div><div class="line">	s.sqlExecutor,</div><div class="line">	&amp;s.internalMemMetrics,</div><div class="line">	&amp;rootSQLMemoryMonitor,</div><div class="line">	s.cfg.HistogramWindowInterval(),</div><div class="line">)</div></pre></td></tr></table></figure>
 <h3><span id="p-s-server-start">(s *Server) Start</span></h3>
+<h4><span id="phttpserver-8080">httpserver 8080</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">httpServer := netutil.MakeServer(s.stopper, tlsConfig, s)</div><div class="line">   ...</div><div class="line">s.stopper.RunWorker(workersCtx, <span class="function"><span class="keyword">func</span><span class="params">(context.Context)</span></span> &#123;</div><div class="line">	netutil.FatalIfUnexpected(httpServer.Serve(httpLn))</div><div class="line">&#125;)</div></pre></td></tr></table></figure>
+<h4><span id="pclient-tcp-server-26257">client tcp server 26257</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">ln, err := net.Listen(<span class="string">"tcp"</span>, s.cfg.Addr)</div><div class="line">   ...</div><div class="line">	serveOnMux.Do(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		<span class="comment">// A cmux can't gracefully shut down without Serve being called on it.</span></div><div class="line">		netutil.FatalIfUnexpected(m.Serve())</div><div class="line">	&#125;)</div></pre></td></tr></table></figure>
+<h4><span id="pgrpc-server">grpc server</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">s.stopper.RunWorker(workersCtx, <span class="function"><span class="keyword">func</span><span class="params">(context.Context)</span></span> &#123;</div><div class="line">	netutil.FatalIfUnexpected(s.grpc.Serve(anyL))</div><div class="line">&#125;)</div></pre></td></tr></table></figure>
+<h4><span id="pgossip-start">gossip start</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">s.gossip.Start(unresolvedAdvertAddr, filtered)</div></pre></td></tr></table></figure>
+<h4><span id="pinit-rocksdb-data-node">Init Rocksdb Data Node</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">s.engines, err = s.cfg.CreateEngines(ctx)</div></pre></td></tr></table></figure>
+<h4><span id="pxie-3-ge-addr-wen-jian">写3个addr文件</span></h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">➜  node1 cat cockroach.http-addr</div><div class="line">localhost:8080</div><div class="line">➜  node1 cat cockroach.listen-addr</div><div class="line">localhost:26257</div></pre></td></tr></table></figure>
+<h4><span id="pinspectengines">inspectEngines</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> bootstrappedEngines, _, _, err := inspectEngines(ctx, s.engines, s.cfg.Settings.Version.MinSupportedVersion, s.cfg.Settings.Version.ServerVersion); err != <span class="literal">nil</span> &#123;</div></pre></td></tr></table></figure>
+<p>遍历engine，查看每个engine是否empty或者bootstrapped</p>
+<h4><span id="procksdb-node1-bootstrap">rocksdb node1 bootstrap</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">		<span class="keyword">if</span> err := s.node.bootstrap(ctx, s.engines, bootstrapVersion); err != <span class="literal">nil</span> &#123;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">bootstrapCluster</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">    <span class="keyword">func</span> (s *Store)</span> <span class="title">Bootstrap</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	<span class="keyword">if</span> err := engine.MVCCPutProto(</span></span></div><div class="line"><span class="function"><span class="params">		ctx,</span></span></div><div class="line"><span class="function"><span class="params">		batch,</span></span></div><div class="line"><span class="function"><span class="params">		<span class="literal">nil</span>,</span></span></div><div class="line"><span class="function"><span class="params">		keys.StoreIdentKey()</span>,</span></div><div class="line"><span class="function">		<span class="title">hlc</span>.<span class="title">Timestamp</span></span>&#123;&#125;,</div><div class="line">		<span class="literal">nil</span>,</div><div class="line">		&amp;s.Ident,</div><div class="line">	); err != <span class="literal">nil</span> &#123;</div><div class="line">		batch.Close()</div><div class="line">		<span class="keyword">return</span> err</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> err := WriteClusterVersion(ctx, batch, cv); err != <span class="literal">nil</span> &#123;</div><div class="line"></div><div class="line">	<span class="keyword">if</span> err := s.BootstrapRange(initialValues, bootstrapVersion.MinimumVersion); err != <span class="literal">nil</span> &#123;</div></pre></td></tr></table></figure>
+<p>初始化集群数据, 写local数据，包含clusterID，nodeid，storeid，以及clusterversion,<br>
+同时初始化一个range，包含所有的key，是new cluster的第一个range</p>
+<h4><span id="pnode-start">node start</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> err := s.node.start(</div><div class="line">	ctx,</div><div class="line">	unresolvedAdvertAddr,</div><div class="line">	bootstrappedEngines, emptyEngines,</div><div class="line">	s.cfg.NodeAttributes,</div><div class="line">	s.cfg.Locality,</div><div class="line">	cv,</div><div class="line">); err != <span class="literal">nil</span> &#123;</div><div class="line">	<span class="keyword">return</span> err</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4><span id="pschema-change-manager-start">schema change manager start</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">sql.NewSchemaChangeManager(</div><div class="line">	s.st,</div><div class="line">	testingKnobs,</div><div class="line">	*s.db,</div><div class="line">	s.node.Descriptor,</div><div class="line">	s.rpcContext,</div><div class="line">	s.distSQLServer,</div><div class="line">	s.distSender,</div><div class="line">	s.gossip,</div><div class="line">	s.leaseMgr,</div><div class="line">	s.clock,</div><div class="line">	s.jobRegistry,</div><div class="line">	distSQLPlanner,</div><div class="line">).Start(s.stopper)</div></pre></td></tr></table></figure>
+<h4><span id="pexecutor-start">Executor start</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">s.sqlExecutor.Start(ctx, &amp;s.adminMemMetrics, distSQLPlanner)</div><div class="line">s.distSQLServer.Start()</div></pre></td></tr></table></figure>
+<h4><span id="pdeng-dai-yong-hu-lian-jie">等待用户链接</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> err := s.pgServer.ServeConn(connCtx, conn); err != <span class="literal">nil</span> &amp;&amp; !netutil.IsClosedConnection(err) &#123;</div><div class="line">	<span class="comment">// Report the error on this connection's context, so that we</span></div></pre></td></tr></table></figure>
 <h2><span id="pchuang-jian-errchan-gua-qi-zhu-jin-cheng">创建errchan, 挂起主进程</span></h2>
 <p>等待各种信号，用于退出</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">   errChan := make(chan error, 1)</div><div class="line"></div><div class="line">   select &#123;</div><div class="line">case err := &lt;-errChan:</div><div class="line">case &lt;-stopper.ShouldStop():</div><div class="line">case sig := &lt;-signalCh:</div></pre></td></tr></table></figure>
@@ -400,6 +476,21 @@ s.engines, err = s.cfg.CreateEngines(ctx)
     <div>
       
         
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/11/01/crdb-init/">cockroachdb初始化流程</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年11月01日 - 19:11</p>
+  <p><span>最后更新:</span>2017年11月13日 - 10:11</p>
+  <p><span>原始链接:</span><a href="/2017/11/01/crdb-init/">/2017/11/01/crdb-init/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
 
       
     </div>
@@ -411,6 +502,12 @@ s.engines, err = s.cfg.CreateEngines(ctx)
     
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/cockroachdb/" rel="tag"># cockroachdb</a>
+          
+        </div>
       
 
       
@@ -510,7 +607,7 @@ s.engines, err = s.cfg.CreateEngines(ctx)
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">43</span>
+                <span class="site-state-item-count">45</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -532,7 +629,7 @@ s.engines, err = s.cfg.CreateEngines(ctx)
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">63</span>
+                <span class="site-state-item-count">65</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -580,7 +677,7 @@ s.engines, err = s.cfg.CreateEngines(ctx)
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">命令行参数解析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">initTempStorageConfig</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">信号处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">创建logs和profile</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text">log文件初始化, 在第一次输出的时候自动初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text">profile文件初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.</span> <span class="nav-text">创建stopper</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">使用goroutine启动服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text">InitNode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text">server.NewServer(serverCfg, stopper)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.1.</span> <span class="nav-text">注册RPC服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.2.</span> <span class="nav-text">gossip服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.3.</span> <span class="nav-text">创建RocksDB Engine</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.</span> <span class="nav-text">(s *Server) Start</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">创建errchan, 挂起主进程</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">命令行参数解析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">initTempStorageConfig</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">信号处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">创建logs和profile</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text">log文件初始化, 在第一次输出的时候自动初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text">profile文件初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.</span> <span class="nav-text">创建stopper</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">使用goroutine启动服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text">InitNode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text">server.NewServer(serverCfg, stopper)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.1.</span> <span class="nav-text">注册RPC服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.2.</span> <span class="nav-text">gossip服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.3.</span> <span class="nav-text">DistSender</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.4.</span> <span class="nav-text">TxnCoordSender</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.5.</span> <span class="nav-text">DB</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.6.</span> <span class="nav-text">NodeLiveness</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.7.</span> <span class="nav-text">StorePool</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.8.</span> <span class="nav-text">RaftTransport</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.9.</span> <span class="nav-text">NewDBServer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.10.</span> <span class="nav-text">LeaseManager</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.11.</span> <span class="nav-text">TMP RocksDB Engine</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.12.</span> <span class="nav-text">tsServer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.13.</span> <span class="nav-text">new node</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.14.</span> <span class="nav-text">distsql server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.15.</span> <span class="nav-text">Admin server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.16.</span> <span class="nav-text">Authentication server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.17.</span> <span class="nav-text">Executor</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.18.</span> <span class="nav-text">pgwire</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.</span> <span class="nav-text">(s *Server) Start</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.1.</span> <span class="nav-text">httpserver 8080</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.2.</span> <span class="nav-text">client tcp server 26257</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.3.</span> <span class="nav-text">grpc server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.4.</span> <span class="nav-text">gossip start</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.5.</span> <span class="nav-text">Init Rocksdb Data Node</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.6.</span> <span class="nav-text">写3个addr文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.7.</span> <span class="nav-text">inspectEngines</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.8.</span> <span class="nav-text">rocksdb node1 bootstrap</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.9.</span> <span class="nav-text">node start</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.10.</span> <span class="nav-text">schema change manager start</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.11.</span> <span class="nav-text">Executor start</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.12.</span> <span class="nav-text">等待用户链接</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">创建errchan, 挂起主进程</span></a></li></ol></div>
             
 
           </div>
