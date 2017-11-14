@@ -98,19 +98,19 @@
 
 
 
-<meta name="description" content="¶什么是lease? client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。 如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.">
+<meta name="description" content="什么是lease? client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。 如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.">
 <meta name="keywords" content="HDFS,recovery,namenode,datanode,lease,replica">
 <meta property="og:type" content="article">
 <meta property="og:title" content="HDFS故障恢复技术">
 <meta property="og:url" content="http://yoursite.com/2017/09/20/hdfs-recovery/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶什么是lease? client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。 如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.">
+<meta property="og:description" content="什么是lease? client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。 如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/hdfs/write_pipeline.png">
 <meta property="og:updated_time" content="2017-09-25T06:39:06.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HDFS故障恢复技术">
-<meta name="twitter:description" content="¶什么是lease? client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。 如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.">
+<meta name="twitter:description" content="什么是lease? client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。 如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.">
 <meta name="twitter:image" content="http://yoursite.com/images/hdfs/write_pipeline.png">
 
 
@@ -120,7 +120,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -372,11 +372,11 @@
       
 
       
-        <h2><span id="pshi-me-shi-lease">什么是lease?</span></h2>
+        <h2><span id="什么是lease">什么是lease?</span></h2>
 <p>client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。</p>
 <p>如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.</p>
 <a id="more"></a>
-<h2><span id="please-recovery">lease recovery</span></h2>
+<h2><span id="lease-recovery">lease recovery</span></h2>
 <p>lease recovery是client过了lease的租期后，被master回收写权限，同时需要对之前client的写操作进行处理的过程。</p>
 <ol>
 <li>获取涉及文件f的最后一个block的所有datanode节点。</li>
@@ -390,7 +390,7 @@
 <li>master清除client的lease，让其它client可以进行写入操作</li>
 <li>master写WAL</li>
 </ol>
-<h2><span id="phdfs-write-pipeline">HDFS write pipeline</span></h2>
+<h2><span id="hdfs-write-pipeline">HDFS write pipeline</span></h2>
 <p>HDFS为了达到高可用，一条数据会写多个副本，写数据采用了pipeline方式。</p>
 <p><img src="/images/hdfs/write_pipeline.png" alt="HDFS Write Pipeline"></p>
 <p>管道写的三个流程：</p>
@@ -399,23 +399,23 @@
 <li>Data streaming.客户端将写操作缓存，buffer满或者调用了flush之后，缓存数据才会写到datanode</li>
 <li>Close. 结束写入，等待所有datanode写入完成的通知，然后发送close命令给datanode，datanode接收到命令后，将状态设置为FINALIZED.</li>
 </ol>
-<h2><span id="pdatanode-recovery">DataNode recovery</span></h2>
-<h3><span id="precovery-from-pipeline-setup-failure">Recovery from Pipeline Setup Failure</span></h3>
+<h2><span id="datanode-recovery">DataNode recovery</span></h2>
+<h3><span id="recovery-from-pipeline-setup-failure">Recovery from Pipeline Setup Failure</span></h3>
 <ol>
 <li>如果是申请写新的block失败，则向master重新申请新的block,以及新的datanodes列表。</li>
 <li>如果是写老block失败，则用正常的datanodes重建datanodes链表，并更新generation stamp</li>
 </ol>
-<h3><span id="precovery-from-data-streaming-failure">Recovery from Data Streaming Failure</span></h3>
+<h3><span id="recovery-from-data-streaming-failure">Recovery from Data Streaming Failure</span></h3>
 <ol>
 <li>当某个datanode出现问题，比如宕机或者磁盘故障，所有的TCP/IP连接都会断开。</li>
 <li>client感知某个datanode故障，停止发送写请求，利用正常的datanodes重建datanodes链表,同时更新GS</li>
 <li>client重新发送buffered data。如果一些datanode已经接受过此数据，则此datanode只会作为数据的跳板，不再重复写入，而是讲数据顺序下发。</li>
 </ol>
-<h3><span id="precovery-from-close-failure">Recovery from Close Failure</span></h3>
+<h3><span id="recovery-from-close-failure">Recovery from Close Failure</span></h3>
 <ol>
 <li>client重建datanode链表，每个datanode提升GS，同时没有进入FINALIZED状态的进入FINALIZED状态</li>
 </ol>
-<h2><span id="pge-ren-si-kao">个人思考</span></h2>
+<h2><span id="个人思考">个人思考</span></h2>
 <ol>
 <li>datanode的写入是通过pipeline方式管道写入，性能存在瓶颈</li>
 <li>故障恢复依赖了master和client的相互作用</li>

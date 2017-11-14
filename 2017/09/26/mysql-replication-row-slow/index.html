@@ -98,13 +98,13 @@
 
 
 
-<meta name="description" content="¶现场问题">
+<meta name="description" content="现场问题">
 <meta name="keywords" content="mysql,replication,row">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL无索引行级复制延迟巨大">
 <meta property="og:url" content="http://yoursite.com/2017/09/26/mysql-replication-row-slow/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶现场问题">
+<meta property="og:description" content="现场问题">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/mysql/row-rep-slow.png">
 <meta property="og:image" content="http://yoursite.com/images/mysql/row-rep-slow1.png">
@@ -114,7 +114,7 @@
 <meta property="og:updated_time" content="2017-09-28T14:40:40.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL无索引行级复制延迟巨大">
-<meta name="twitter:description" content="¶现场问题">
+<meta name="twitter:description" content="现场问题">
 <meta name="twitter:image" content="http://yoursite.com/images/mysql/row-rep-slow.png">
 
 
@@ -124,7 +124,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -387,11 +387,11 @@
       
 
       
-        <h2><span id="pxian-chang-wen-ti">现场问题</span></h2>
+        <h2><span id="现场问题">现场问题</span></h2>
 <p><img src="/images/mysql/row-rep-slow.png" alt="rowslow"></p>
 <a id="more"></a>
 <p>Zabbix监控图可以看出从15:58开始，slave的主从延迟成直线飚升，可见是堵在了这个具体的event上了。</p>
-<h2><span id="ppai-cha-wen-ti">排查问题</span></h2>
+<h2><span id="排查问题">排查问题</span></h2>
 <p><img src="/images/mysql/row-rep-slow1.png" alt="rowslow"><br>
 通过show slave status命令得到slave卡在了nnmhdb02-relay-bin.000078:4596880的位置。</p>
 <p>对此relaylog文件进行解析：</p>
@@ -404,7 +404,7 @@
 <li>查看表结构，<strong>发现表竟然没有任何索引</strong>！！！</li>
 <li>没有索引会导致每个row event都要去做全表扫描。这张表有近1000W行数据，故会进行900*10000W行扫描。</li>
 </ol>
-<h2><span id="pjie-jue-wen-ti">解决问题</span></h2>
+<h2><span id="解决问题">解决问题</span></h2>
 <p>如何解决这个问题呢？首先肯定是想到对表创建主键，但是客户没有明确主键，如果贸然加一个自增列的话，可能会导致现有应用程序出现问题！</p>
 <p>那么只能考虑添加普通索引。那么问题来了，如何添加索引呢？</p>
 <ol>
@@ -417,7 +417,7 @@
 <p>执行的过程中又遇到了新问题，由于当前的事务还在执行中，<code>stop slave sql_thread</code> hang住了！！</p>
 <p>此时没有好的方法，只能等待，等待了大概两个小时，终于执行成功！！</p>
 <p>修改成功后，几分钟就把binlog追平了！！</p>
-<h2><span id="pstop-slave-sql-thread-luo-ji-shi-shi-me">stop slave sql_thread逻辑是什么？</span></h2>
+<h2><span id="stop-slave-sql_thread逻辑是什么">stop slave sql_thread逻辑是什么？</span></h2>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (thread_mask &amp; (SLAVE_SQL|SLAVE_FORCE_ALL))</div><div class="line">&#123;</div><div class="line">  DBUG_PRINT(<span class="string">"info"</span>,(<span class="string">"Terminating SQL thread"</span>));</div><div class="line">  mi-&gt;rli-&gt;abort_slave= <span class="number">1</span>;</div><div class="line">  <span class="keyword">if</span> ((error=terminate_slave_thread(mi-&gt;rli-&gt;info_thd, sql_lock,</div><div class="line">                                    &amp;mi-&gt;rli-&gt;stop_cond,</div><div class="line">                                    &amp;mi-&gt;rli-&gt;slave_running,</div><div class="line">                                    &amp;total_stop_wait_timeout,</div><div class="line">                                    need_lock_term)) &amp;&amp;</div><div class="line">      !force_all)</div></pre></td></tr></table></figure>
 <ul>
 <li>stop slave <code>sql_thread</code>设置对应的sql线程<code>abort_slave=1</code>，然后调用<code>terminate_slave_thread</code>函数。</li>

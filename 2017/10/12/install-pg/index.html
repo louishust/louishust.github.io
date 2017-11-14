@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="¶安装 123456yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpmyum install postgresql10yum install postgresql10-server/usr/pgsql-10/bin/postgr">
+<meta name="description" content="安装 123456yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpmyum install postgresql10yum install postgresql10-server/usr/pgsql-10/bin/postgre">
 <meta name="keywords" content="install,pg,pg10,postgresql">
 <meta property="og:type" content="article">
 <meta property="og:title" content="centos7安装pg10">
 <meta property="og:url" content="http://yoursite.com/2017/10/12/install-pg/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶安装 123456yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpmyum install postgresql10yum install postgresql10-server/usr/pgsql-10/bin/postgr">
+<meta property="og:description" content="安装 123456yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpmyum install postgresql10yum install postgresql10-server/usr/pgsql-10/bin/postgre">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2017-10-12T04:26:35.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="centos7安装pg10">
-<meta name="twitter:description" content="¶安装 123456yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpmyum install postgresql10yum install postgresql10-server/usr/pgsql-10/bin/postgr">
+<meta name="twitter:description" content="安装 123456yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpmyum install postgresql10yum install postgresql10-server/usr/pgsql-10/bin/postgre">
 
 
 
@@ -118,7 +118,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -370,12 +370,12 @@
       
 
       
-        <h2><span id="pan-zhuang">安装</span></h2>
+        <h2><span id="安装">安装</span></h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpm</div><div class="line">yum install postgresql10</div><div class="line">yum install postgresql10-server</div><div class="line">/usr/pgsql-10/bin/postgresql10-setup initdb</div><div class="line">systemctl <span class="built_in">enable</span> postgresql-10</div><div class="line">systemctl start postgresql-10</div></pre></td></tr></table></figure>
 <a id="more"></a>
-<h2><span id="pxiu-gai-pei-zhi-wen-jian">修改配置文件</span></h2>
+<h2><span id="修改配置文件">修改配置文件</span></h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">/var/lib/pgsql/10/data/postgresql.conf</div><div class="line">listen_addresses = <span class="string">'*'</span></div><div class="line"></div><div class="line"></div><div class="line">/var/lib/pgsql/10/data/pg_hba.conf</div><div class="line"><span class="comment"># IPv4 local connections:</span></div><div class="line">host    all             all             0.0.0.0/0            trust</div><div class="line"></div><div class="line"></div><div class="line">systemctl restart postgresql-10</div></pre></td></tr></table></figure>
-<h2><span id="pchuang-jian-yong-hu">创建用户</span></h2>
+<h2><span id="创建用户">创建用户</span></h2>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">su - postgres</div><div class="line">psql</div><div class="line"></div><div class="line">postgres=# CREATE USER benchmarksql WITH ENCRYPTED PASSWORD 'changeme';</div><div class="line"><span class="keyword">CREATE</span> <span class="keyword">ROLE</span></div><div class="line">postgres=# <span class="keyword">CREATE</span> <span class="keyword">DATABASE</span> benchmarksql OWNER benchmarksql;</div><div class="line"><span class="keyword">CREATE</span> <span class="keyword">DATABASE</span></div></pre></td></tr></table></figure>
 
       

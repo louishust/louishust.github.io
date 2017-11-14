@@ -116,7 +116,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -373,7 +373,7 @@
 
       
         
-          <h2 id="安装delve"><a class="header-anchor" href="#安装delve">¶</a>安装delve</h2>
+          <h2 id="an-zhuang-delve"><a class="header-anchor" href="#安装delve"></a>安装delve</h2>
 <p><code>Mac</code>: <code>xcode-select --install</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ go get -u github.com/derekparker/delve/cmd/dlv</div><div class="line">$ make install</div></pre></td></tr></table></figure>
           <!--noindex-->
@@ -524,7 +524,7 @@
 
       
         
-          <h2 id="overview"><a class="header-anchor" href="#overview">¶</a>Overview</h2>
+          <h2 id="overview"><a class="header-anchor" href="#overview"></a>Overview</h2>
 <p>crdb内部分为五层架构.</p>
 <p><img src="/images/crdb/crdb_arch0.png" alt="crdb arch"></p>
 <ol>
@@ -1154,7 +1154,7 @@
 
       
         
-          <h2 id="引言"><a class="header-anchor" href="#引言">¶</a>引言</h2>
+          <h2 id="yin-yan"><a class="header-anchor" href="#引言"></a>引言</h2>
 <p>DBMS的本质是事务，缺少事务支持的只能成为<code>data stores</code>，比如hbase,bigtable等。Google的bigtable缺少跨行事务，导致应用开发负担很大，因此percolator系统在bigtable的基础上实现了分布式事务。</p>
           <!--noindex-->
           <div class="post-button text-center">
@@ -1305,7 +1305,7 @@
       
         
           <p>由于crdb不兼容benchmarksql，只能使用crdb官方的tpcc测试程序loadgen进行测试。</p>
-<h2 id="安装loadgen"><a class="header-anchor" href="#安装loadgen">¶</a>安装loadgen</h2>
+<h2 id="an-zhuang-loadgen"><a class="header-anchor" href="#安装loadgen"></a>安装loadgen</h2>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">go get github.com/cockroachdb/loadgen</div><div class="line">cd loadgen</div><div class="line">make</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
@@ -1456,7 +1456,7 @@
       
         
           <p>针对100warehouse进行不同并发的测试，测试程序和pg在一台机器上。</p>
-<h2 id="16线程5分钟"><a class="header-anchor" href="#16线程5分钟">¶</a>16线程5分钟</h2>
+<h2 id="16-xian-cheng-5-fen-zhong"><a class="header-anchor" href="#16线程5分钟"></a>16线程5分钟</h2>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">13:08:48,025 [Thread-10] INFO   jTPCC : Term-00, Measured tpmC (NewOrders) = 152711.98</div><div class="line">13:08:48,025 [Thread-10] INFO   jTPCC : Term-00, Measured tpmTOTAL = 339066.1</div><div class="line">13:08:48,026 [Thread-10] INFO   jTPCC : Term-00, Session Start     = 2017-10-15 13:03:48</div><div class="line">13:08:48,026 [Thread-10] INFO   jTPCC : Term-00, Session End       = 2017-10-15 13:08:48</div><div class="line">13:08:48,026 [Thread-10] INFO   jTPCC : Term-00, Transaction Count = 1695403</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
@@ -1606,7 +1606,7 @@
 
       
         
-          <h2 id="导入方法"><a class="header-anchor" href="#导入方法">¶</a>导入方法</h2>
+          <h2 id="dao-ru-fang-fa"><a class="header-anchor" href="#导入方法"></a>导入方法</h2>
 <p>两种方式导入100warehouse数据到crdbv1.1.0：</p>
 <ol>
 <li>首先通过benchmarksql导入pg，然后<code>pg_dump</code>导出copy语句，crdb执行copy语句</li>

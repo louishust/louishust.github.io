@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="¶示例代码 cobra是go的命令解析工具库，解析命令行参数。">
+<meta name="description" content="示例代码 cobra是go的命令解析工具库，解析命令行参数。">
 <meta name="keywords" content="cobra">
 <meta property="og:type" content="article">
 <meta property="og:title" content="命令行解析cobra使用">
 <meta property="og:url" content="http://yoursite.com/2017/11/07/go-cobra/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶示例代码 cobra是go的命令解析工具库，解析命令行参数。">
+<meta property="og:description" content="示例代码 cobra是go的命令解析工具库，解析命令行参数。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2017-11-07T12:30:13.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="命令行解析cobra使用">
-<meta name="twitter:description" content="¶示例代码 cobra是go的命令解析工具库，解析命令行参数。">
+<meta name="twitter:description" content="示例代码 cobra是go的命令解析工具库，解析命令行参数。">
 
 
 
@@ -118,7 +118,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -370,11 +370,11 @@
       
 
       
-        <h2><span id="pshi-li-dai-ma">示例代码</span></h2>
+        <h2><span id="示例代码">示例代码</span></h2>
 <p>cobra是go的命令解析工具库，解析命令行参数。</p>
 <a id="more"></a>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">    <span class="string">"fmt"</span></div><div class="line">    <span class="string">"os"</span></div><div class="line"></div><div class="line">    <span class="string">"github.com/spf13/cobra"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">var</span> RootCmd = &amp;cobra.Command&#123;</div><div class="line">    Use:   <span class="string">"hugo"</span>,</div><div class="line">    Short: <span class="string">"Hugo is a very fast static site generator"</span>,</div><div class="line">    Long: <span class="string">`A Fast and Flexible Static Site Generator built with</span></div><div class="line"><span class="string">                      love by spf13 and friends in Go.</span></div><div class="line"><span class="string">                                      Complete documentation is available at http://hugo.spf13.com`</span>,</div><div class="line">    Run: <span class="function"><span class="keyword">func</span><span class="params">(cmd *cobra.Command, args []<span class="keyword">string</span>)</span></span> &#123;</div><div class="line">        <span class="comment">// Do Stuff Here</span></div><div class="line">    &#125;,</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> param <span class="keyword">string</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</div><div class="line">    RootCmd.AddCommand(startCmd)</div><div class="line">    f := startCmd.Flags()</div><div class="line">    f.StringVarP(&amp;param, <span class="string">"param"</span>, <span class="string">"p"</span>, <span class="string">""</span>, <span class="string">"Source directory to read from"</span>)</div><div class="line">    RootCmd.AddCommand(versionCmd)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> versionCmd = &amp;cobra.Command&#123;</div><div class="line">    Use:   <span class="string">"version"</span>,</div><div class="line">    Short: <span class="string">"Print the version number of Hugo"</span>,</div><div class="line">    Long:  <span class="string">`All software has versions. This is Hugo's`</span>,</div><div class="line">    Run: <span class="function"><span class="keyword">func</span><span class="params">(cmd *cobra.Command, args []<span class="keyword">string</span>)</span></span> &#123;</div><div class="line">        fmt.Println(<span class="string">"Hugo Static Site Generator v0.9 -- HEAD"</span>)</div><div class="line">    &#125;,</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> startCmd = &amp;cobra.Command&#123;</div><div class="line">    Use:   <span class="string">"start"</span>,</div><div class="line">    Short: <span class="string">"run Hugo"</span>,</div><div class="line">    Long:  <span class="string">`run`</span>,</div><div class="line">    Run: <span class="function"><span class="keyword">func</span><span class="params">(cmd *cobra.Command, args []<span class="keyword">string</span>)</span></span> &#123;</div><div class="line">        fmt.Println(<span class="string">"param is "</span>, param)</div><div class="line">    &#125;,</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">    <span class="keyword">if</span> err := RootCmd.Execute(); err != <span class="literal">nil</span> &#123;</div><div class="line">        fmt.Println(err)</div><div class="line">        os.Exit(<span class="number">1</span>)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2><span id="pxiang-guan-lian-jie">相关链接</span></h2>
+<h2><span id="相关链接">相关链接</span></h2>
 <ol>
 <li><a href="https://github.com/spf13/cobra" target="_blank" rel="external">cobra</a></li>
 <li><a href="https://github.com/louishust/go-test/blob/master/cobra.go" target="_blank" rel="external">cobra example</a></li>

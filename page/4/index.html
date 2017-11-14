@@ -116,7 +116,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -384,7 +384,7 @@
 
       
         
-          <h2 id="现场问题"><a class="header-anchor" href="#现场问题">¶</a>现场问题</h2>
+          <h2 id="xian-chang-wen-ti"><a class="header-anchor" href="#现场问题"></a>现场问题</h2>
 <p><img src="/images/mysql/row-rep-slow.png" alt="rowslow"></p>
           <!--noindex-->
           <div class="post-button text-center">
@@ -534,7 +534,7 @@
 
       
         
-          <h2 id="引入原因"><a class="header-anchor" href="#引入原因">¶</a>引入原因</h2>
+          <h2 id="yin-ru-yuan-yin"><a class="header-anchor" href="#引入原因"></a>引入原因</h2>
 <p>Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。</p>
           <!--noindex-->
           <div class="post-button text-center">
@@ -684,7 +684,7 @@
 
       
         
-          <h2 id="snapshot-vs-rr"><a class="header-anchor" href="#snapshot-vs-rr">¶</a>snapshot vs RR</h2>
+          <h2 id="snapshot-vs-rr"><a class="header-anchor" href="#snapshot-vs-rr"></a>snapshot vs RR</h2>
 <p>RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。</p>
 <p>两者均通过MVCC实现快照读，读不上锁，写上锁。</p>
 <p>两者的区别是在出现冲突写的情况时：</p>
@@ -841,7 +841,7 @@
 
       
         
-          <h2 id="什么是lease"><a class="header-anchor" href="#什么是lease">¶</a>什么是lease?</h2>
+          <h2 id="shi-yao-shi-lease"><a class="header-anchor" href="#什么是lease"></a>什么是lease?</h2>
 <p>client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。</p>
 <p>如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.</p>
           <!--noindex-->
@@ -992,7 +992,7 @@
 
       
         
-          <h2 id="摘要"><a class="header-anchor" href="#摘要">¶</a>摘要</h2>
+          <h2 id="zhai-yao"><a class="header-anchor" href="#摘要"></a>摘要</h2>
 <p>MapReduce是用于大规模数据的新的编程模型，map对KV数据进行处理，生成中间KV结果，reduce对中间结果按照KEY进行分组操作。</p>
           <!--noindex-->
           <div class="post-button text-center">
@@ -1142,7 +1142,7 @@
 
       
         
-          <h2 id="移动光标"><a class="header-anchor" href="#移动光标">¶</a>移动光标</h2>
+          <h2 id="yi-dong-guang-biao"><a class="header-anchor" href="#移动光标"></a>移动光标</h2>
 <ul>
 <li><code>ctrl+b</code>: 前移一个字符(backward)</li>
 <li><code>ctrl+f</code>: 后移一个字符(forward)</li>
@@ -1311,7 +1311,7 @@
 
       
         
-          <h2 id="现场问题"><a class="header-anchor" href="#现场问题">¶</a>现场问题</h2>
+          <h2 id="xian-chang-wen-ti"><a class="header-anchor" href="#现场问题"></a>现场问题</h2>
 <p>客户使用Xtrabackup在进行备份，今天上班发现数据库完全不能使用了。通过processlist看到如下信息。</p>
 <p><img src="/images/mysql/table_lock.jpeg" alt=""></p>
           <!--noindex-->
@@ -1612,7 +1612,7 @@
 
       
         
-          <h2 id="安装"><a class="header-anchor" href="#安装">¶</a>安装</h2>
+          <h2 id="an-zhuang"><a class="header-anchor" href="#安装"></a>安装</h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">$ go get github.com/cockroachdb/cockroach</div><div class="line">$ <span class="built_in">cd</span> <span class="variable">$GOPATH</span>/src/github.com/cockroachdb/cockroach</div><div class="line">$ make build</div><div class="line">$ sudo make install</div><div class="line">$ cockroach version</div><div class="line">Build Tag:    341f413</div><div class="line">Build Time:   2017/09/13 23:39:20</div><div class="line">Distribution: CCL</div><div class="line">Platform:     darwin amd64</div><div class="line">Go Version:   go1.8.1</div><div class="line">C Compiler:   4.2.1 Compatible Apple LLVM 8.1.0 (clang-802.0.42)</div><div class="line">Build SHA-1:  341f4134c1e99e9e1a404d6984f15815120af5be</div><div class="line">Build Type:   development</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
@@ -1773,7 +1773,7 @@
 
       
         
-          <h2 id="现场问题"><a class="header-anchor" href="#现场问题">¶</a>现场问题</h2>
+          <h2 id="xian-chang-wen-ti"><a class="header-anchor" href="#现场问题"></a>现场问题</h2>
 <p>客户重库SQL线程报错如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Last_Errno: 1030</div><div class="line">Last_Error: Error <span class="string">'Got error 122 from storage engine'</span> on query .....</div></pre></td></tr></table></figure>
           <!--noindex-->

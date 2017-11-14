@@ -98,13 +98,13 @@
 
 
 
-<meta name="description" content="¶引入原因 Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。">
+<meta name="description" content="引入原因 Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。">
 <meta name="keywords" content="paper,distributed transaction,percolator">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Percolator">
 <meta property="og:url" content="http://yoursite.com/2017/09/26/percolator/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶引入原因 Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。">
+<meta property="og:description" content="引入原因 Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/paper/percolator.png">
 <meta property="og:image" content="http://yoursite.com/images/paper/percolator1.png">
@@ -115,7 +115,7 @@
 <meta property="og:updated_time" content="2017-10-17T03:00:51.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Percolator">
-<meta name="twitter:description" content="¶引入原因 Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。">
+<meta name="twitter:description" content="引入原因 Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。">
 <meta name="twitter:image" content="http://yoursite.com/images/paper/percolator.png">
 
 
@@ -125,7 +125,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -377,10 +377,10 @@
       
 
       
-        <h2><span id="pyin-ru-yuan-yin">引入原因</span></h2>
+        <h2><span id="引入原因">引入原因</span></h2>
 <p>Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。</p>
 <a id="more"></a>
-<h2><span id="pjia-gou">架构</span></h2>
+<h2><span id="架构">架构</span></h2>
 <p><img src="/images/paper/percolator.png" alt="架构"></p>
 <p>主要组成部分</p>
 <ol>
@@ -393,7 +393,7 @@
 <li>提供跨行跨表的分布式事务</li>
 <li>提供OB框架</li>
 </ol>
-<h2><span id="pfen-bu-shi-shi-wu">分布式事务</span></h2>
+<h2><span id="分布式事务">分布式事务</span></h2>
 <ol>
 <li>实现了Snapshot的隔离级别</li>
 <li>使用2PL+MVCC技术</li>
@@ -402,9 +402,9 @@
 <li>2PC，首先prepare，然后commit</li>
 <li>缓冲写。写都缓存在client端，只有提交的时候才真正和bigtable交互。</li>
 </ol>
-<h3><span id="pmvcc-ji-ben-luo-ji">MVCC基本逻辑</span></h3>
+<h3><span id="mvcc基本逻辑">MVCC基本逻辑</span></h3>
 <p><img src="/images/paper/percolator1.png" alt="MVCC"></p>
-<h3><span id="pxie-ru-ju-li">写入举例</span></h3>
+<h3><span id="写入举例">写入举例</span></h3>
 <p>每行数据引入新的列：lock和write.</p>
 <ol>
 <li>lock用于写入新数据之前的上锁</li>
@@ -422,24 +422,24 @@
 <li>此时达到了commit阶段，写入新的记录bal:write列表示commit结束，之后清理所有的lock。<br>
 <img src="/images/paper/percolator5.png" alt="init"></li>
 </ol>
-<h3><span id="pxie-ru-luo-ji">写入逻辑</span></h3>
-<h4><span id="pprepare">Prepare</span></h4>
+<h3><span id="写入逻辑">写入逻辑</span></h3>
+<h4><span id="prepare">Prepare</span></h4>
 <ol>
 <li>检查自startts之后是否有新的write值，如果存在，表示有其它事务已经提交，故回滚本事务</li>
 <li>检查是否有lock，如果有，表示其它事务已经上锁，回滚,故存在两个事务同时发现互相被锁的情况，导致两个事务都被回滚</li>
 <li>对数据上锁lock字段，并写入data字段。</li>
 </ol>
-<h4><span id="pcommit">Commit</span></h4>
+<h4><span id="commit">Commit</span></h4>
 <ol>
 <li>对所有的数据写入write字段</li>
 <li>清理所有的lock数据</li>
 </ol>
-<h3><span id="pdu-qu-luo-ji">读取逻辑</span></h3>
+<h3><span id="读取逻辑">读取逻辑</span></h3>
 <ol>
 <li>查看是否存在lock，存在则等待lock释放</li>
 <li>获取[0,startts]的write</li>
 </ol>
-<h3><span id="pyi-ge-shi-wu-zhong-de-liang-ge-get-ru-he-bao-zheng-du-qu-de-shu-ju-shi-yi-zhi-de">一个事务中的两个GET如何保证读取的数据是一致的？</span></h3>
+<h3><span id="一个事务中的两个get如何保证读取的数据是一致的">一个事务中的两个GET如何保证读取的数据是一致的？</span></h3>
 <p>TRX1 GET1 GET2<br>
 TRX2 SET1 SET2</p>
 <ol>
@@ -448,7 +448,7 @@ TRX2 SET1 SET2</p>
 <li>如果GET1被LOCK1阻塞，则等待LOCK1结束，数据的可见性就取决于TRX2的committs的取值，但是数据也是一致的。</li>
 </ol>
 <p>故读取必然一致。</p>
-<h2><span id="pge-ren-guan-dian">个人观点</span></h2>
+<h2><span id="个人观点">个人观点</span></h2>
 <ol start="0">
 <li>与其说Percolator是一个分布式事务系统，不如说Percolator是一个应用程序。</li>
 <li>Percolator在bigtable的基础之上，以第三方库的形式提供服务，这就注定了其分布式事务无法很好的和bigtable原有事务融合，而是建立在bigtable的row transaction的基础之上。</li>

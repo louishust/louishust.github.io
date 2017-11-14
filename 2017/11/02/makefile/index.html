@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="¶makefile rule 1234target … : prerequisites …        recipe        …        …  target: 生成目标，可执行文件或者中间object文件 prerequisites: 生成target所需的文件,作为recipe的输入 recipe: make需要执行的具体命令">
+<meta name="description" content="makefile rule 1234target … : prerequisites …        recipe        …        …  target: 生成目标，可执行文件或者中间object文件 prerequisites: 生成target所需的文件,作为recipe的输入 recipe: make需要执行的具体命令">
 <meta name="keywords" content="makefile">
 <meta property="og:type" content="article">
 <meta property="og:title" content="makefile笔记">
 <meta property="og:url" content="http://yoursite.com/2017/11/02/makefile/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶makefile rule 1234target … : prerequisites …        recipe        …        …  target: 生成目标，可执行文件或者中间object文件 prerequisites: 生成target所需的文件,作为recipe的输入 recipe: make需要执行的具体命令">
+<meta property="og:description" content="makefile rule 1234target … : prerequisites …        recipe        …        …  target: 生成目标，可执行文件或者中间object文件 prerequisites: 生成target所需的文件,作为recipe的输入 recipe: make需要执行的具体命令">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2017-11-02T12:02:39.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="makefile笔记">
-<meta name="twitter:description" content="¶makefile rule 1234target … : prerequisites …        recipe        …        …  target: 生成目标，可执行文件或者中间object文件 prerequisites: 生成target所需的文件,作为recipe的输入 recipe: make需要执行的具体命令">
+<meta name="twitter:description" content="makefile rule 1234target … : prerequisites …        recipe        …        …  target: 生成目标，可执行文件或者中间object文件 prerequisites: 生成target所需的文件,作为recipe的输入 recipe: make需要执行的具体命令">
 
 
 
@@ -118,7 +118,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -370,7 +370,7 @@
       
 
       
-        <h2><span id="pmakefile-rule">makefile rule</span></h2>
+        <h2><span id="makefile-rule">makefile rule</span></h2>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">target … : prerequisites …</div><div class="line">        recipe</div><div class="line">        …</div><div class="line">        …</div></pre></td></tr></table></figure>
 <ul>
 <li><code>target</code>: 生成目标，可执行文件或者中间object文件</li>
@@ -383,24 +383,24 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">edit : main.o kbd.o command.o display.o \</div><div class="line">       insert.o search.o files.o utils.o</div><div class="line">        cc -o edit main.o kbd.o command.o display.o \</div><div class="line">                   insert.o search.o files.o utils.o</div></pre></td></tr></table></figure>
 <p>只有recipe，不依赖文件的target，称为<code>phony targets</code>, 如clean:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">clean :</div><div class="line">        rm edit main.o kbd.o command.o display.o \</div><div class="line">           insert.o search.o files.o utils.o</div></pre></td></tr></table></figure>
-<h2><span id="pmake-zhi-xing-liu-cheng">make执行流程</span></h2>
+<h2><span id="make执行流程">make执行流程</span></h2>
 <p>make读取当前目录下的makefile,从第一个rule开始执行，如果这个rule依赖其它文件，则make需要先执行依赖文件的rule。</p>
-<h2><span id="pshi-yong-bian-liang">使用变量</span></h2>
+<h2><span id="使用变量">使用变量</span></h2>
 <p>使用变量可以简化makefile的书写。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">edit : main.o kbd.o command.o display.o \</div><div class="line">              insert.o search.o files.o utils.o</div><div class="line">        cc -o edit main.o kbd.o command.o display.o \</div><div class="line">                   insert.o search.o files.o utils.o</div></pre></td></tr></table></figure>
 <p>可以使用变量把object文件包含:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">objects = main.o kbd.o command.o display.o \</div><div class="line">          insert.o search.o files.o utils.o</div><div class="line"></div><div class="line">edit : $(objects)</div><div class="line">        cc -o edit $(objects)</div></pre></td></tr></table></figure>
-<h2><span id="pmake-zi-dong-tui-dao-gui-ze">make自动推导规则</span></h2>
+<h2><span id="make自动推导规则">make自动推导规则</span></h2>
 <p>make具有隐藏推导规则的功能,可以省略依赖的<code>.c</code>文件和recipe规则。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">main.o : defs.h</div><div class="line">kbd.o : defs.h command.h</div><div class="line">command.o : defs.h command.h</div><div class="line">display.o : defs.h buffer.h</div><div class="line">insert.o : defs.h buffer.h</div><div class="line">search.o : defs.h buffer.h</div><div class="line">files.o : defs.h buffer.h command.h</div><div class="line">utils.o : defs.h</div></pre></td></tr></table></figure>
-<h2><span id="pqing-li-mu-lu-de-gui-ze">清理目录的规则</span></h2>
+<h2><span id="清理目录的规则">清理目录的规则</span></h2>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">.PHONY : clean</div><div class="line">clean :</div><div class="line">        -rm edit $(objects)</div></pre></td></tr></table></figure>
 <p>这样规避了如果有clean文件生成的规则。</p>
 <p>clean不能放在最前面，会被当成default rule执行。</p>
-<h2><span id="pmake-xun-zhao-makefile-wen-jian-shun-xu">make寻找makefile文件顺序</span></h2>
+<h2><span id="make寻找makefile文件顺序">make寻找makefile文件顺序</span></h2>
 <p>GNUmakefile, makefile and Makefile</p>
 <p>建议使用<code>Makefile</code>,如果想用其它名字的文件，可以<code>make -f</code>指定文件名。</p>
-<h2><span id="pxiang-guan-lian-jie">相关链接</span></h2>
+<h2><span id="相关链接">相关链接</span></h2>
 <ol>
 <li><a href="https://www.gnu.org/software/make/manual/make.html#Overview" target="_blank" rel="external">gnu make</a></li>
 </ol>

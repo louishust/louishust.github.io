@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="¶snapshot vs RR RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。 两者均通过MVCC实现快照读，读不上锁，写上锁。 两者的区别是在出现冲突写的情况时：  RR只会阻塞冲突写，待一方事务结束(commit或rollback)，等待的事务继续执行。 SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。  SS隔离级别更高。">
+<meta name="description" content="snapshot vs RR RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。 两者均通过MVCC实现快照读，读不上锁，写上锁。 两者的区别是在出现冲突写的情况时：  RR只会阻塞冲突写，待一方事务结束(commit或rollback)，等待的事务继续执行。 SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。  SS隔离级别更高。">
 <meta name="keywords" content="mysql,cockroachdb,pg,transaction,snapshot isolation">
 <meta property="og:type" content="article">
 <meta property="og:title" content="事务快照行为对比测试">
 <meta property="og:url" content="http://yoursite.com/2017/09/25/trx-test/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶snapshot vs RR RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。 两者均通过MVCC实现快照读，读不上锁，写上锁。 两者的区别是在出现冲突写的情况时：  RR只会阻塞冲突写，待一方事务结束(commit或rollback)，等待的事务继续执行。 SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。  SS隔离级别更高。">
+<meta property="og:description" content="snapshot vs RR RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。 两者均通过MVCC实现快照读，读不上锁，写上锁。 两者的区别是在出现冲突写的情况时：  RR只会阻塞冲突写，待一方事务结束(commit或rollback)，等待的事务继续执行。 SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。  SS隔离级别更高。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2017-10-19T07:45:38.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="事务快照行为对比测试">
-<meta name="twitter:description" content="¶snapshot vs RR RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。 两者均通过MVCC实现快照读，读不上锁，写上锁。 两者的区别是在出现冲突写的情况时：  RR只会阻塞冲突写，待一方事务结束(commit或rollback)，等待的事务继续执行。 SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。  SS隔离级别更高。">
+<meta name="twitter:description" content="snapshot vs RR RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。 两者均通过MVCC实现快照读，读不上锁，写上锁。 两者的区别是在出现冲突写的情况时：  RR只会阻塞冲突写，待一方事务结束(commit或rollback)，等待的事务继续执行。 SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。  SS隔离级别更高。">
 
 
 
@@ -118,7 +118,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -370,7 +370,7 @@
       
 
       
-        <h2><span id="psnapshot-vs-rr">snapshot vs RR</span></h2>
+        <h2><span id="snapshot-vs-rr">snapshot vs RR</span></h2>
 <p>RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。</p>
 <p>两者均通过MVCC实现快照读，读不上锁，写上锁。</p>
 <p>两者的区别是在出现冲突写的情况时：</p>
@@ -380,10 +380,10 @@
 </ol>
 <p>SS隔离级别更高。</p>
 <a id="more"></a>
-<h2><span id="pzhun-bei-shu-ju">准备数据</span></h2>
+<h2><span id="准备数据">准备数据</span></h2>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">database</span> <span class="keyword">test</span>;</div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> test.t1(c1 <span class="built_in">int</span>);</div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t1 <span class="keyword">values</span>(<span class="number">1</span>);</div></pre></td></tr></table></figure>
 <p>针对mysql、pg、cockroachdb进行行为测试。</p>
-<h2><span id="pce-shi-yong-li">测试用例</span></h2>
+<h2><span id="测试用例">测试用例</span></h2>
 <table>
 <thead>
 <tr>
@@ -425,19 +425,19 @@
 </tr>
 </tbody>
 </table>
-<h2><span id="pce-shi-jie-guo">测试结果</span></h2>
+<h2><span id="测试结果">测试结果</span></h2>
 <p>所有的trx2:step3都会被阻塞。</p>
 <p>mysql和pg行为一致，最后c1的值为200.</p>
 <p><strong>cockroachdb会回滚trx2,最后为100</strong></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root@:26257/test  OPEN&gt; commit;</div><div class="line">pq: restart transaction: HandledRetryableTxnError: TransactionRetryError: retry txn (RETRY_WRITE_TOO_OLD): &quot;sql txn&quot; id=21c77f2d key=/Table/51/1/282625409419902977/0 rw=true pri=0.02703415 iso=SNAPSHOT stat=PENDING epo=0 ts=1506321077.996153908,2 orig=1506321070.372553259,0 max=1506321070.372553259,0 wto=false rop=false seq=5</div></pre></td></tr></table></figure>
-<h2><span id="pce-shi-jiao-ben">测试脚本</span></h2>
+<h2><span id="测试脚本">测试脚本</span></h2>
 <p>cockroachdb</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">BEGIN</span> <span class="keyword">TRANSACTION</span> <span class="keyword">ISOLATION</span> <span class="keyword">LEVEL</span> <span class="keyword">SNAPSHOT</span>;</div></pre></td></tr></table></figure>
 <p>mysql</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SET</span> <span class="keyword">TRANSACTION</span> <span class="keyword">ISOLATION</span> <span class="keyword">LEVEL</span> REPEATABLE <span class="keyword">READ</span>;</div></pre></td></tr></table></figure>
 <p>pg</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SET</span> <span class="keyword">TRANSACTION</span> <span class="keyword">ISOLATION</span> <span class="keyword">LEVEL</span> REPEATABLE <span class="keyword">READ</span>;</div></pre></td></tr></table></figure>
-<h2><span id="pcan-kao-lian-jie">参考链接</span></h2>
+<h2><span id="参考链接">参考链接</span></h2>
 <p>*<a href="https://en.wikipedia.org/wiki/Isolation_(database_systems)" target="_blank" rel="external">trx isolation</a><br>
 *<a href="https://en.wikipedia.org/wiki/Snapshot_isolation" target="_blank" rel="external">snapshot isolation</a></p>
 

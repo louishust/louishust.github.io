@@ -116,7 +116,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -671,7 +671,7 @@
 
       
         
-          <h2 id="总体介绍"><a class="header-anchor" href="#总体介绍">¶</a>总体介绍</h2>
+          <h2 id="zong-ti-jie-shao"><a class="header-anchor" href="#总体介绍"></a>总体介绍</h2>
 <p>初始化流程分为如下几个阶段：</p>
 <ol>
 <li><code>命令解析</code>: crdb是单执行程序，根据不用的参数执行不同的命令</li>
@@ -831,7 +831,7 @@
 
       
         
-          <h2 id="示例代码"><a class="header-anchor" href="#示例代码">¶</a>示例代码</h2>
+          <h2 id="shi-li-dai-ma"><a class="header-anchor" href="#示例代码"></a>示例代码</h2>
 <p>cobra是go的命令解析工具库，解析命令行参数。</p>
           <!--noindex-->
           <div class="post-button text-center">
@@ -981,7 +981,7 @@
 
       
         
-          <h2 id="context"><a class="header-anchor" href="#context">¶</a>context</h2>
+          <h2 id="context"><a class="header-anchor" href="#context"></a>context</h2>
 <p>context是go并发模式，用户处理goroutines和其父亲之间逻辑。比如接受一个用户的请求后，针对这个请求可能需要开启多个并发的goroutine，如何把这些goroutine和这个client进行关联？就是通过context，如果用户取消请求，所有的goroutine应该能感知，并自动结束。同时可以将共用的变量存储在context之中，供不同的goroutine使用。</p>
           <!--noindex-->
           <div class="post-button text-center">
@@ -1131,7 +1131,7 @@
 
       
         
-          <h2 id="grpc简介"><a class="header-anchor" href="#grpc简介">¶</a>gRPC简介</h2>
+          <h2 id="g-rpc-jian-jie"><a class="header-anchor" href="#grpc简介"></a>gRPC简介</h2>
 <p>grpc是google remote procedure call, 远程过程调用。多用于分布式服务。服务端定义服务的具体实现，客户端直接调用服务端的实现，得到对应的返回。gRPC以protocol buffer作为消息序列化工具，封装了客户端与服务器之间的消息通信，</p>
           <!--noindex-->
           <div class="post-button text-center">
@@ -1281,7 +1281,7 @@
 
       
         
-          <h2 id="makefile-rule"><a class="header-anchor" href="#makefile-rule">¶</a>makefile rule</h2>
+          <h2 id="makefile-rule"><a class="header-anchor" href="#makefile-rule"></a>makefile rule</h2>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">target … : prerequisites …</div><div class="line">        recipe</div><div class="line">        …</div><div class="line">        …</div></pre></td></tr></table></figure>
 <ul>
 <li><code>target</code>: 生成目标，可执行文件或者中间object文件</li>
@@ -1436,7 +1436,7 @@
 
       
         
-          <h2 id="命令行参数解析"><a class="header-anchor" href="#命令行参数解析">¶</a>命令行参数解析</h2>
+          <h2 id="ming-ling-xing-can-shu-jie-xi"><a class="header-anchor" href="#命令行参数解析"></a>命令行参数解析</h2>
 <p><code>pkg/cli/cli.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">cockroachCmd.AddCommand(</div><div class="line">        startCmd,</div><div class="line">        initCmd,</div><div class="line">        certCmd,</div><div class="line">        quitCmd,</div><div class="line"></div><div class="line">        sqlShellCmd,</div><div class="line">        userCmd,</div><div class="line">        zoneCmd,</div><div class="line">        nodeCmd,</div><div class="line">        dumpCmd,</div><div class="line"></div><div class="line">        <span class="comment">// Miscellaneous commands.</span></div><div class="line">        <span class="comment">// TODO(pmattis): stats</span></div><div class="line">        genCmd,</div><div class="line">        versionCmd,</div><div class="line">        debugCmd,</div><div class="line">    )</div></pre></td></tr></table></figure>
           <!--noindex-->
@@ -1587,7 +1587,7 @@
 
       
         
-          <h2 id="connection-manager"><a class="header-anchor" href="#connection-manager">¶</a>connection manager</h2>
+          <h2 id="connection-manager"><a class="header-anchor" href="#connection-manager"></a>connection manager</h2>
 <p>连接管理，接受用户连接。</p>
 <ul>
 <li>相关文件

@@ -98,19 +98,19 @@
 
 
 
-<meta name="description" content="¶安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install">
+<meta name="description" content="安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install">
 <meta name="keywords" content="go,delve,dlv">
 <meta property="og:type" content="article">
 <meta property="og:title" content="delve调试go程序">
 <meta property="og:url" content="http://yoursite.com/2017/10/26/dlv/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install">
+<meta property="og:description" content="安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/go/dlv.gif">
 <meta property="og:updated_time" content="2017-10-28T06:57:40.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="delve调试go程序">
-<meta name="twitter:description" content="¶安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install">
+<meta name="twitter:description" content="安装delve Mac: xcode-select --install 12$ go get -u github.com/derekparker/delve/cmd/dlv$ make install">
 <meta name="twitter:image" content="http://yoursite.com/images/go/dlv.gif">
 
 
@@ -120,7 +120,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -372,23 +372,23 @@
       
 
       
-        <h2><span id="pan-zhuang-delve">安装delve</span></h2>
+        <h2><span id="安装delve">安装delve</span></h2>
 <p><code>Mac</code>: <code>xcode-select --install</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ go get -u github.com/derekparker/delve/cmd/dlv</div><div class="line">$ make install</div></pre></td></tr></table></figure>
 <a id="more"></a>
-<h2><span id="pshi-li-cheng-xu">实例程序</span></h2>
+<h2><span id="实例程序">实例程序</span></h2>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">    <span class="string">"fmt"</span></div><div class="line">    <span class="string">"time"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">say</span><span class="params">(s <span class="keyword">string</span>)</span></span> &#123;</div><div class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</div><div class="line">        time.Sleep(<span class="number">100</span> * time.Millisecond)</div><div class="line">        fmt.Println(s)</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">    <span class="keyword">go</span> say(<span class="string">"world"</span>)</div><div class="line">    say(<span class="string">"hello"</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>生成测试程序：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">go build test.go</div></pre></td></tr></table></figure>
-<h2><span id="pqi-dong-delve">启动delve</span></h2>
-<h3><span id="pqi-dong-yi-jing-sheng-cheng-de-zhi-xing-wen-jian">启动已经生成的执行文件</span></h3>
+<h2><span id="启动delve">启动delve</span></h2>
+<h3><span id="启动已经生成的执行文件">启动已经生成的执行文件</span></h3>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">dlv <span class="built_in">exec</span> <span class="built_in">test</span></div><div class="line">dlv <span class="built_in">exec</span> ./cockroach -- start --insecure --store=node1 --host=localhost</div></pre></td></tr></table></figure>
-<h3><span id="pgen-ju-wen-jian-jin-xing-qi-dong">根据文件进行启动</span></h3>
+<h3><span id="根据文件进行启动">根据文件进行启动</span></h3>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">dlv debug test.go</div><div class="line"></div><div class="line">dlv debug main.go -- start --insecure --store=node1 --host=localhost</div></pre></td></tr></table></figure>
-<h3><span id="pattach-dao-zheng-zai-zhi-xing-de-cheng-xu">attach到正在执行的程序</span></h3>
+<h3><span id="attach到正在执行的程序">attach到正在执行的程序</span></h3>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">dlv attach pid <span class="built_in">test</span></div></pre></td></tr></table></figure>
-<h2><span id="pdiao-shi-ming-ling">调试命令</span></h2>
-<h3><span id="pduan-dian-she-zhi">断点设置</span></h3>
+<h2><span id="调试命令">调试命令</span></h2>
+<h3><span id="断点设置">断点设置</span></h3>
 <p><img src="/images/go/dlv.gif" alt="dlv debug"></p>
 <ul>
 <li><code>b main.main</code>: breakpoint on package.function</li>
@@ -397,7 +397,7 @@
 <li><code>clearall</code>: clear all breakpoints</li>
 <li><code>clear id</code>: clear id breakpoint</li>
 </ul>
-<h3><span id="pdiao-shi">调试</span></h3>
+<h3><span id="调试">调试</span></h3>
 <ul>
 <li><code>c</code>: continue</li>
 <li><code>s</code>: step in</li>
@@ -406,7 +406,7 @@
 <li><code>threads</code>: list threads</li>
 <li><code>thread xxxx</code>: switch to xxxx thread</li>
 </ul>
-<h2><span id="pcan-kao-lian-jie">参考链接</span></h2>
+<h2><span id="参考链接">参考链接</span></h2>
 <ol>
 <li><a href="https://github.com/derekparker/delve" target="_blank" rel="external">delve github</a></li>
 <li><a href="https://github.com/derekparker/delve/tree/master/Documentation/installation" target="_blank" rel="external">delve install</a></li>

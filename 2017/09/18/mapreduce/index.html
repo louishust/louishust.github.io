@@ -98,19 +98,19 @@
 
 
 
-<meta name="description" content="¶摘要 MapReduce是用于大规模数据的新的编程模型，map对KV数据进行处理，生成中间KV结果，reduce对中间结果按照KEY进行分组操作。">
+<meta name="description" content="摘要 MapReduce是用于大规模数据的新的编程模型，map对KV数据进行处理，生成中间KV结果，reduce对中间结果按照KEY进行分组操作。">
 <meta name="keywords" content="mapreduce,paper">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MapReduce: Simpliﬁed Data Processing on Large Clusters">
 <meta property="og:url" content="http://yoursite.com/2017/09/18/mapreduce/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶摘要 MapReduce是用于大规模数据的新的编程模型，map对KV数据进行处理，生成中间KV结果，reduce对中间结果按照KEY进行分组操作。">
+<meta property="og:description" content="摘要 MapReduce是用于大规模数据的新的编程模型，map对KV数据进行处理，生成中间KV结果，reduce对中间结果按照KEY进行分组操作。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/paper/mapreduce_execute_flow.png">
 <meta property="og:updated_time" content="2017-09-25T06:38:52.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MapReduce: Simpliﬁed Data Processing on Large Clusters">
-<meta name="twitter:description" content="¶摘要 MapReduce是用于大规模数据的新的编程模型，map对KV数据进行处理，生成中间KV结果，reduce对中间结果按照KEY进行分组操作。">
+<meta name="twitter:description" content="摘要 MapReduce是用于大规模数据的新的编程模型，map对KV数据进行处理，生成中间KV结果，reduce对中间结果按照KEY进行分组操作。">
 <meta name="twitter:image" content="http://yoursite.com/images/paper/mapreduce_execute_flow.png">
 
 
@@ -120,7 +120,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -372,15 +372,15 @@
       
 
       
-        <h2><span id="pzhai-yao">摘要</span></h2>
+        <h2><span id="摘要">摘要</span></h2>
 <p>MapReduce是用于大规模数据的新的编程模型，map对KV数据进行处理，生成中间KV结果，reduce对中间结果按照KEY进行分组操作。</p>
 <a id="more"></a>
-<h2><span id="pjian-jie">简介</span></h2>
+<h2><span id="简介">简介</span></h2>
 <p>随着互联网的发展，数据量出现了迸发式的增长，如何对如此大规模的数据进行分布式存储？如何基于这些数据进行并行计算？如何处理计算过程中的故障问题？</p>
 <p>为了解决基于大数据量、普通PC机器的大规模计算问题，可以将所有的计算单元抽象为map和reduce连个原子操作的集合。通过用户自定义的map和reduce的函数模型，我们可以实现执行单元的并发执行，以及良好的容错机制。</p>
-<h2><span id="pbian-cheng-mo-xing">编程模型</span></h2>
+<h2><span id="编程模型">编程模型</span></h2>
 <p>计算的操作对象都是KV模型，用户只需要编写map和reduce函数即可实现编程。</p>
-<h3><span id="pshi-li">示例</span></h3>
+<h3><span id="示例">示例</span></h3>
 <ul>
 <li><strong><em>map函数</em></strong></li>
 </ul>
@@ -389,8 +389,8 @@
 <li><strong><em>reduce函数</em></strong></li>
 </ul>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">reduce(String key, Iterator values):</div><div class="line">    <span class="comment">// key: a word</span></div><div class="line">    <span class="comment">// values: a list of counts </span></div><div class="line">    <span class="keyword">int</span> result = <span class="number">0</span>;</div><div class="line">    <span class="keyword">for</span> each v in values:</div><div class="line">        result += ParseInt(v);</div><div class="line">    Emit(AsString(result));</div></pre></td></tr></table></figure>
-<h2><span id="pshi-xian">实现</span></h2>
-<h3><span id="pzhi-xing-liu-cheng">执行流程</span></h3>
+<h2><span id="实现">实现</span></h2>
+<h3><span id="执行流程">执行流程</span></h3>
 <p><img src="/images/paper/mapreduce_execute_flow.png" alt="执行流程"></p>
 <ol>
 <li>讲输入进行分片，分片的基本单位是64MB</li>
@@ -401,45 +401,45 @@
 <li>reduce worker遍历中间结果，应用用户的reduce函数。</li>
 <li>所有的map和reduce tasks执行结束，master将控制权交给用户程序。</li>
 </ol>
-<h3><span id="pmaster-shu-ju-jie-gou">Master数据结构</span></h3>
+<h3><span id="master数据结构">Master数据结构</span></h3>
 <p>master管理map和reduce task的状态，以及worker machine的状态。</p>
 <p>master将map产生的中间结果的位置，传递给reduce worker。</p>
-<h3><span id="prong-cuo">容错</span></h3>
-<h4><span id="pworker-failure">worker failure</span></h4>
+<h3><span id="容错">容错</span></h3>
+<h4><span id="worker-failure">worker failure</span></h4>
 <p>master定期ping各个worker机器，如果在规定时间内不返回的话，认为此机器宕机了。</p>
 <ul>
 <li>任何执行完成的map task会重置为idle状态，被重新执行。</li>
 <li>任何在执行中的map和reduce task会被重置为idle状态。</li>
 <li>已经执行完成的reduce task不会被重新执行。</li>
 </ul>
-<h4><span id="pmaster-failure">master failure</span></h4>
+<h4><span id="master-failure">master failure</span></h4>
 <p>可以通过周期性的做检查点，来恢复master故障，但是考虑到master只有一个，很少出现故障，因此如果master宕机，这里选择放弃当前任务的策略。</p>
-<h4><span id="pchu-cuo-de-chu-li">出错的处理</span></h4>
+<h4><span id="出错的处理">出错的处理</span></h4>
 <p>如果用户的map和reduce函数是确定性函数，则其结果集也是确定的。</p>
 <p>不会存在map的中间结果被重复执行的情况。master会忽略相同的map输出结果。</p>
 <p>也不会存在多个相同的reduce操作同时进行，因为reduce的结果会先生成临时文件，然后执行rename操作，rename操作是原子的，如果多个相同的reduce执行rename操作，只有一个会成功。依赖的GFS底层的原子rename操作。</p>
-<h3><span id="pben-di-ji-suan">本地计算</span></h3>
+<h3><span id="本地计算">本地计算</span></h3>
 <p>带宽是mapreduce集群非常重要的一个因素，尽量讲map下放到和其分片数据在一台机器上的worker。尽量减少数据在网络的传输。GFS中的数据存在3个副本，master会尽可能利用副本所在的机器分配worker。</p>
-<h3><span id="pren-wu-li-du">任务粒度</span></h3>
+<h3><span id="任务粒度">任务粒度</span></h3>
 <p>已经将map分为M片，reduce分为R片。应该让M和R远远大于worker机器，这样每个worker可以分配更多的任务，任务粒度更低，任务调度更加准确，更有利于集群机器的负载均衡。</p>
-<h3><span id="pbei-fen-ren-wu">备份任务</span></h3>
+<h3><span id="备份任务">备份任务</span></h3>
 <p>很多作业的最终任务集中在几个大的reduce上，而这几个大的reduce可能因为机器原因往往导致执行特别慢。</p>
 <p>我们提供备份任务的机制，当MR任务进入最后的快要结束状态，master备份各个task的状态，并利用其它worker去执行未完成的task，这样，不管是主的任务还是备份任务，只要有一个完成，整个任务就算结束了。</p>
 <p>经过我们的实际统计的数据，可以知道，关闭backup策略后，执行时间普遍增加44%.</p>
-<h2><span id="pyou-hua">优化</span></h2>
-<h3><span id="pfen-qu-han-shu">分区函数</span></h3>
+<h2><span id="优化">优化</span></h2>
+<h3><span id="分区函数">分区函数</span></h3>
 <p>默认的分区函数是hash(key)的方式，一般来说，数据会比较均匀，当然也存在特殊情况。MR库提供特殊的分区函数，如hash(Hostname(urlkey))</p>
-<h3><span id="pzhong-jian-jie-guo-pai-xu">中间结果排序</span></h3>
+<h3><span id="中间结果排序">中间结果排序</span></h3>
 <p>保证每个partiton的key按照升序排列,有利于后续需要排序的操作。</p>
-<h3><span id="pcombiner-han-shu">Combiner函数</span></h3>
+<h3><span id="combiner函数">Combiner函数</span></h3>
 <p>允许每个partition进行提前合并，在map之后，在reduce之前，比如单词统计中，(“the”, 1)肯定有很多，可以先统计成(“the”, N), 再传递给reduce</p>
-<h3><span id="pfu-zuo-yong">副作用</span></h3>
+<h3><span id="副作用">副作用</span></h3>
 <p>尽量减少手动生成临时文件，因为无法保证多个文件的原子性提交。</p>
-<h3><span id="ptiao-guo-cuo-wu-ji-lu">跳过错误记录</span></h3>
+<h3><span id="跳过错误记录">跳过错误记录</span></h3>
 <p>由于程序或者数据问题，引起部分task异常的时候，可以选择性的忽略对这些数据的操作。</p>
-<h3><span id="pben-di-zhi-xing">本地执行</span></h3>
+<h3><span id="本地执行">本地执行</span></h3>
 <p>由于分布式系统的不确定性，提供了本地执行的方式，所有的任务在一台机器上顺序执行，并提供了类似gdb的工具进行调试。</p>
-<h3><span id="pge-ren-guan-dian">个人观点</span></h3>
+<h3><span id="个人观点">个人观点</span></h3>
 <p>mapreduce开启了一种新的对于打数据量进行分析的编程方法，但是存在几点不足。</p>
 <ol>
 <li>对同一份数据的不同分析，需要写不同的map和reduce任务</li>

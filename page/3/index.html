@@ -116,7 +116,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -373,7 +373,7 @@
 
       
         
-          <h2 id="download-caddy-with-http-upload-module"><a class="header-anchor" href="#download-caddy-with-http-upload-module">¶</a>Download Caddy with http.upload module</h2>
+          <h2 id="download-caddy-with-http-upload-module"><a class="header-anchor" href="#download-caddy-with-http-upload-module"></a>Download Caddy with http.upload module</h2>
 <p><a href="https://caddyserver.com/download" target="_blank" rel="external">download here</a></p>
           <!--noindex-->
           <div class="post-button text-center">
@@ -677,7 +677,7 @@ we’re actively working on improving the benchmark so it shouldn’t be too lon
 
       
         
-          <h2 id="安装"><a class="header-anchor" href="#安装">¶</a>安装</h2>
+          <h2 id="an-zhuang"><a class="header-anchor" href="#安装"></a>安装</h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-1.noarch.rpm</div><div class="line">yum install postgresql10</div><div class="line">yum install postgresql10-server</div><div class="line">/usr/pgsql-10/bin/postgresql10-setup initdb</div><div class="line">systemctl <span class="built_in">enable</span> postgresql-10</div><div class="line">systemctl start postgresql-10</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
@@ -1125,7 +1125,7 @@ we’re actively working on improving the benchmark so it shouldn’t be too lon
 
       
         
-          <h2 id="备份"><a class="header-anchor" href="#备份">¶</a>备份</h2>
+          <h2 id="bei-fen"><a class="header-anchor" href="#备份"></a>备份</h2>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">BACKUP</span> <span class="keyword">DATABASE</span> <span class="keyword">test</span> <span class="keyword">TO</span> <span class="string">'nodelocal:/tmp/back'</span>;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
@@ -1424,7 +1424,7 @@ we’re actively working on improving the benchmark so it shouldn’t be too lon
 
       
         
-          <h2 id="会话操作"><a class="header-anchor" href="#会话操作">¶</a>会话操作</h2>
+          <h2 id="hui-hua-cao-zuo"><a class="header-anchor" href="#会话操作"></a>会话操作</h2>
 <ul>
 <li><code>tmux new -s dev</code>: 新建一个名为dev的会话</li>
 <li><code>ctrl+a+d</code>: detach当前会话</li>
@@ -1580,7 +1580,7 @@ we’re actively working on improving the benchmark so it shouldn’t be too lon
 
       
         
-          <h2 id="attach进程生成core"><a class="header-anchor" href="#attach进程生成core">¶</a>attach进程生成core</h2>
+          <h2 id="attach-jin-cheng-sheng-cheng-core"><a class="header-anchor" href="#attach进程生成core"></a>attach进程生成core</h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">gdb</div><div class="line">(gdb) attach pid</div><div class="line">(gdb) gcore</div><div class="line">(gdb) detach</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">

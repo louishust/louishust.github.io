@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="¶现场问题 客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query .....">
+<meta name="description" content="现场问题 客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query .....">
 <meta name="keywords" content="mysql">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Got error 122 from storage engine">
 <meta property="og:url" content="http://yoursite.com/2017/09/13/mysql-error-122/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶现场问题 客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query .....">
+<meta property="og:description" content="现场问题 客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query .....">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2017-09-25T06:39:24.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Got error 122 from storage engine">
-<meta name="twitter:description" content="¶现场问题 客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query .....">
+<meta name="twitter:description" content="现场问题 客户重库SQL线程报错如下： 12Last_Errno: 1030Last_Error: Error &apos;Got error 122 from storage engine&apos; on query .....">
 
 
 
@@ -118,7 +118,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -381,11 +381,11 @@
       
 
       
-        <h2><span id="pxian-chang-wen-ti">现场问题</span></h2>
+        <h2><span id="现场问题">现场问题</span></h2>
 <p>客户重库SQL线程报错如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Last_Errno: 1030</div><div class="line">Last_Error: Error <span class="string">'Got error 122 from storage engine'</span> on query .....</div></pre></td></tr></table></figure>
 <a id="more"></a>
-<h2><span id="pcha-zhao-wen-ti">查找问题</span></h2>
+<h2><span id="查找问题">查找问题</span></h2>
 <p>从include/my_base.h中找到错误码定义：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> HA_ERR_INTERNAL_ERROR   122	<span class="comment">/* Internal error */</span></span></div></pre></td></tr></table></figure>
 <p>没什么意义，没有具体说明。接着从mysql-test里面搜索是否有类似报错：</p>
@@ -394,7 +394,7 @@
 <p>对应的test文件是：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">--echo #</span></div><div class="line"><span class="comment">--echo # Bug#20819189: Assert if .frm exists but no partitioned InnoDB table</span></div><div class="line"><span class="comment">--echo #</span></div><div class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t1 (a <span class="built_in">int</span>) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">PARTITION</span> <span class="keyword">BY</span> <span class="keyword">HASH</span> (a) <span class="keyword">PARTITIONS</span> <span class="number">2</span>;</div><div class="line"><span class="comment">--copy_file $MYSQLD_DATADIR/test/t1.frm $MYSQLD_DATADIR/test/t2.frm</span></div><div class="line"><span class="comment">--error ER_GET_ERRNO</span></div><div class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t2;</div><div class="line"><span class="comment">--remove_file $MYSQLD_DATADIR/test/t2.frm</span></div><div class="line"># Flush table is needed to remove the 'orphan' t2 definition.</div><div class="line"><span class="keyword">FLUSH</span> <span class="keyword">TABLE</span> t2;</div><div class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> t1;</div></pre></td></tr></table></figure>
 <p>可以看到是因为表只有frm文件，而缺失ibd文件导致的。</p>
-<h2><span id="pjie-jue-wen-ti">解决问题</span></h2>
+<h2><span id="解决问题">解决问题</span></h2>
 <p>这种情况一般是在建表的时候，服务器异常宕机，导致只有frm文件生成。<br>
 对于这种问题，处理方法很简单，重建此表就行。</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">rm t2.frm</div><div class="line"><span class="keyword">flush</span> <span class="keyword">table</span> t2;</div><div class="line"><span class="keyword">set</span> sql_log_bin=<span class="keyword">off</span>;</div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> t2 xxx</div><div class="line"><span class="keyword">set</span> sql_log_bin=<span class="keyword">on</span>;</div><div class="line"><span class="keyword">start</span> <span class="keyword">slave</span>;</div></pre></td></tr></table></figure>

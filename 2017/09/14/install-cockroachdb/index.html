@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="¶安装 12345678910111213$ go get github.com/cockroachdb/cockroach$ cd $GOPATH/src/github.com/cockroachdb/cockroach$ make build$ sudo make install$ cockroach versionBuild Tag:    341f413Build Time:   2017">
+<meta name="description" content="安装 12345678910111213$ go get github.com/cockroachdb/cockroach$ cd $GOPATH/src/github.com/cockroachdb/cockroach$ make build$ sudo make install$ cockroach versionBuild Tag:    341f413Build Time:   2017/">
 <meta name="keywords" content="cockroachdb">
 <meta property="og:type" content="article">
 <meta property="og:title" content="源码安装cockroachdb">
 <meta property="og:url" content="http://yoursite.com/2017/09/14/install-cockroachdb/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶安装 12345678910111213$ go get github.com/cockroachdb/cockroach$ cd $GOPATH/src/github.com/cockroachdb/cockroach$ make build$ sudo make install$ cockroach versionBuild Tag:    341f413Build Time:   2017">
+<meta property="og:description" content="安装 12345678910111213$ go get github.com/cockroachdb/cockroach$ cd $GOPATH/src/github.com/cockroachdb/cockroach$ make build$ sudo make install$ cockroach versionBuild Tag:    341f413Build Time:   2017/">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2017-09-25T06:38:15.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="源码安装cockroachdb">
-<meta name="twitter:description" content="¶安装 12345678910111213$ go get github.com/cockroachdb/cockroach$ cd $GOPATH/src/github.com/cockroachdb/cockroach$ make build$ sudo make install$ cockroach versionBuild Tag:    341f413Build Time:   2017">
+<meta name="twitter:description" content="安装 12345678910111213$ go get github.com/cockroachdb/cockroach$ cd $GOPATH/src/github.com/cockroachdb/cockroach$ make build$ sudo make install$ cockroach versionBuild Tag:    341f413Build Time:   2017/">
 
 
 
@@ -118,7 +118,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -370,21 +370,21 @@
       
 
       
-        <h2><span id="pan-zhuang">安装</span></h2>
+        <h2><span id="安装">安装</span></h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">$ go get github.com/cockroachdb/cockroach</div><div class="line">$ <span class="built_in">cd</span> <span class="variable">$GOPATH</span>/src/github.com/cockroachdb/cockroach</div><div class="line">$ make build</div><div class="line">$ sudo make install</div><div class="line">$ cockroach version</div><div class="line">Build Tag:    341f413</div><div class="line">Build Time:   2017/09/13 23:39:20</div><div class="line">Distribution: CCL</div><div class="line">Platform:     darwin amd64</div><div class="line">Go Version:   go1.8.1</div><div class="line">C Compiler:   4.2.1 Compatible Apple LLVM 8.1.0 (clang-802.0.42)</div><div class="line">Build SHA-1:  341f4134c1e99e9e1a404d6984f15815120af5be</div><div class="line">Build Type:   development</div></pre></td></tr></table></figure>
 <a id="more"></a>
-<h2><span id="pqi-dong">启动</span></h2>
-<h3><span id="pqi-dong-di-yi-ge-jie-dian">启动第一个节点</span></h3>
+<h2><span id="启动">启动</span></h2>
+<h3><span id="启动第一个节点">启动第一个节点</span></h3>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cockroach start --insecure --store=node1 --host=localhost</div></pre></td></tr></table></figure>
-<h3><span id="pqi-dong-di-er-ge-jie-dian">启动第二个节点</span></h3>
+<h3><span id="启动第二个节点">启动第二个节点</span></h3>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">➜  cockroach start --insecure \</div><div class="line">--store=node2 \</div><div class="line">--host=localhost \</div><div class="line">--port=26258 \</div><div class="line">--http-port=8081 \</div><div class="line">--join=localhost:26257</div></pre></td></tr></table></figure>
-<h3><span id="pqi-dong-di-san-ge-jie-dian">启动第三个节点</span></h3>
+<h3><span id="启动第三个节点">启动第三个节点</span></h3>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">➜  cockroach start --insecure \</div><div class="line">--store=node3 \</div><div class="line">--host=localhost \</div><div class="line">--port=26259 \</div><div class="line">--http-port=8082 \</div><div class="line">--join=localhost:26257</div></pre></td></tr></table></figure>
-<h2><span id="pdeng-lu-ke-hu-duan">登录客户端</span></h2>
+<h2><span id="登录客户端">登录客户端</span></h2>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ cockroach sql --insecure</div></pre></td></tr></table></figure>
-<h2><span id="pjian-kong">监控</span></h2>
+<h2><span id="监控">监控</span></h2>
 <p><a href="http://localhost:8080/#/cluster/all/overview" target="_blank" rel="external">http://localhost:8080/#/cluster/all/overview</a></p>
-<h2><span id="pcan-kao-lian-jie">参考链接</span></h2>
+<h2><span id="参考链接">参考链接</span></h2>
 <ul>
 <li><a href="https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html" target="_blank" rel="external">https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html</a></li>
 <li><a href="https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html" target="_blank" rel="external">https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html</a></li>

@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="¶attach进程生成core 1234gdb(gdb) attach pid(gdb) gcore(gdb) detach">
+<meta name="description" content="attach进程生成core 1234gdb(gdb) attach pid(gdb) gcore(gdb) detach">
 <meta name="keywords" content="gdb,stack,core">
 <meta property="og:type" content="article">
 <meta property="og:title" content="gdb使用">
 <meta property="og:url" content="http://yoursite.com/2017/09/27/gdb/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="¶attach进程生成core 1234gdb(gdb) attach pid(gdb) gcore(gdb) detach">
+<meta property="og:description" content="attach进程生成core 1234gdb(gdb) attach pid(gdb) gcore(gdb) detach">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2017-09-27T13:55:49.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="gdb使用">
-<meta name="twitter:description" content="¶attach进程生成core 1234gdb(gdb) attach pid(gdb) gcore(gdb) detach">
+<meta name="twitter:description" content="attach进程生成core 1234gdb(gdb) attach pid(gdb) gcore(gdb) detach">
 
 
 
@@ -118,7 +118,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
     fancybox: true,
     tabs: true,
     motion: true,
@@ -370,10 +370,10 @@
       
 
       
-        <h2><span id="pattach-jin-cheng-sheng-cheng-core">attach进程生成core</span></h2>
+        <h2><span id="attach进程生成core">attach进程生成core</span></h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">gdb</div><div class="line">(gdb) attach pid</div><div class="line">(gdb) gcore</div><div class="line">(gdb) detach</div></pre></td></tr></table></figure>
 <a id="more"></a>
-<h2><span id="pgdb-da-yin-dui-zhan">gdb打印堆栈</span></h2>
+<h2><span id="gdb打印堆栈">gdb打印堆栈</span></h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">gdb -ex <span class="string">"set pagination 0"</span>    \</div><div class="line">             -ex <span class="string">"thread apply all bt"</span> \</div><div class="line">             -batch                    \</div><div class="line">             -p pid &gt; outfile</div></pre></td></tr></table></figure>
 
       
