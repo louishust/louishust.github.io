@@ -372,7 +372,7 @@
       
 
       
-        <h2><span id="什么是lease">什么是lease?</span></h2>
+        <h2><span id="shi-me-shi-lease">什么是lease?</span></h2>
 <p>client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。</p>
 <p>如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.</p>
 <a id="more"></a>
@@ -415,7 +415,7 @@
 <ol>
 <li>client重建datanode链表，每个datanode提升GS，同时没有进入FINALIZED状态的进入FINALIZED状态</li>
 </ol>
-<h2><span id="个人思考">个人思考</span></h2>
+<h2><span id="ge-ren-si-kao">个人思考</span></h2>
 <ol>
 <li>datanode的写入是通过pipeline方式管道写入，性能存在瓶颈</li>
 <li>故障恢复依赖了master和client的相互作用</li>

@@ -370,34 +370,34 @@
       
 
       
-        <h2><span id="grpc简介">gRPC简介</span></h2>
+        <h2><span id="grpc-jian-jie">gRPC简介</span></h2>
 <p>grpc是google remote procedure call, 远程过程调用。多用于分布式服务。服务端定义服务的具体实现，客户端直接调用服务端的实现，得到对应的返回。gRPC以protocol buffer作为消息序列化工具，封装了客户端与服务器之间的消息通信，</p>
 <a id="more"></a>
-<h2><span id="服务定义">服务定义</span></h2>
+<h2><span id="fu-wu-ding-yi">服务定义</span></h2>
 <p>服务定义是直接写在proto文件中，如下所示：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// The greeting service definition.</span></div><div class="line">service Greeter &#123;</div><div class="line">  <span class="comment">// Sends a greeting</span></div><div class="line">  rpc SayHello (HelloRequest) returns (HelloReply) &#123;&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// The request message containing the user's name.</span></div><div class="line">message HelloRequest &#123;</div><div class="line">  <span class="keyword">string</span> name = <span class="number">1</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// The response message containing the greetings</span></div><div class="line">message HelloReply &#123;</div><div class="line">  <span class="keyword">string</span> message = <span class="number">1</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>service定义服务名称，rpc定义远程函数调用名称。</p>
-<h2><span id="将proto文件转化为go代码">将proto文件转化为go代码</span></h2>
+<h2><span id="jiang-proto-wen-jian-zhuan-hua-wei-go-dai-ma">将proto文件转化为go代码</span></h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">protoc hello.proto --go_out=plugins=grpc:./</div></pre></td></tr></table></figure>
 <p>生成hellp.pb.go文件，可以被go程序调用。</p>
-<h2><span id="编写服务器">编写服务器</span></h2>
-<h3><span id="实现rpc方法">实现rpc方法</span></h3>
+<h2><span id="bian-xie-fu-wu-qi">编写服务器</span></h2>
+<h3><span id="shi-xian-rpc-fang-fa">实现rpc方法</span></h3>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> server <span class="keyword">struct</span>&#123;&#125;</div><div class="line"><span class="comment">// SayHello implements helloworld.GreeterServer</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *server)</span> <span class="title">SayHello</span><span class="params">(ctx context.Context, in *pb.HelloRequest)</span> <span class="params">(*pb.HelloReply, error)</span></span> &#123;</div><div class="line">    <span class="keyword">return</span> &amp;pb.HelloReply&#123;Message: <span class="string">"Hello "</span> + in.Name&#125;, <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3><span id="监听端口amp开启服务">监听端口&amp;开启服务</span></h3>
+<h3><span id="jian-ting-duan-kou-amp-kai-qi-fu-wu">监听端口&amp;开启服务</span></h3>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">    lis, err := net.Listen(<span class="string">"tcp"</span>, port)</div><div class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">        log.Fatalf(<span class="string">"failed to listen: %v"</span>, err)</div><div class="line">    &#125;</div><div class="line">    s := grpc.NewServer()</div><div class="line">    pb.RegisterGreeterServer(s, &amp;server&#123;&#125;)</div><div class="line">    <span class="comment">// Register reflection service on gRPC server.</span></div><div class="line">    reflection.Register(s)</div><div class="line">    <span class="keyword">if</span> err := s.Serve(lis); err != <span class="literal">nil</span> &#123;</div><div class="line">        log.Fatalf(<span class="string">"failed to serve: %v"</span>, err)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <ol>
 <li>设置监听端口</li>
 <li>注册服务</li>
 <li>开始服务</li>
 </ol>
-<h2><span id="编写客户端">编写客户端</span></h2>
+<h2><span id="bian-xie-ke-hu-duan">编写客户端</span></h2>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">    <span class="comment">// Set up a connection to the server.</span></div><div class="line">    conn, err := grpc.Dial(address, grpc.WithInsecure())</div><div class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">        log.Fatalf(<span class="string">"did not connect: %v"</span>, err)</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">defer</span> conn.Close()</div><div class="line"></div><div class="line">    c := pb.NewGreeterClient(conn)</div><div class="line">    r, err := c.SayHello(context.Background(), &amp;pb.HelloRequest&#123;Name: <span class="string">"world"</span>&#125;)</div><div class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">        log.Fatalf(<span class="string">"could not greet: %v"</span>, err)</div><div class="line">    &#125;</div><div class="line">    log.Printf(<span class="string">"Greeting: %s"</span>, r.Message)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <ol>
 <li>连接服务器端口</li>
 <li>创建服务对应的客户端</li>
 <li>调用服务的方法</li>
 </ol>
-<h2><span id="相关链接">相关链接</span></h2>
+<h2><span id="xiang-guan-lian-jie">相关链接</span></h2>
 <ol>
 <li><a href="https://grpc.io/docs/guides/" target="_blank" rel="external">What is gRPC?</a></li>
 <li><a href="https://grpc.io/docs/quickstart/go.html" target="_blank" rel="external">Go Quick Start</a></li>

@@ -371,10 +371,10 @@
 
       
         <p>由于crdb不兼容benchmarksql，只能使用crdb官方的tpcc测试程序loadgen进行测试。</p>
-<h2><span id="安装loadgen">安装loadgen</span></h2>
+<h2><span id="an-zhuang-loadgen">安装loadgen</span></h2>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">go get github.com/cockroachdb/loadgen</div><div class="line">cd loadgen</div><div class="line">make</div></pre></td></tr></table></figure>
 <a id="more"></a>
-<h2><span id="初始化100个仓库">初始化100个仓库</span></h2>
+<h2><span id="chu-shi-hua-100-ge-cang-ku">初始化100个仓库</span></h2>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./tpcc -concurrency=32 -warehouses=100 -load postgresql://root@a1:26257/tpcc?sslmode=disable</div></pre></td></tr></table></figure>
 <p>加载时间:</p>
 <ol>
@@ -382,22 +382,22 @@
 <li>创建索引：30min</li>
 </ol>
 <p>总计：107min</p>
-<h2><span id="测试">测试</span></h2>
-<h3><span id="32并发5分钟">32并发5分钟</span></h3>
+<h2><span id="ce-shi">测试</span></h2>
+<h3><span id="32-bing-fa-5-fen-zhong">32并发5分钟</span></h3>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">./tpcc -concurrency=32 -warehouses=100 --duration=5m  postgresql://root@a1:26257/tpcc?sslmode=disable</div><div class="line"></div><div class="line">_elapsed___newOrders___newOrder(cum)__avg(ms)__p50(ms)__p95(ms)__p99(ms)_pMax(ms)</div><div class="line">  300.0s       27539            91.8    215.1    209.7    335.5    419.4   1208.0</div><div class="line"></div><div class="line">TPCC       27539      10893781.8 ns/op</div></pre></td></tr></table></figure>
-<h3><span id="64并发5分钟">64并发5分钟</span></h3>
+<h3><span id="64-bing-fa-5-fen-zhong">64并发5分钟</span></h3>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">./tpcc -concurrency=64 -warehouses=100 --duration=5m  postgresql://root@a1:26257/tpcc?sslmode=disable</div><div class="line"></div><div class="line">_elapsed___newOrders___newOrder(cum)__avg(ms)__p50(ms)__p95(ms)__p99(ms)_pMax(ms)</div><div class="line">  300.0s       25615            85.4    471.9    453.0    771.8   1140.9   6710.9</div><div class="line"></div><div class="line">TPCC       25615      11712288.7 ns/op</div></pre></td></tr></table></figure>
-<h3><span id="128并发5分钟">128并发5分钟</span></h3>
+<h3><span id="128-bing-fa-5-fen-zhong">128并发5分钟</span></h3>
 <p>会出现冲突回滚的事务</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">./tpcc -concurrency=128 -warehouses=100 --duration=5m  postgresql://root@a1:26257/tpcc?sslmode=disable</div><div class="line"></div><div class="line">2017/10/16 12:42:29 error in payment: driver: bad connection</div><div class="line">...</div><div class="line">2017/10/16 12:36:42 error in payment: select by last name fail: pq: restart transaction: HandledRetryableTxnError: TransactionAbortedError: txn aborted &quot;sql txn&quot; id=351d7126 key=/Table/111/1/50/0 rw=true pri=0.01763613 iso=SERIALIZABLE stat=ABORTED epo=0 ts=1508128600.475877835,0 orig=1508128600.475877835,0 max=1508128600.975877835,0 wto=false rop=false seq=7</div><div class="line">...</div><div class="line">_elapsed___newOrders___newOrder(cum)__avg(ms)__p50(ms)__p95(ms)__p99(ms)_pMax(ms)</div><div class="line">  300.0s        7564            25.2   1887.9   1208.0   6710.9  10200.5  10200.5</div><div class="line"></div><div class="line">TPCC        7564      39665007.6 ns/op</div></pre></td></tr></table></figure>
-<h2><span id="官方回答">官方回答</span></h2>
+<h2><span id="guan-fang-hui-da">官方回答</span></h2>
 <blockquote>
 <p>This is pretty much expected - like I was saying on Gitter, since we haven’t implemented think time or wait time yet in tpcc, the workload that’s currently simulated is a worst-case extremely high contention workload, which is why performance suffers with higher concurrency. It’s not representative of a normal tpcc benchmark.<br>
 In a correctly implemented tpcc benchmark (which we’re working on and should have ready this or next week), per-warehouse concurrency is capped, and each concurrent connection spends a lot of its time being idle. The benchmark is not designed to measure extremely high contention - instead it’s supposed to measure a highly concurrent but low contention workload.<br>
 As for the errors you’re seeing with concurrency=128, in CockroachDB sometimes the client must get involved2 to retry a transaction. The load generator doesn’t currently implement retries correctly, hence the output errors.</p>
 </blockquote>
 <p>等待他们tpc-c测试程序的稳定。</p>
-<h2><span id="相关链接">相关链接</span></h2>
+<h2><span id="xiang-guan-lian-jie">相关链接</span></h2>
 <ol>
 <li><a href="https://github.com/cockroachdb/loadgen" target="_blank" rel="external">loadgen</a></li>
 <li><a href="https://forum.cockroachlabs.com/t/tpc-c-poor-performance/1015" target="_blank" rel="external">crdb bug report</a></li>

@@ -383,7 +383,7 @@
       
         <p>TPC-C是事务测试标准，数据库性能唯一官方指标。TPC-C模拟商品库存，交易，支付等过程，相比之下，sysbench就是个玩具。</p>
 <a id="more"></a>
-<h2><span id="表定义">表定义</span></h2>
+<h2><span id="biao-ding-yi">表定义</span></h2>
 <h3><span id="warehouse">WAREHOUSE</span></h3>
 <p><img src="/images/crdb/tpcc0.png" alt=""></p>
 <h3><span id="district">DISTRICT</span></h3>
@@ -392,19 +392,19 @@
 <p><img src="/images/crdb/tpcc2.png" alt=""></p>
 <h3><span id="history">HISTORY</span></h3>
 <p><img src="/images/crdb/tpcc3.png" alt=""></p>
-<h3><span id="new_order">NEW_ORDER</span></h3>
+<h3><span id="new-order">NEW_ORDER</span></h3>
 <p><img src="/images/crdb/tpcc4.png" alt=""></p>
 <h3><span id="order">ORDER</span></h3>
 <p><img src="/images/crdb/tpcc5.png" alt=""></p>
-<h3><span id="order_line">ORDER_LINE</span></h3>
+<h3><span id="order-line">ORDER_LINE</span></h3>
 <p><img src="/images/crdb/tpcc6.png" alt=""></p>
 <h3><span id="item">ITEM</span></h3>
 <p><img src="/images/crdb/tpcc7.png" alt=""></p>
 <h3><span id="stock">STOCK</span></h3>
 <p><img src="/images/crdb/tpcc8.png" alt=""></p>
-<h2><span id="表的关系">表的关系</span></h2>
+<h2><span id="biao-de-guan-xi">表的关系</span></h2>
 <p><img src="/images/crdb/tpcc9.png" alt=""></p>
-<h2><span id="业务">业务</span></h2>
+<h2><span id="ye-wu">业务</span></h2>
 <ol>
 <li>New-Order: 45%</li>
 <li>Payment:43%</li>
@@ -412,11 +412,11 @@
 <li>Order-Status:4%</li>
 <li>Stock-Level:4%</li>
 </ol>
-<h3><span id="新订单new-order">新订单(New-Order)</span></h3>
+<h3><span id="xin-ding-dan-new-order">新订单(New-Order)</span></h3>
 <p>在一个事务中输入一张完整定单。它是中重量级的读写事务，发生频率高， 要求响应时间短。</p>
-<h4><span id="输入">输入：</span></h4>
+<h4><span id="shu-ru">输入：</span></h4>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">仓库代码(W_ID)</div><div class="line">地区代码(D_W_ID，D_ID)</div><div class="line">客户代码 (C_W_ID，C_D_ID_，C_ID)</div><div class="line">分录数(OL_CNT)</div><div class="line">各分录对应的商品代码(OL_I_ID)</div><div class="line">供货仓库代码(OL_SUPPLY_W_ID)</div><div class="line">数量 (OL_QUANTITY)</div></pre></td></tr></table></figure>
-<h4><span id="事务逻辑">事务逻辑</span></h4>
+<h4><span id="shi-wu-luo-ji">事务逻辑</span></h4>
 <ol>
 <li>根据<code>W_ID</code>查询WAREHOUSE, 得到税率<code>W_TAX</code></li>
 <li>根据<code>D_W_ID</code>, <code>D_ID</code>查询DISTRICT, 取税率<code>D_TAX</code>, 同时取<code>D_NEXT_O_ID</code>，<strong>并对其加一</strong>。</li>
@@ -432,7 +432,7 @@
 </li>
 <li>计算定单总价格 <code>H_AMOUNT = SUM(OL_AMOUNT)*(1- C_DISCOUNT)*(1+W_TAX+D_TAX)</code></li>
 </ol>
-<h4><span id="涉及到的修改操作">涉及到的修改操作</span></h4>
+<h4><span id="she-ji-dao-de-xiu-gai-cao-zuo">涉及到的修改操作</span></h4>
 <ol>
 <li><code>DISTRICT</code>表对字段<code>D_NEXT_O_ID</code>进行自增, 属于热点更新，每个订单都要更新此数据</li>
 <li><code>NEW_ORDER</code>和<code>ORDER</code>表各插入一行数据，无热点</li>
@@ -440,11 +440,11 @@
 <li>对每笔分录，进行插入，无热点</li>
 </ol>
 <p>主要是第一个热点更新是性能瓶颈。</p>
-<h3><span id="付款payment">付款(Payment)</span></h3>
+<h3><span id="fu-kuan-payment">付款(Payment)</span></h3>
 <p>在一个事务中更新客户余额、地区、仓库的销售数据。它是轻重量级的读写事 务，发生频率高，要求响应时间短。另外，此事务中有不按关键字访问 CUSTOMER 的情况。</p>
-<h4><span id="输入">输入</span></h4>
+<h4><span id="shu-ru">输入</span></h4>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">输入仓库代码(W_ID)，地区代码(D_W_ID，D_ID)，客户代码 (C_W_ID，C_D_ID，C_ID)或者客户姓氏 (C_W_ID，C_D_ID，C_LAST)，支付金额(H_AMOUNT)</div></pre></td></tr></table></figure>
-<h4><span id="事务逻辑">事务逻辑</span></h4>
+<h4><span id="shi-wu-luo-ji">事务逻辑</span></h4>
 <ol>
 <li>根据<code>W_ID</code>,更新WAREHOUSE表，<code>W_YTD = W_YTD + H_AMOUNT</code></li>
 <li>根据<code>D_W_ID，D_ID</code>，更新DISTRICT, <code>D_YTD = D_YTD + H_AMOUNT</code></li>
@@ -461,7 +461,7 @@
 <li>如果客户的<code>C_CREDIT</code>为<code>BC</code>，表示信用差，需要修改<code>C_DATA = C_W_ID，C_D_ID，C_ID,D_ID,D_ID,W_ID + C_DATA</code></li>
 <li>修改HISTORY表，<code>H_DATA= W_NAME+D_NAME+H_DATA</code></li>
 </ol>
-<h4><span id="涉及到的修改操作">涉及到的修改操作</span></h4>
+<h4><span id="she-ji-dao-de-xiu-gai-cao-zuo">涉及到的修改操作</span></h4>
 <ol>
 <li>更新WAREHOUSE的<code>W_YTD</code>字段，每个订单更新一次，热点更新</li>
 <li>更新DISTRICT的<code>D_YTD</code>字段，每个订单更新一次，热点更新</li>
@@ -469,21 +469,21 @@
 <li>修改HISTORY表，无热点</li>
 </ol>
 <p>1和2热点更新严重</p>
-<h3><span id="查询定单order-status">查询定单(Order-Status)</span></h3>
+<h3><span id="cha-xun-ding-dan-order-status">查询定单(Order-Status)</span></h3>
 <p>显示指定客户最近的定单状态。它是中重量级的只读事务，发生频率高。另 外，此事务中有不按关键字访问 CUSTOMER 的情况。</p>
-<h4><span id="输入">输入</span></h4>
+<h4><span id="shu-ru">输入</span></h4>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">输入客户代码(C_W_ID，C_D_ID，C_ID)或客户姓氏 (C_W_ID，C_D_ID，C_LAST)</div></pre></td></tr></table></figure>
-<h4><span id="事务逻辑">事务逻辑</span></h4>
+<h4><span id="shi-wu-luo-ji">事务逻辑</span></h4>
 <ol>
 <li>根据<code>C_W_ID，C_D_ID，C_ID</code>查询CUSTOMER表，获取用户<code>C_FIRST，C_MIDDLE，C_LAST, C_BALANCE</code></li>
 <li>根据<code>O_W_ID = C_W_ID AND O_D_ID = O_D_ID AND O_D_ID = O_D_ID</code>查询定单表，取<code>O_ID</code>最大的这行数据</li>
 <li>根据<code>O_W_ID = C_W_ID AND O_D_ID = O_D_ID AND O_ID = OL_O_ID</code>查询订单分录表，记录按照<code>OL_I_ID</code>排序，获取<code>OL_SUPPLY_W_ID, OL_QUANTITY, OL_QUANTITY,OL_DELIVERY_D</code></li>
 </ol>
-<h3><span id="发货delivery">发货(Delivery)</span></h3>
+<h3><span id="fa-huo-delivery">发货(Delivery)</span></h3>
 <p>以10笔新订单(<code>NEW_ORDER</code>，未发货订单)为一批处理，一张订单的处 理必须在一个读写型事务中完成。至于一个数据库事务中只处理一张订单还是处 理多张订单，在实现时可以根据情况调整。一笔业务处理包括一个或多个数据库 事务(最多 10 个)，发生频率低，响应时间要求低</p>
-<h4><span id="输入">输入</span></h4>
+<h4><span id="shu-ru">输入</span></h4>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">输入仓库(W_ID)</div><div class="line">对其下属地区(D_W_ID，D_ID)</div><div class="line">和指定的运输代码(O_CARRIER_ID)</div></pre></td></tr></table></figure>
-<h4><span id="事务逻辑">事务逻辑</span></h4>
+<h4><span id="shi-wu-luo-ji">事务逻辑</span></h4>
 <ol>
 <li>根据<code>NO_W_ID = W_ID and NO_W_ID = W_ID</code>在<code>NEW_ORDER</code>表中查询最小的订单号<code>NO_O_ID</code>的订单，如不存在新订单，则略过</li>
 <li>在<code>NEW_ORDER</code>中删除记录</li>
@@ -491,19 +491,19 @@
 <li>根据<code>OL_W_ID = O_W_ID and OL_D_ID = O_D_ID and OL_O_ID = O_O_ID</code>查询<code>ORDER_LINE</code>表，更新发货时间<code>OL_DELIVERY_D</code>为当前时间，记录<code>OL_AMOUNT</code></li>
 <li>修改CUSTOMER表，<code>C_BALANCE = C_BALANCE + OL_AMOUNT</code>, 累计发货数量加一<code>C_DELIVERY_CNT + 1</code></li>
 </ol>
-<h4><span id="涉及到的修改操作">涉及到的修改操作</span></h4>
+<h4><span id="she-ji-dao-de-xiu-gai-cao-zuo">涉及到的修改操作</span></h4>
 <ol>
 <li>对<code>NEW_ORDER</code>表进行删除操作，无热点</li>
 <li>更新ORDER表, 无热点</li>
 <li>更新<code>ORDER_LINE</code>表, 无热点</li>
 <li>更新<code>CUSTOMER</code>表，无热点</li>
 </ol>
-<h3><span id="库存报警stock-level">库存报警(Stock-Level)</span></h3>
+<h3><span id="ku-cun-bao-jing-stock-level">库存报警(Stock-Level)</span></h3>
 <p>找出最近销售的哪些商品库存低于指定限值。是重量级的只读事务，发生频<br>
 率低，响应时间要求低。</p>
-<h4><span id="输入">输入</span></h4>
+<h4><span id="shu-ru">输入</span></h4>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">输入仓库代码(W_ID)、地区代码(D_W_ID，D_ID)、限值</div></pre></td></tr></table></figure>
-<h4><span id="事务逻辑">事务逻辑</span></h4>
+<h4><span id="shi-wu-luo-ji">事务逻辑</span></h4>
 <ol>
 <li>根据<code>W_ID, D_ID</code>，查询<code>DISTRICT</code>，获取下一订单号<code>D_NEXT_O_ID</code></li>
 <li>根据<code>OL_W_ID = W_ID and OL_D_ID = D_ID and D_NEXT_O_ID-20 &lt;= OL_O_ID &lt; D_NEXT_O_ID</code> 查询<code>ORDER_LINE</code>表，查询结果为最近销售的 20 笔商品</li>

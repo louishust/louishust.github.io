@@ -370,14 +370,14 @@
       
 
       
-        <h2><span id="导入方法">导入方法</span></h2>
+        <h2><span id="dao-ru-fang-fa">导入方法</span></h2>
 <p>两种方式导入100warehouse数据到crdbv1.1.0：</p>
 <ol>
 <li>首先通过benchmarksql导入pg，然后<code>pg_dump</code>导出copy语句，crdb执行copy语句</li>
 <li>首先通过benchmarksql生成csv文件，</li>
 </ol>
 <a id="more"></a>
-<h2><span id="性能比较">性能比较</span></h2>
+<h2><span id="xing-neng-bi-jiao">性能比较</span></h2>
 <ol>
 <li>
 <p>单线程导入<code>pg_dump</code>的文件，耗时132min</p>
@@ -412,7 +412,7 @@
 </ol>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@a1 run]# time ./runDatabaseBuild.sh props.pg</div><div class="line">real    7m27.513s</div></pre></td></tr></table></figure>
 <p>由此可见，crdb通过import语法直接导入csv文件效率最高，但是与pg10相比较，性能有差距。</p>
-<h2><span id="参考链接">参考链接</span></h2>
+<h2><span id="can-kao-lian-jie">参考链接</span></h2>
 <ol>
 <li><a href="https://louishust.github.io/2017/10/15/cock-caddy/" target="_blank" rel="external">caddy导入csv文件</a></li>
 <li><a href="https://www.cockroachlabs.com/docs/stable/import.html" target="_blank" rel="external">crdb import csv</a></li>

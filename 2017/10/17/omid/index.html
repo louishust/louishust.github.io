@@ -374,7 +374,7 @@
       
 
       
-        <h2><span id="引言">引言</span></h2>
+        <h2><span id="yin-yan">引言</span></h2>
 <p>DBMS的本质是事务，缺少事务支持的只能成为<code>data stores</code>，比如hbase,bigtable等。Google的bigtable缺少跨行事务，导致应用开发负担很大，因此percolator系统在bigtable的基础上实现了分布式事务。</p>
 <a id="more"></a>
 <p>目前的大部分系统都以支持SI为最基本的需求，SI需要检测write-write冲突，检测这种冲突需要事务的元数据信息，比如<code>commit time</code>。事务元数据量很大，可能需要分布式存储，同时使用2PC协议协调涉及到的各个datanode，保证提交的原子性。</p>
@@ -385,7 +385,7 @@
 <li>序列化的消耗限制了SO的消息发送能力</li>
 </ol>
 <p>本论文是解决SO单点瓶颈的问题。</p>
-<h2><span id="背景">背景</span></h2>
+<h2><span id="bei-jing">背景</span></h2>
 <h3><span id="snapshot-isolation">snapshot isolation</span></h3>
 <p>通过MVCC方式实现SI，如果两个事务出现了写写冲突，需要回滚一个事务。相对于<code>serialization snapshot isolation</code> (SSI)， SI可能出现write skew的问题。</p>
 <p>两个事务写写冲突的充分必要条件是：</p>
@@ -422,14 +422,14 @@
 </ol>
 <p>SO身兼TO(timestamp oracle)的角色，假设Ts(txni)=txni，故Ts的搜集就是事务号。</p>
 <p>uncommited writes类似percolator，存储在data nodes。</p>
-<h4><span id="算法一commit-request">算法一：commit request</span></h4>
+<h4><span id="suan-fa-yi-commit-request">算法一：commit request</span></h4>
 <p><img src="/images/paper/omid1.png" alt="commit request"></p>
 <p>W是事务txni的修改的row集合.Tc和lastCommit是SO中的内存数据，表示事务提交的时间戳以及修改行的提交时间戳。</p>
 <p>此算法只能串行, 不能并发。</p>
-<h4><span id="算法二insnapshot">算法二：inSnapshot</span></h4>
+<h4><span id="suan-fa-er-insnapshot">算法二：inSnapshot</span></h4>
 <p><img src="/images/paper/omid2.png" alt="inSnapshot"></p>
 <p>读取数据的时候，需要判断是否可见，可见性需要进行版本号的判断。</p>
-<h2><span id="omid设计">OMID设计</span></h2>
+<h2><span id="omid-she-ji">OMID设计</span></h2>
 <p>这一节介绍SO的瓶颈以及OMID如何解决这些问题的。</p>
 <p>为了提升SO的能力，事务元数据量应该都存储在内存中，而非磁盘，但是元数据的增长可能超出SO的承受能力：</p>
 <ol>
@@ -442,7 +442,7 @@
 <p>算法三：Commit request</p>
 <p><img src="/images/paper/omid3.png" alt="commit request"></p>
 <p>由于Tmax是个最大值，可能存在回滚一些不冲突事务的可能性！！所以淘汰算法可以进行改进，根据当前活跃的最小的事务号进行淘汰。</p>
-<h2><span id="相关链接">相关链接</span></h2>
+<h2><span id="xiang-guan-lian-jie">相关链接</span></h2>
 <p><a href="https://louishust.github.io/2017/09/26/percolator/" target="_blank" rel="external">percolator解读</a></p>
 
       

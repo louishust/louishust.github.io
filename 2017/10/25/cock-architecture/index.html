@@ -568,7 +568,7 @@
 <p>这避免了跟踪每个range的lease，这里假设所有的lease都不会过期，直到node脱离集群。</p>
 <h4><span id="expiration-based-leases-meta-amp-system-ranges">Expiration-Based Leases (Meta &amp; System Ranges)</span></h4>
 <p>meta range也有租约，不是epoch，而是<code>expiration-based lease</code>。定期重新选leaseholder。</p>
-<h3><span id="membership-changes-rebalancerepair">Membership Changes: Rebalance/Repair</span></h3>
+<h3><span id="membership-changes-rebalance-repair">Membership Changes: Rebalance/Repair</span></h3>
 <p>集群的节点数出现变化后，raft group的成员也会变化，range副本需要rebalance。</p>
 <ol>
 <li>Nodes added: 新节点与其它节点通信，表示自己空闲，集群便转移一部分replica过去。</li>
@@ -613,7 +613,7 @@
 <h3><span id="interactions-with-other-layers">Interactions with Other Layers</span></h3>
 <h4><span id="storage-amp-replication-layers">Storage &amp; Replication Layers</span></h4>
 <p>Storage Layer通过raft log将数据写入磁盘，同时将数据返回给Replication Layer.</p>
-<h2><span id="参考链接">参考链接</span></h2>
+<h2><span id="can-kao-lian-jie">参考链接</span></h2>
 <ol>
 <li><a href="https://www.cockroachlabs.com/docs/stable/architecture/overview.html" target="_blank" rel="external">cockroachdb doc</a></li>
 <li><a href="https://www.cockroachlabs.com/blog/how-cockroachdb-distributes-atomic-transactions/" target="_blank" rel="external">How CockroachDB Does Distributed, Atomic Transactions</a></li>

@@ -370,10 +370,10 @@
       
 
       
-        <h2><span id="attach进程生成core">attach进程生成core</span></h2>
+        <h2><span id="attach-jin-cheng-sheng-cheng-core">attach进程生成core</span></h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">gdb</div><div class="line">(gdb) attach pid</div><div class="line">(gdb) gcore</div><div class="line">(gdb) detach</div></pre></td></tr></table></figure>
 <a id="more"></a>
-<h2><span id="gdb打印堆栈">gdb打印堆栈</span></h2>
+<h2><span id="gdb-da-yin-dui-zhan">gdb打印堆栈</span></h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">gdb -ex <span class="string">"set pagination 0"</span>    \</div><div class="line">             -ex <span class="string">"thread apply all bt"</span> \</div><div class="line">             -batch                    \</div><div class="line">             -p pid &gt; outfile</div></pre></td></tr></table></figure>
 
       

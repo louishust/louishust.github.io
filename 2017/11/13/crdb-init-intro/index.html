@@ -370,7 +370,7 @@
       
 
       
-        <h2><span id="总体介绍">总体介绍</span></h2>
+        <h2><span id="zong-ti-jie-shao">总体介绍</span></h2>
 <p>初始化流程分为如下几个阶段：</p>
 <ol>
 <li><code>命令解析</code>: crdb是单执行程序，根据不用的参数执行不同的命令</li>
@@ -383,17 +383,17 @@
 <li><code>挂起主进程</code>：等待error退出</li>
 </ol>
 <a id="more"></a>
-<h2><span id="命令解析">命令解析</span></h2>
+<h2><span id="ming-ling-jie-xi">命令解析</span></h2>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&gt; main.main</div><div class="line">| &gt; cli.Main</div><div class="line">| | &gt; cli.Run</div><div class="line">| | | &gt; cli.runStart</div></pre></td></tr></table></figure>
 <p>以<code>cockroach start --insecure --store=node1 --host=localhost</code>为例</p>
-<h3><span id="设置包含的命令">设置包含的命令</span></h3>
+<h3><span id="she-zhi-bao-han-de-ming-ling">设置包含的命令</span></h3>
 <p><code>pkg/cli/cli.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">cockroachCmd.AddCommand(</div><div class="line">	startCmd,</div><div class="line">	initCmd,</div><div class="line">	certCmd,</div><div class="line">	quitCmd,</div><div class="line"></div><div class="line">	sqlShellCmd,</div><div class="line">	userCmd,</div><div class="line">	zoneCmd,</div><div class="line">	nodeCmd,</div><div class="line">	dumpCmd,</div><div class="line"></div><div class="line">	<span class="comment">// Miscellaneous commands.</span></div><div class="line">	<span class="comment">// TODO(pmattis): stats</span></div><div class="line">	genCmd,</div><div class="line">	versionCmd,</div><div class="line">	debugCmd,</div><div class="line">)</div></pre></td></tr></table></figure>
-<h3><span id="设置start命令的描述">设置start命令的描述</span></h3>
+<h3><span id="she-zhi-start-ming-ling-de-miao-shu">设置start命令的描述</span></h3>
 <p><code>pkg/cli/start.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> startCmd = &amp;cobra.Command&#123;</div><div class="line">	Use:   <span class="string">"start"</span>,</div><div class="line">	Short: <span class="string">"start a node"</span>,</div><div class="line">	Long: <span class="string">`</span></div><div class="line"><span class="string">Start a CockroachDB node, which will export data from one or more</span></div><div class="line"><span class="string">storage devices, specified via --store flags.</span></div><div class="line"><span class="string"></span></div><div class="line"><span class="string">If no cluster exists yet and this is the first node, no additional</span></div><div class="line"><span class="string">flags are required. If the cluster already exists, and this node is</span></div><div class="line"><span class="string">uninitialized, specify the --join flag to point to any healthy node</span></div><div class="line"><span class="string">(or list of nodes) already part of the cluster.</span></div><div class="line"><span class="string">`</span>,</div><div class="line">	Example: <span class="string">`  cockroach start --insecure --store=attrs=ssd,path=/mnt/ssd1 [--join=host:port,[host:port]]`</span>,</div><div class="line">	RunE:    MaybeShoutError(MaybeDecorateGRPCError(runStart)),</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>执行函数为runStart.</p>
-<h3><span id="start命令的参数设置与存储">start命令的参数设置与存储</span></h3>
+<h3><span id="start-ming-ling-de-can-shu-she-zhi-yu-cun-chu">start命令的参数设置与存储</span></h3>
 <ol>
 <li>参数设置</li>
 </ol>
@@ -405,16 +405,16 @@
 <p><code>pkg/cli/flags.go</code></p>
 <p><code>cli.init</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">f := startCmd.Flags()</div><div class="line"></div><div class="line"><span class="comment">// Server flags.</span></div><div class="line">stringFlag(f, &amp;serverConnHost, cliflags.ServerHost, <span class="string">""</span>)</div><div class="line">stringFlag(f, &amp;serverConnPort, cliflags.ServerPort, base.DefaultPort)</div><div class="line">stringFlag(f, &amp;serverAdvertiseHost, cliflags.AdvertiseHost, <span class="string">""</span>)</div><div class="line">stringFlag(f, &amp;serverAdvertisePort, cliflags.AdvertisePort, <span class="string">""</span>)</div></pre></td></tr></table></figure>
-<h2><span id="创建临时目录">创建临时目录</span></h2>
+<h2><span id="chuang-jian-lin-shi-mu-lu">创建临时目录</span></h2>
 <p><code>pkg/cli/start.go</code></p>
 <p><code>cli.runStart</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> err error</div><div class="line"><span class="keyword">if</span> serverCfg.TempStorageConfig, err = initTempStorageConfig(ctx, serverCfg.Stores.Specs[<span class="number">0</span>]); err != <span class="literal">nil</span> &#123;</div><div class="line">	<span class="keyword">return</span> err</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>创建临时存储目录cockroach-temp012521878, 创建temp-dirs-record.txt文件，里面存放临时存储目录的全路径。</p>
-<h2><span id="信号处理">信号处理</span></h2>
+<h2><span id="xin-hao-chu-li">信号处理</span></h2>
 <p><code>pkg/cli/start.go</code></p>
 <p><code>cli.runStart</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">signalCh := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">1</span>)</div><div class="line">signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)</div></pre></td></tr></table></figure>
-<h2><span id="日志初始化">日志初始化</span></h2>
+<h2><span id="ri-zhi-chu-shi-hua">日志初始化</span></h2>
 <p><code>pkg/util/log/clog.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&gt; (l *loggingT) createFile()</div><div class="line">| &gt; (sb *syncBuffer) rotateFile</div></pre></td></tr></table></figure>
 <ol>
@@ -437,7 +437,7 @@
 </li>
 </ol>
 <h2><span id="newserver">NewServer</span></h2>
-<h3><span id="注册rpc服务">注册rpc服务</span></h3>
+<h3><span id="zhu-ce-rpc-fu-wu">注册rpc服务</span></h3>
 <p><code>pkg/server/server.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">	<span class="keyword">var</span> earlyRPCWhiteList = <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">struct</span>&#123;&#125;&#123;</div><div class="line">		<span class="string">"/cockroach.rpc.Heartbeat/Ping"</span>:   &#123;&#125;,</div><div class="line">		<span class="string">"/cockroach.gossip.Gossip/Gossip"</span>: &#123;&#125;,</div><div class="line">	&#125;</div><div class="line">	s.grpc = rpc.NewServerWithInterceptor(s.rpcContext, <span class="function"><span class="keyword">func</span><span class="params">(fullName <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> atomic.LoadInt32(&amp;s.serveNonGossip) != <span class="number">0</span> &#123;</div><div class="line">			<span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">		&#125;</div><div class="line">		<span class="keyword">if</span> _, allowed := earlyRPCWhiteList[fullName]; !allowed &#123;</div><div class="line">			<span class="keyword">return</span> grpcstatus.Errorf(</div><div class="line">				codes.Unavailable, <span class="string">"node waiting for gossip network; %s not available"</span>, fullName,</div><div class="line">			)</div><div class="line">		&#125;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">	&#125;)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p><code>pkg/rpc/context.go</code></p>
@@ -449,22 +449,22 @@
 <li>对unaryInterceptor和streamInterceptor进行注入</li>
 <li>注册HeartBeat服务</li>
 </ol>
-<h3><span id="注册gossip服务">注册gossip服务</span></h3>
+<h3><span id="zhu-ce-gossip-fu-wu">注册gossip服务</span></h3>
 <p><code>pkg/server/server.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">s.gossip = gossip.New(</div><div class="line">	s.cfg.AmbientCtx,</div><div class="line">	&amp;s.nodeIDContainer,</div><div class="line">	s.rpcContext,</div><div class="line">	s.grpc,</div><div class="line">	s.stopper,</div><div class="line">	s.registry,</div><div class="line">)</div></pre></td></tr></table></figure>
 <p><code>pkg/gossip/gossip.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ambient log.AmbientContext,</span></span></div><div class="line"><span class="function"><span class="params">	nodeID *base.NodeIDContainer,</span></span></div><div class="line"><span class="function"><span class="params">	rpcContext *rpc.Context,</span></span></div><div class="line"><span class="function"><span class="params">	grpcServer *grpc.Server,</span></span></div><div class="line"><span class="function"><span class="params">	stopper *stop.Stopper,</span></span></div><div class="line"><span class="function"><span class="params">	registry *metric.Registry,</span></span></div><div class="line"><span class="function"><span class="params">)</span> *<span class="title">Gossip</span></span> &#123;</div><div class="line">....</div><div class="line">	<span class="keyword">if</span> grpcServer != <span class="literal">nil</span> &#123;</div><div class="line">		RegisterGossipServer(grpcServer, g.server)</div><div class="line">	&#125;</div></pre></td></tr></table></figure>
 <p><code>pkg/gossip/gossip.proto</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">service Gossip &#123;</div><div class="line">  rpc Gossip (stream Request) returns (stream Response) &#123;&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3><span id="初始化distsender">初始化DistSender</span></h3>
+<h3><span id="chu-shi-hua-distsender">初始化DistSender</span></h3>
 <p><code>pkg/server/server.go</code><br>
 <code>pkg/kv/dist_sender.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewServer</span><span class="params">(cfg Config, stopper *stop.Stopper)</span> <span class="params">(*Server, error)</span></span> &#123;</div><div class="line">    ......</div><div class="line">	distSenderCfg := kv.DistSenderConfig&#123;</div><div class="line">		AmbientCtx:      s.cfg.AmbientCtx,</div><div class="line">		Settings:        st,</div><div class="line">		Clock:           s.clock,</div><div class="line">		RPCContext:      s.rpcContext,</div><div class="line">		RPCRetryOptions: &amp;retryOpts,</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> distSenderTestingKnobs := s.cfg.TestingKnobs.DistSender; distSenderTestingKnobs != <span class="literal">nil</span> &#123;</div><div class="line">		distSenderCfg.TestingKnobs = *distSenderTestingKnobs.(*kv.DistSenderTestingKnobs)</div><div class="line">	&#125;</div><div class="line">	s.distSender = kv.NewDistSender(distSenderCfg, s.gossip)</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3><span id="初始化txncoordsender">初始化TxnCoordSender</span></h3>
+<h3><span id="chu-shi-hua-txncoordsender">初始化TxnCoordSender</span></h3>
 <p><code>pkg/server/server.go</code><br>
 <code>pkg/kv/txn_coord_sender.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">s.txnCoordSender = kv.NewTxnCoordSender(</div><div class="line">	s.cfg.AmbientCtx,</div><div class="line">	st,</div><div class="line">	s.distSender,</div><div class="line">	s.clock,</div><div class="line">	s.cfg.Linearizable,</div><div class="line">	s.stopper,</div><div class="line">	txnMetrics,</div><div class="line">)</div></pre></td></tr></table></figure>
-<h3><span id="初始化storepool">初始化StorePool</span></h3>
+<h3><span id="chu-shi-hua-storepool">初始化StorePool</span></h3>
 <p><code>pkg/server/server.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">s.storePool = storage.NewStorePool(</div><div class="line">	s.cfg.AmbientCtx,</div><div class="line">	s.st,</div><div class="line">	s.gossip,</div><div class="line">	s.clock,</div><div class="line">	storage.MakeStorePoolNodeLivenessFunc(s.nodeLiveness),</div><div class="line">	<span class="comment">/* deterministic */</span> <span class="literal">false</span>,</div><div class="line">)</div></pre></td></tr></table></figure>
 <p><code>pkg/storage/store_pool.go</code></p>
@@ -473,7 +473,7 @@
 <li>StorePool维护集群中所有store的信息及健康状态.</li>
 <li>注册gossip的回调函数，用于更新store的信息。</li>
 </ol>
-<h3><span id="初始化rafttranport">初始化RaftTranport</span></h3>
+<h3><span id="chu-shi-hua-rafttranport">初始化RaftTranport</span></h3>
 <p><code>pkg/storage/raft_transport</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewRaftTransport</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ambient log.AmbientContext,</span></span></div><div class="line"><span class="function"><span class="params">	st *cluster.Settings,</span></span></div><div class="line"><span class="function"><span class="params">	resolver NodeAddressResolver,</span></span></div><div class="line"><span class="function"><span class="params">	grpcServer *grpc.Server,</span></span></div><div class="line"><span class="function"><span class="params">	rpcContext *rpc.Context,</span></span></div><div class="line"><span class="function"><span class="params">)</span> *<span class="title">RaftTransport</span></span> &#123;</div><div class="line">....</div><div class="line">	<span class="keyword">if</span> grpcServer != <span class="literal">nil</span> &#123;</div><div class="line">		RegisterMultiRaftServer(grpcServer, t)</div><div class="line">	&#125;</div></pre></td></tr></table></figure>
 <p><code>pkg/storage/raft.proto</code></p>
@@ -482,23 +482,23 @@
 <li>注册raft服务</li>
 <li>定时更新message queue的状态(每隔10s)</li>
 </ol>
-<h3><span id="初始化dbserver">初始化DBServer</span></h3>
+<h3><span id="chu-shi-hua-dbserver">初始化DBServer</span></h3>
 <p><code>pkg/server/server.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">s.kvDB = kv.NewDBServer(s.cfg.Config, s.txnCoordSender, s.stopper)</div><div class="line">roachpb.RegisterExternalServer(s.grpc, s.kvDB)</div></pre></td></tr></table></figure>
 <p><code>pkg/roachpb/api.proto</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">service Internal &#123;</div><div class="line">  rpc Batch (BatchRequest) returns (BatchResponse) &#123;&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">service External &#123;</div><div class="line">  rpc Batch (BatchRequest) returns (BatchResponse) &#123;&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3><span id="初始化leasemanager">初始化LeaseManager</span></h3>
+<h3><span id="chu-shi-hua-leasemanager">初始化LeaseManager</span></h3>
 <p><code>pkg/server/server.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// descriptor.ModificationTime &lt;= txn.Timestamp &lt; expirationTime</span></div><div class="line">	s.leaseMgr = sql.NewLeaseManager(</div><div class="line">		s.cfg.AmbientCtx,</div><div class="line">		&amp;s.nodeIDContainer,</div><div class="line">		*s.db,</div><div class="line">		s.clock,</div><div class="line">		lmKnobs,</div><div class="line">		s.stopper,</div><div class="line">		&amp;s.internalMemMetrics,</div><div class="line">		s.cfg.LeaseManagerConfig,</div><div class="line">	)</div></pre></td></tr></table></figure>
 <p>LeaseManager用于获取和释放每个表上的租约.</p>
-<h3><span id="初始distsql用到的temp-engine">初始DistSQL用到的temp engine</span></h3>
+<h3><span id="chu-shi-distsql-yong-dao-de-temp-engine">初始DistSQL用到的temp engine</span></h3>
 <p><code>pkg/server/server.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tempEngine, err := engine.NewTempEngine(s.cfg.TempStorageConfig)</div></pre></td></tr></table></figure>
-<h3><span id="初始化ts-server">初始化ts server</span></h3>
+<h3><span id="chu-shi-hua-ts-server">初始化ts server</span></h3>
 <p><code>pkg/server/server.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">s.tsDB = ts.NewDB(s.db, s.cfg.Settings)</div><div class="line">s.tsServer = ts.MakeServer(s.cfg.AmbientCtx, s.tsDB, s.cfg.TimeSeriesServerConfig, s.stopper)</div></pre></td></tr></table></figure>
 <p>tsDB是一个内部的时序数据库，tsServer对tsDB进行存取操作</p>
-<h3><span id="生成node实例">生成Node实例</span></h3>
+<h3><span id="sheng-cheng-node-shi-li">生成Node实例</span></h3>
 <p><code>pkg/server/server.go</code><br>
 <code>pkg/server/node.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">s.node = NewNode(storeCfg, s.recorder, s.registry, s.stopper, txnMetrics, sql.MakeEventLogger(s.leaseMgr))</div><div class="line">roachpb.RegisterInternalServer(s.grpc, s.node)</div><div class="line">storage.RegisterConsistencyServer(s.grpc, s.node.storesServer)</div><div class="line">serverpb.RegisterInitServer(s.grpc, &amp;noopInitServer&#123;clusterID: s.ClusterID&#125;)</div></pre></td></tr></table></figure>
@@ -512,32 +512,32 @@
 <li>注册ConsistencySerice</li>
 <li>注册InitService</li>
 </ol>
-<h3><span id="注册distsqlserver">注册DistSQLServer</span></h3>
+<h3><span id="zhu-ce-distsqlserver">注册DistSQLServer</span></h3>
 <p><code>pkg/server/server.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">s.distSQLServer = distsqlrun.NewServer(ctx, distSQLCfg)</div><div class="line">distsqlrun.RegisterDistSQLServer(s.grpc, s.distSQLServer)</div></pre></td></tr></table></figure>
 <p><code>pkg/sql/distsqlrun/api.proto</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">service DistSQL &#123;</div><div class="line">  <span class="comment">// RunSyncFlow instantiates a flow and streams back results of that flow.</span></div><div class="line">  <span class="comment">// The request must contain one flow, and that flow must have a single mailbox</span></div><div class="line">  <span class="comment">// of the special sync response type.</span></div><div class="line">  rpc RunSyncFlow(stream ConsumerSignal) returns (stream ProducerMessage) &#123;&#125;</div><div class="line"></div><div class="line">  <span class="comment">// SetupFlow instantiates a flow (subgraphs of a distributed SQL</span></div><div class="line">  <span class="comment">// computation) on the receiving node.</span></div><div class="line">  rpc SetupFlow(SetupFlowRequest) returns (SimpleResponse) &#123;&#125;</div><div class="line"></div><div class="line">  <span class="comment">// FlowStream is used to push a stream of messages that is part of a flow. The</span></div><div class="line">  <span class="comment">// first message will have a StreamHeader which identifies the flow and the</span></div><div class="line">  <span class="comment">// stream (mailbox).</span></div><div class="line">  <span class="comment">//</span></div><div class="line">  <span class="comment">// The response is a stream that the consumer uses to perform a handshake and</span></div><div class="line">  <span class="comment">// to signal the producer when it wants it to start draining. The client (i.e.</span></div><div class="line">  <span class="comment">// the producer) will read from this consumer-&gt;producer stream until it has</span></div><div class="line">  <span class="comment">// sent everything it needs to send and it performs CloseSend() on the</span></div><div class="line">  <span class="comment">// producer-&gt;consumer stream; after that point the producer isn't listening</span></div><div class="line">  <span class="comment">// for consumer signals any more.</span></div><div class="line">  rpc FlowStream(stream ProducerMessage) returns (stream ConsumerSignal) &#123;&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3><span id="设置executor">设置Executor</span></h3>
+<h3><span id="she-zhi-executor">设置Executor</span></h3>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">s.sqlExecutor = sql.NewExecutor(execCfg, s.stopper)</div></pre></td></tr></table></figure>
-<h3><span id="设置pg-server">设置pg server</span></h3>
+<h3><span id="she-zhi-pg-server">设置pg server</span></h3>
 <p><code>pkg/server/server.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">s.pgServer = pgwire.MakeServer(</div><div class="line">	s.cfg.AmbientCtx,</div><div class="line">	s.cfg.Config,</div><div class="line">	s.sqlExecutor,</div><div class="line">	&amp;s.internalMemMetrics,</div><div class="line">	&amp;rootSQLMemoryMonitor,</div><div class="line">	s.cfg.HistogramWindowInterval(),</div><div class="line">)</div></pre></td></tr></table></figure>
 <p>用于处理客户端连接的请求.</p>
 <h2><span id="start">Start</span></h2>
 <p><code>pkg/cli/start.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> err := s.Start(ctx); err != <span class="literal">nil</span> &#123;</div></pre></td></tr></table></figure>
-<h3><span id="启动httpserver端口8080">启动httpserver端口8080</span></h3>
+<h3><span id="qi-dong-httpserver-duan-kou-8080">启动httpserver端口8080</span></h3>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">httpServer := netutil.MakeServer(s.stopper, tlsConfig, s)</div><div class="line"></div><div class="line">httpLn, err := net.Listen(<span class="string">"tcp"</span>, s.cfg.HTTPAddr)</div><div class="line"></div><div class="line">s.mux.Handle(adminPrefix, authHandler)</div><div class="line">s.mux.Handle(ts.URLPrefix, authHandler)</div><div class="line">s.mux.Handle(statusPrefix, authHandler)</div><div class="line">s.mux.Handle(authPrefix, gwMux)</div><div class="line">s.mux.Handle(<span class="string">"/health"</span>, gwMux)</div><div class="line">s.mux.Handle(statusVars, http.HandlerFunc(s.status.handleVars))</div><div class="line"></div><div class="line">   ...</div><div class="line">s.stopper.RunWorker(workersCtx, <span class="function"><span class="keyword">func</span><span class="params">(context.Context)</span></span> &#123;</div><div class="line">	netutil.FatalIfUnexpected(httpServer.Serve(httpLn))</div><div class="line">&#125;)</div></pre></td></tr></table></figure>
 <p>注册一些服务到8080http服务。</p>
-<h3><span id="启动tcp-server-端口26257">启动tcp server 端口26257</span></h3>
+<h3><span id="qi-dong-tcp-server-duan-kou-26257">启动tcp server 端口26257</span></h3>
 <p><code>pkg/server/server.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">ln, err := net.Listen(<span class="string">"tcp"</span>, s.cfg.Addr)</div><div class="line"></div><div class="line">m := cmux.New(ln)</div><div class="line">initL := m.Match(<span class="function"><span class="keyword">func</span><span class="params">(_ io.Reader)</span> <span class="title">bool</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> atomic.LoadInt32(&amp;initLActive) != <span class="number">0</span></div><div class="line">&#125;)</div><div class="line"></div><div class="line">pgL := m.Match(pgwire.Match)</div><div class="line">anyL := m.Match(cmux.Any())</div><div class="line">   ...</div><div class="line">	serveOnMux.Do(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		<span class="comment">// A cmux can't gracefully shut down without Serve being called on it.</span></div><div class="line">		netutil.FatalIfUnexpected(m.Serve())</div><div class="line">	&#125;)</div><div class="line"></div><div class="line">       <span class="comment">//监听init服务</span></div><div class="line">	initServer := newInitServer(s)</div><div class="line">	initServer.serve(ctx, initL)</div><div class="line"></div><div class="line">       <span class="comment">//监听pg连接</span></div><div class="line">	netutil.FatalIfUnexpected(httpServer.ServeWith(pgCtx, s.stopper, pgL, <span class="function"><span class="keyword">func</span><span class="params">(conn net.Conn)</span></span> &#123;</div><div class="line">		connCtx := log.WithLogTagStr(pgCtx, <span class="string">"client"</span>, conn.RemoteAddr().String())</div><div class="line"></div><div class="line">   <span class="comment">//监听rpc服务</span></div><div class="line">s.stopper.RunWorker(workersCtx, <span class="function"><span class="keyword">func</span><span class="params">(context.Context)</span></span> &#123;</div><div class="line">	netutil.FatalIfUnexpected(s.grpc.Serve(anyL))</div><div class="line">&#125;)</div></pre></td></tr></table></figure>
 <p>启动26247端口监控，多路复用监听，分别监听init，pg，以及rpc通信。</p>
-<h3><span id="启动gossip">启动gossip</span></h3>
+<h3><span id="qi-dong-gossip">启动gossip</span></h3>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">filtered := s.cfg.FilterGossipBootstrapResolvers(ctx, unresolvedListenAddr, unresolvedAdvertAddr)</div><div class="line">s.gossip.Start(unresolvedAdvertAddr, filtered)</div></pre></td></tr></table></figure>
-<h3><span id="初始化rocksdb数据节点">初始化rocksdb数据节点</span></h3>
+<h3><span id="chu-shi-hua-rocksdb-shu-ju-jie-dian">初始化rocksdb数据节点</span></h3>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">s.engines, err = s.cfg.CreateEngines(ctx)</div></pre></td></tr></table></figure>
-<h3><span id="写3个addr文件">写3个addr文件</span></h3>
+<h3><span id="xie-3-ge-addr-wen-jian">写3个addr文件</span></h3>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">➜  node1 cat cockroach.http-addr</div><div class="line">localhost:8080</div><div class="line">➜  node1 cat cockroach.listen-addr</div><div class="line">localhost:26257</div></pre></td></tr></table></figure>
 <h3><span id="inspectengines">inspectEngines</span></h3>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> bootstrappedEngines, _, _, err := inspectEngines(ctx, s.engines, s.cfg.Settings.Version.MinSupportedVersion, s.cfg.Settings.Version.ServerVersion); err != <span class="literal">nil</span> &#123;</div></pre></td></tr></table></figure>
@@ -555,15 +555,15 @@
 <li>为每个range生成replica结构</li>
 <li>启动后台raft goroutine</li>
 </ol>
-<h3><span id="启动执行器">启动执行器</span></h3>
+<h3><span id="qi-dong-zhi-xing-qi">启动执行器</span></h3>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">s.sqlExecutor.Start(ctx, &amp;s.adminMemMetrics, distSQLPlanner)</div><div class="line">s.distSQLServer.Start()</div></pre></td></tr></table></figure>
 <ol>
 <li>Executor注册systemconfig channel,等待更新系统配置</li>
 <li>distSQLServer等待flow命令</li>
 </ol>
-<h3><span id="等待用户链接">等待用户链接</span></h3>
+<h3><span id="deng-dai-yong-hu-lian-jie">等待用户链接</span></h3>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> err := s.pgServer.ServeConn(connCtx, conn); err != <span class="literal">nil</span> &amp;&amp; !netutil.IsClosedConnection(err) &#123;</div><div class="line">	<span class="comment">// Report the error on this connection's context, so that we</span></div></pre></td></tr></table></figure>
-<h2><span id="创建errchan-挂起主进程">创建errchan, 挂起主进程</span></h2>
+<h2><span id="chuang-jian-errchan-gua-qi-zhu-jin-cheng">创建errchan, 挂起主进程</span></h2>
 <p>等待各种信号，用于退出</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">   errChan := make(chan error, 1)</div><div class="line"></div><div class="line">   select &#123;</div><div class="line">case err := &lt;-errChan:</div><div class="line">case &lt;-stopper.ShouldStop():</div><div class="line">case sig := &lt;-signalCh:</div></pre></td></tr></table></figure>
 
