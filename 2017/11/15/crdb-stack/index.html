@@ -82,7 +82,7 @@
 <link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="cockroachdb,stack," />
+  <meta name="keywords" content="cockroachdb,stack,kv,sql," />
 
 
 
@@ -98,18 +98,18 @@
 
 
 
-<meta name="description" content="session默认事务隔离级别 pkg/storage/engine/enginepb/mvcc3.pb.go 1234567891011type IsolationType int32const (	SERIALIZABLE IsolationType = 0	SNAPSHOT     IsolationType = 1)var IsolationType_name = map[int32]st">
-<meta name="keywords" content="cockroachdb,stack">
+<meta name="description" content="跟踪insert和select语句对应的从sql层到kv层的调度堆栈">
+<meta name="keywords" content="cockroachdb,stack,kv,sql">
 <meta property="og:type" content="article">
-<meta property="og:title" content="crdb代码相关堆栈">
+<meta property="og:title" content="crdb代码sql到kv调用堆栈">
 <meta property="og:url" content="http://yoursite.com/2017/11/15/crdb-stack/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="session默认事务隔离级别 pkg/storage/engine/enginepb/mvcc3.pb.go 1234567891011type IsolationType int32const (	SERIALIZABLE IsolationType = 0	SNAPSHOT     IsolationType = 1)var IsolationType_name = map[int32]st">
+<meta property="og:description" content="跟踪insert和select语句对应的从sql层到kv层的调度堆栈">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-11-17T07:34:09.000Z">
+<meta property="og:updated_time" content="2017-11-17T07:43:06.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="crdb代码相关堆栈">
-<meta name="twitter:description" content="session默认事务隔离级别 pkg/storage/engine/enginepb/mvcc3.pb.go 1234567891011type IsolationType int32const (	SERIALIZABLE IsolationType = 0	SNAPSHOT     IsolationType = 1)var IsolationType_name = map[int32]st">
+<meta name="twitter:title" content="crdb代码sql到kv调用堆栈">
+<meta name="twitter:description" content="跟踪insert和select语句对应的从sql层到kv层的调度堆栈">
 
 
 
@@ -144,7 +144,7 @@
 
 
 
-  <title>crdb代码相关堆栈 | 小贝壳爸爸</title>
+  <title>crdb代码sql到kv调用堆栈 | 小贝壳爸爸</title>
   
 
 
@@ -298,7 +298,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">crdb代码相关堆栈</h1>
+          <h1 class="post-title" itemprop="name headline">crdb代码sql到kv调用堆栈</h1>
         
 
         <div class="post-meta">
@@ -370,17 +370,8 @@
       
 
       
-        <h2><span id="session-mo-ren-shi-wu-ge-chi-ji-bie">session默认事务隔离级别</span></h2>
-<p><code>pkg/storage/engine/enginepb/mvcc3.pb.go</code></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> IsolationType <span class="keyword">int32</span></div><div class="line"></div><div class="line"><span class="keyword">const</span> (</div><div class="line">	SERIALIZABLE IsolationType = <span class="number">0</span></div><div class="line">	SNAPSHOT     IsolationType = <span class="number">1</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">var</span> IsolationType_name = <span class="keyword">map</span>[<span class="keyword">int32</span>]<span class="keyword">string</span>&#123;</div><div class="line">	<span class="number">0</span>: <span class="string">"SERIALIZABLE"</span>,</div><div class="line">	<span class="number">1</span>: <span class="string">"SNAPSHOT"</span>,</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+        <p>跟踪insert和select语句对应的从sql层到kv层的调度堆栈</p>
 <a id="more"></a>
-<p><code>pkg/sql/pgwire/v3.go</code><br>
-<code>pkg/sql/session.go</code></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewSession</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ctx context.Context, args SessionArgs, e *Executor, remote net.Addr, memMetrics *MemoryMetrics,</span></span></div><div class="line"><span class="function"><span class="params">)</span> *<span class="title">Session</span></span> &#123;</div><div class="line">	ctx = e.AnnotateCtx(ctx)</div><div class="line">	distSQLMode := DistSQLExecMode(DistSQLClusterExecMode.Get(&amp;e.cfg.Settings.SV))</div><div class="line"></div><div class="line">	s := &amp;Session&#123;</div><div class="line">		Database:              args.Database,</div><div class="line">		DefaultIsolationLevel: enginepb.SNAPSHOT,</div><div class="line">		DistSQLMode:           distSQLMode,</div><div class="line">		SearchPath:            sqlbase.DefaultSearchPath,</div><div class="line">		Location:              time.UTC,</div><div class="line">		User:                  args.User,</div><div class="line">		virtualSchemas:        e.virtualSchemas,</div><div class="line">		execCfg:               &amp;e.cfg,</div></pre></td></tr></table></figure>
-<p>初始化session时，不指定DefaultIsolationLevel，即DefaultIsolationLevel=0.</p>
-<p><code>pkg/sql/executor.go</code></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">txnState.resetForNewSQLTxn(</div><div class="line">	e, session,</div><div class="line">	autoCommit, <span class="comment">/* implicitTxn */</span></div><div class="line">	<span class="literal">false</span>,      <span class="comment">/* retryIntent */</span></div><div class="line">	e.cfg.Clock.PhysicalTime(), <span class="comment">/* sqlTimestamp */</span></div><div class="line">	session.DefaultIsolationLevel,</div><div class="line">	roachpb.NormalUserPriority,</div><div class="line">)</div></pre></td></tr></table></figure>
-<p>执行语句之前，如果语句不在trx中，则reset其隔离级别为session.DefaultIsolationLevel</p>
 <h2><span id="insert-into-t1-values-1-cong-qing-qiu-dao-kv-rpc-dui-zhan">insert into t1 values(1) 从请求到kv rpc堆栈</span></h2>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div></pre></td><td class="code"><pre><div class="line"> <span class="number">0</span>  <span class="number">0x00000000057d</span>7b43 in github.com/cockroachdb/cockroach/pkg/server.(*Node).batchInternal.func1</div><div class="line">    at ./pkg/server/node.<span class="keyword">go</span>:<span class="number">851</span></div><div class="line"> <span class="number">1</span>  <span class="number">0x0000000004aacf</span>e8 in github.com/cockroachdb/cockroach/pkg/util/stop.(*Stopper).RunTaskWithErr</div><div class="line">    at ./pkg/util/stop/stopper.<span class="keyword">go</span>:<span class="number">246</span></div><div class="line"> <span class="number">2</span>  <span class="number">0x00000000057bc9a2</span> in github.com/cockroachdb/cockroach/pkg/server.(*Node).batchInternal</div><div class="line">    at ./pkg/server/node.<span class="keyword">go</span>:<span class="number">837</span></div><div class="line"> <span class="number">3</span>  <span class="number">0x00000000057bcd</span>2c in github.com/cockroachdb/cockroach/pkg/server.(*Node).Batch</div><div class="line">    at ./pkg/server/node.<span class="keyword">go</span>:<span class="number">878</span></div><div class="line"> <span class="number">4</span>  <span class="number">0x00000000054dbd</span>76 in github.com/cockroachdb/cockroach/pkg/kv.(*grpcTransport).send.func1</div><div class="line">    at ./pkg/kv/transport.<span class="keyword">go</span>:<span class="number">229</span></div><div class="line"> <span class="number">5</span>  <span class="number">0x00000000054cf</span>a7c in github.com/cockroachdb/cockroach/pkg/kv.(*grpcTransport).send</div><div class="line">    at ./pkg/kv/transport.<span class="keyword">go</span>:<span class="number">242</span></div><div class="line"> <span class="number">6</span>  <span class="number">0x00000000054cf</span>613 in github.com/cockroachdb/cockroach/pkg/kv.(*grpcTransport).SendNext</div><div class="line">    at ./pkg/kv/transport.<span class="keyword">go</span>:<span class="number">194</span></div><div class="line"> <span class="number">7</span>  <span class="number">0x00000000054c50b0</span> in github.com/cockroachdb/cockroach/pkg/kv.(*DistSender).sendToReplicas</div><div class="line">    at ./pkg/kv/dist_sender.<span class="keyword">go</span>:<span class="number">1229</span></div><div class="line"> <span class="number">8</span>  <span class="number">0x00000000054bd7bf</span> in github.com/cockroachdb/cockroach/pkg/kv.(*DistSender).sendRPC</div><div class="line">    at ./pkg/kv/dist_sender.<span class="keyword">go</span>:<span class="number">383</span></div><div class="line"> <span class="number">9</span>  <span class="number">0x00000000054bd</span>e64 in github.com/cockroachdb/cockroach/pkg/kv.(*DistSender).sendSingleRange</div><div class="line">    at ./pkg/kv/dist_sender.<span class="keyword">go</span>:<span class="number">447</span></div><div class="line"><span class="number">10</span>  <span class="number">0x00000000054c2608</span> in github.com/cockroachdb/cockroach/pkg/kv.(*DistSender).sendPartialBatch</div><div class="line">    at ./pkg/kv/dist_sender.<span class="keyword">go</span>:<span class="number">1013</span></div><div class="line"><span class="number">11</span>  <span class="number">0x00000000054c1b0b</span> in github.com/cockroachdb/cockroach/pkg/kv.(*DistSender).divideAndSendBatchToRanges</div><div class="line">    at ./pkg/kv/dist_sender.<span class="keyword">go</span>:<span class="number">689</span></div><div class="line"><span class="number">12</span>  <span class="number">0x00000000054bf76d</span> in github.com/cockroachdb/cockroach/pkg/kv.(*DistSender).Send</div><div class="line">    at ./pkg/kv/dist_sender.<span class="keyword">go</span>:<span class="number">619</span></div><div class="line"><span class="number">13</span>  <span class="number">0x00000000054d2f</span>75 in github.com/cockroachdb/cockroach/pkg/kv.(*TxnCoordSender).Send</div><div class="line">    at ./pkg/kv/txn_coord_sender.<span class="keyword">go</span>:<span class="number">444</span></div><div class="line"><span class="number">14</span>  <span class="number">0x0000000004b4a336</span> in github.com/cockroachdb/cockroach/pkg/internal/client.(*DB).send</div><div class="line">    at ./pkg/internal/client/db.<span class="keyword">go</span>:<span class="number">551</span></div><div class="line"><span class="number">15</span>  <span class="number">0x0000000004b58f</span>c1 in github.com/cockroachdb/cockroach/pkg/internal/client.(*Txn).Send</div><div class="line">    at ./pkg/internal/client/txn.<span class="keyword">go</span>:<span class="number">959</span></div><div class="line"><span class="number">16</span>  <span class="number">0x0000000004b5ee06</span> in github.com/cockroachdb/cockroach/pkg/internal/client.(*Txn).Send-fm</div><div class="line">    at ./pkg/internal/client/txn.<span class="keyword">go</span>:<span class="number">510</span></div><div class="line"><span class="number">17</span>  <span class="number">0x0000000004b497f</span>3 in github.com/cockroachdb/cockroach/pkg/internal/client.sendAndFill</div><div class="line">    at ./pkg/internal/client/db.<span class="keyword">go</span>:<span class="number">457</span></div><div class="line"><span class="number">18</span>  <span class="number">0x0000000004b55e3d</span> in github.com/cockroachdb/cockroach/pkg/internal/client.(*Txn).Run</div><div class="line">    at ./pkg/internal/client/txn.<span class="keyword">go</span>:<span class="number">510</span></div><div class="line"><span class="number">19</span>  <span class="number">0x0000000004b56815</span> in github.com/cockroachdb/cockroach/pkg/internal/client.(*Txn).CommitInBatch</div><div class="line">    at ./pkg/internal/client/txn.<span class="keyword">go</span>:<span class="number">575</span></div><div class="line"><span class="number">20</span>  <span class="number">0x00000000056ad</span>b85 in github.com/cockroachdb/cockroach/pkg/sql.(*tableInserter).finalize</div><div class="line">    at ./pkg/sql/tablewriter.<span class="keyword">go</span>:<span class="number">123</span></div><div class="line"><span class="number">21</span>  <span class="number">0x00000000056494d</span>2 in github.com/cockroachdb/cockroach/pkg/sql.(*insertNode).internalNext</div><div class="line">    at ./pkg/sql/insert.<span class="keyword">go</span>:<span class="number">357</span></div><div class="line"><span class="number">22</span>  <span class="number">0x0000000005649276</span> in github.com/cockroachdb/cockroach/pkg/sql.(*insertNode).Next</div><div class="line">    at ./pkg/sql/insert.<span class="keyword">go</span>:<span class="number">333</span></div><div class="line"><span class="number">23</span>  <span class="number">0x000000000561e6f</span>6 in github.com/cockroachdb/cockroach/pkg/sql.forEachRow</div><div class="line">    at ./pkg/sql/executor.<span class="keyword">go</span>:<span class="number">2026</span></div><div class="line"><span class="number">24</span>  <span class="number">0x000000000561e897</span> in github.com/cockroachdb/cockroach/pkg/sql.countRowsAffected</div><div class="line">    at ./pkg/sql/executor.<span class="keyword">go</span>:<span class="number">2049</span></div><div class="line"><span class="number">25</span>  <span class="number">0x000000000561e572</span> in github.com/cockroachdb/cockroach/pkg/sql.(*Executor).execClassic</div><div class="line">    at ./pkg/sql/executor.<span class="keyword">go</span>:<span class="number">1995</span></div><div class="line"><span class="number">26</span>  <span class="number">0x000000000561f</span>529 in github.com/cockroachdb/cockroach/pkg/sql.(*Executor).execStmt</div><div class="line">    at ./pkg/sql/executor.<span class="keyword">go</span>:<span class="number">2156</span></div><div class="line"><span class="number">27</span>  <span class="number">0x000000000561c7ba</span> in github.com/cockroachdb/cockroach/pkg/sql.(*Executor).execStmtInOpenTxn</div><div class="line">    at ./pkg/sql/executor.<span class="keyword">go</span>:<span class="number">1795</span></div><div class="line"><span class="number">28</span>  <span class="number">0x000000000561af</span>78 in github.com/cockroachdb/cockroach/pkg/sql.(*Executor).execSingleStatement</div><div class="line">    at ./pkg/sql/executor.<span class="keyword">go</span>:<span class="number">1315</span></div><div class="line"><span class="number">29</span>  <span class="number">0x000000000561a45c</span> in github.com/cockroachdb/cockroach/pkg/sql.runTxnAttempt</div><div class="line">    at ./pkg/sql/executor.<span class="keyword">go</span>:<span class="number">1190</span></div><div class="line"><span class="number">30</span>  <span class="number">0x00000000056191bc</span> in github.com/cockroachdb/cockroach/pkg/sql.runWithAutoRetry</div><div class="line">    at ./pkg/sql/executor.<span class="keyword">go</span>:<span class="number">1016</span></div><div class="line"><span class="number">31</span>  <span class="number">0x0000000005617f</span>3e in github.com/cockroachdb/cockroach/pkg/sql.(*Executor).execParsed</div><div class="line">    at ./pkg/sql/executor.<span class="keyword">go</span>:<span class="number">833</span></div><div class="line"><span class="number">32</span>  <span class="number">0x0000000005617aa1</span> in github.com/cockroachdb/cockroach/pkg/sql.(*Executor).execRequest</div><div class="line">    at ./pkg/sql/executor.<span class="keyword">go</span>:<span class="number">744</span></div><div class="line"><span class="number">33</span>  <span class="number">0x0000000005616ecb</span> in github.com/cockroachdb/cockroach/pkg/sql.(*Executor).ExecuteStatements</div><div class="line">    at ./pkg/sql/executor.<span class="keyword">go</span>:<span class="number">629</span></div><div class="line"><span class="number">34</span>  <span class="number">0x0000000005777ec7</span> in github.com/cockroachdb/cockroach/pkg/sql/pgwire.(*v3Conn).handleSimpleQuery</div><div class="line">    at ./pkg/sql/pgwire/v3.<span class="keyword">go</span>:<span class="number">622</span></div><div class="line"><span class="number">35</span>  <span class="number">0x0000000005777024</span> in github.com/cockroachdb/cockroach/pkg/sql/pgwire.(*v3Conn).serve</div><div class="line">    at ./pkg/sql/pgwire/v3.<span class="keyword">go</span>:<span class="number">511</span></div><div class="line"><span class="number">36</span>  <span class="number">0x000000000576d</span>e53 in github.com/cockroachdb/cockroach/pkg/sql/pgwire.(*Server).ServeConn</div><div class="line">    at ./pkg/sql/pgwire/server.<span class="keyword">go</span>:<span class="number">422</span></div><div class="line"><span class="number">37</span>  <span class="number">0x00000000057d</span>9e39 in github.com/cockroachdb/cockroach/pkg/server.(*Server).Start.func17<span class="number">.1</span></div><div class="line">    at ./pkg/server/server.<span class="keyword">go</span>:<span class="number">1188</span></div><div class="line"><span class="number">38</span>  <span class="number">0x0000000004e6dabf</span> in github.com/cockroachdb/cockroach/pkg/util/netutil.(*Server).ServeWith.func1</div></pre></td></tr></table></figure>
 <h2><span id="select-from-t1-dao-kv-ceng-mian-dui-zhan">select * from t1 到kv层面堆栈</span></h2>
@@ -402,7 +393,7 @@
   <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
   <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
-  <p><span>本文标题:</span><a href="/2017/11/15/crdb-stack/">crdb代码相关堆栈</a></p>
+  <p><span>本文标题:</span><a href="/2017/11/15/crdb-stack/">crdb代码sql到kv调用堆栈</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2017年11月15日 - 14:11</p>
   <p><span>最后更新:</span>2017年11月17日 - 15:11</p>
@@ -428,6 +419,10 @@
           
             <a href="/tags/stack/" rel="tag"># stack</a>
           
+            <a href="/tags/kv/" rel="tag"># kv</a>
+          
+            <a href="/tags/sql/" rel="tag"># sql</a>
+          
         </div>
       
 
@@ -449,8 +444,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/11/15/crdb-set-session-vars/" rel="prev" title="crdb session变量的维护">
-                crdb session变量的维护 <i class="fa fa-chevron-right"></i>
+              <a href="/2017/11/15/crdb-set-session-vars/" rel="prev" title="crdb session变量维护堆栈">
+                crdb session变量维护堆栈 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -550,7 +545,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">66</span>
+                <span class="site-state-item-count">68</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -598,7 +593,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">session默认事务隔离级别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">insert into t1 values(1) 从请求到kv rpc堆栈</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">select * from t1 到kv层面堆栈</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">insert into t1 values(1) 从请求到kv rpc堆栈</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">select * from t1 到kv层面堆栈</span></a></li></ol></div>
             
 
           </div>

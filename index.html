@@ -300,7 +300,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/11/15/crdb-set-session-vars/" itemprop="url">crdb session变量的维护</a></h1>
+                <a class="post-title-link" href="/2017/11/15/crdb-set-session-vars/" itemprop="url">crdb session变量维护堆栈</a></h1>
         
 
         <div class="post-meta">
@@ -373,7 +373,9 @@
 
       
         
-          <h2 id="set-default-transaction-isolation-serializable"><a class="header-anchor" href="#set-default-transaction-isolation-serializable"></a>set default_transaction_isolation=‘SERIALIZABLE’</h2>
+          <h2 id="session-mo-ren-shi-wu-ge-chi-ji-bie"><a class="header-anchor" href="#session默认事务隔离级别"></a>session默认事务隔离级别</h2>
+<p><code>pkg/storage/engine/enginepb/mvcc3.pb.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> IsolationType <span class="keyword">int32</span></div><div class="line"></div><div class="line"><span class="keyword">const</span> (</div><div class="line">	SERIALIZABLE IsolationType = <span class="number">0</span></div><div class="line">	SNAPSHOT     IsolationType = <span class="number">1</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">var</span> IsolationType_name = <span class="keyword">map</span>[<span class="keyword">int32</span>]<span class="keyword">string</span>&#123;</div><div class="line">	<span class="number">0</span>: <span class="string">"SERIALIZABLE"</span>,</div><div class="line">	<span class="number">1</span>: <span class="string">"SNAPSHOT"</span>,</div><div class="line">&#125;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/11/15/crdb-set-session-vars/#more" rel="contents">
@@ -449,7 +451,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/11/15/crdb-stack/" itemprop="url">crdb代码相关堆栈</a></h1>
+                <a class="post-title-link" href="/2017/11/15/crdb-stack/" itemprop="url">crdb代码sql到kv调用堆栈</a></h1>
         
 
         <div class="post-meta">
@@ -522,9 +524,7 @@
 
       
         
-          <h2 id="session-mo-ren-shi-wu-ge-chi-ji-bie"><a class="header-anchor" href="#session默认事务隔离级别"></a>session默认事务隔离级别</h2>
-<p><code>pkg/storage/engine/enginepb/mvcc3.pb.go</code></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> IsolationType <span class="keyword">int32</span></div><div class="line"></div><div class="line"><span class="keyword">const</span> (</div><div class="line">	SERIALIZABLE IsolationType = <span class="number">0</span></div><div class="line">	SNAPSHOT     IsolationType = <span class="number">1</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">var</span> IsolationType_name = <span class="keyword">map</span>[<span class="keyword">int32</span>]<span class="keyword">string</span>&#123;</div><div class="line">	<span class="number">0</span>: <span class="string">"SERIALIZABLE"</span>,</div><div class="line">	<span class="number">1</span>: <span class="string">"SNAPSHOT"</span>,</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+          <p>跟踪insert和select语句对应的从sql层到kv层的调度堆栈</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/11/15/crdb-stack/#more" rel="contents">
@@ -1863,7 +1863,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">66</span>
+                <span class="site-state-item-count">68</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
