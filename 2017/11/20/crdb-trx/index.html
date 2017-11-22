@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link href="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+  
+
+<link href="//cdn.staticfile.org/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="session.txnState初始化 如果当前session不在事务中，则reset session的txnState pkg/sql/executor.go 1234567txnState.resetForNewSQLTxn(	e, session,	autoCommit, /* implicitTxn */	false,      /* retryIntent */	e.cfg.Clock.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="crdb-trx">
+<meta property="og:url" content="http://yoursite.com/2017/11/20/crdb-trx/index.html">
+<meta property="og:site_name" content="小贝壳爸爸">
+<meta property="og:description" content="session.txnState初始化 如果当前session不在事务中，则reset session的txnState pkg/sql/executor.go 1234567txnState.resetForNewSQLTxn(	e, session,	autoCommit, /* implicitTxn */	false,      /* retryIntent */	e.cfg.Clock.">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-11-21T09:00:42.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="crdb-trx">
+<meta name="twitter:description" content="session.txnState初始化 如果当前session不在事务中，则reset session的txnState pkg/sql/executor.go 1234567txnState.resetForNewSQLTxn(	e, session,	autoCommit, /* implicitTxn */	false,      /* retryIntent */	e.cfg.Clock.">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/11/20/crdb-trx/"/>
+
+
+
+
+
+  <title>crdb-trx | 小贝壳爸爸</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小贝壳爸爸</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">天桥扛把子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/20/crdb-trx/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">crdb-trx</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-20T14:36:50+08:00">
+                2017-11-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2><span id="session-txnstate-chu-shi-hua">session.txnState初始化</span></h2>
+<h3><span id="ru-guo-dang-qian-session-bu-zai-shi-wu-zhong-ze-reset-session-de-txnstate">如果当前session不在事务中，则reset session的txnState</span></h3>
+<p><code>pkg/sql/executor.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">txnState.resetForNewSQLTxn(</div><div class="line">	e, session,</div><div class="line">	autoCommit, <span class="comment">/* implicitTxn */</span></div><div class="line">	<span class="literal">false</span>,      <span class="comment">/* retryIntent */</span></div><div class="line">	e.cfg.Clock.PhysicalTime(), <span class="comment">/* sqlTimestamp */</span></div><div class="line">	session.DefaultIsolationLevel,</div><div class="line">	roachpb.NormalUserPriority,</div></pre></td></tr></table></figure>
+<h3><span id="resetfornewsqltxn-sheng-cheng-internal-txn">resetForNewSQLTxn 生成internal txn</span></h3>
+<p><code>pkg/sql/session.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ts *txnState)</span> <span class="title">resetForNewSQLTxn</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params"></span></span></div><div class="line"><span class="function"><span class="params">	ts.retryIntent = retryIntent</span></span></div><div class="line"><span class="function"><span class="params">	// Reset state vars to defaults.</span></span></div><div class="line"><span class="function"><span class="params">	ts.commitSeen = <span class="literal">false</span></span></span></div><div class="line"><span class="function"><span class="params">	ts.sqlTimestamp = sqlTimestamp</span></span></div><div class="line"><span class="function"><span class="params">	ts.implicitTxn = implicitTxn</span></span></div><div class="line"><span class="function"><span class="params">	ts.txnResults = s.ResultsWriter.NewResultsGroup()</span></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function">    //设置状态为<span class="title">AutoRetry</span></span></div><div class="line"><span class="function">	<span class="title">ts</span>.<span class="title">SetState</span><span class="params">(AutoRetry)</span></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function">    // 生成<span class="title">internal</span> <span class="title">txn</span></span></div><div class="line"><span class="function">	<span class="title">ts</span>.<span class="title">mu</span>.<span class="title">txn</span> = <span class="title">client</span>.<span class="title">NewTxn</span><span class="params">(e.cfg.DB, e.cfg.NodeID.Get()</span>)</span></div></pre></td></tr></table></figure>
+<h3><span id="e-cfg-db-de-lai-yuan">e.cfg.DB的来源</span></h3>
+<p><code>pkg/server/server.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">NewServer</div><div class="line"></div><div class="line">    s.db = client.NewDB(s.txnCoordSender, s.clock)</div><div class="line"></div><div class="line">	execCfg := sql.ExecutorConfig&#123;</div><div class="line">		Settings:                s.st,</div><div class="line">		NodeInfo:                nodeInfo,</div><div class="line">		AmbientCtx:              s.cfg.AmbientCtx,</div><div class="line">		DB:                      s.db,</div><div class="line">		Gossip:                  s.gossip,</div><div class="line">		DistSender:              s.distSender,</div><div class="line">	</div><div class="line">	s.sqlExecutor = sql.NewExecutor(execCfg, s.stopper)</div></pre></td></tr></table></figure>
+<h3><span id="server-chu-shi-hua-de-clock-fu-zhi-gei-suo-you-de-qi-ta-shi-yong-clock-de-di-fang">server初始化的clock, 赋值给所有的其它使用clock的地方</span></h3>
+<p><code>pkg/server/server.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">s := &amp;Server&#123;</div><div class="line">	st:       st,</div><div class="line">	mux:      http.NewServeMux(),</div><div class="line">	clock:    hlc.NewClock(hlc.UnixNano, time.Duration(cfg.MaxOffset)),</div><div class="line">	stopper:  stopper,</div><div class="line">	cfg:      cfg,</div><div class="line">	registry: metric.NewRegistry(),</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>pkg/base/constants.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">DefaultMaxClockOffset = <span class="number">500</span> * time.Millisecond</div></pre></td></tr></table></figure>
+<p>默认max clock offset是500ms</p>
+<h2><span id="begin-she-zhi-shi-wu-zhuang-tai">begin设置事务状态</span></h2>
+<p><code>pkg/sql/txn.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *planner)</span> <span class="title">BeginTransaction</span><span class="params">(n *parser.BeginTransaction)</span> <span class="params">(planNode, error)</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> p.session.TxnState.State() != AutoRetry || p.txn == <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, errors.Errorf(<span class="string">"the server should have already created a transaction. "</span>+</div><div class="line">			<span class="string">"state: %s"</span>, p.session.TxnState.State())</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> err := p.setTransactionModes(n.Modes); err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> &amp;zeroNode&#123;&#125;, <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2><span id="transaction-record">transaction record</span></h2>
+<p><code>pkg/internal/client/txn.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">needBeginTxn = !(txn.mu.Proto.Writing || txn.mu.writingTxnRecord) &amp;&amp; haveTxnWrite</div><div class="line">needEndTxn := txn.mu.Proto.Writing || txn.mu.writingTxnRecord || haveTxnWrite</div><div class="line">elideEndTxn = haveEndTxn &amp;&amp; !needEndTxn</div><div class="line"></div><div class="line"><span class="comment">// If we're not yet writing in this txn, but intend to, insert a</span></div><div class="line"><span class="comment">// begin transaction request before the first write command and update</span></div><div class="line"><span class="comment">// transaction state accordingly.</span></div><div class="line"><span class="keyword">if</span> needBeginTxn &#123;</div><div class="line">	<span class="comment">// Set txn key based on the key of the first transactional write if</span></div><div class="line">	<span class="comment">// not already set. If the transaction already has a key (we're in a</span></div><div class="line">	<span class="comment">// restart), make sure we keep the anchor key the same.</span></div><div class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(txn.mu.Proto.Key) == <span class="number">0</span> &#123;</div><div class="line">		txnAnchorKey := txn.mu.txnAnchorKey</div><div class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(txnAnchorKey) == <span class="number">0</span> &#123;</div><div class="line">			txnAnchorKey = ba.Requests[<span class="number">0</span>].GetInner().Header().Key</div><div class="line">		&#125;</div><div class="line">		txn.mu.Proto.Key = txnAnchorKey</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Set the key in the begin transaction request to the txn's anchor key.</span></div><div class="line">	bt := &amp;roachpb.BeginTransactionRequest&#123;</div><div class="line">		Span: roachpb.Span&#123;</div><div class="line">			Key: txn.mu.Proto.Key,</div><div class="line">		&#125;,</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Inject the new request before position firstWriteIdx, taking</span></div><div class="line">	<span class="comment">// care to avoid unnecessary allocations.</span></div><div class="line">	oldRequests := ba.Requests</div><div class="line">	ba.Requests = <span class="built_in">make</span>([]roachpb.RequestUnion, <span class="built_in">len</span>(ba.Requests)+<span class="number">1</span>)</div><div class="line">	<span class="built_in">copy</span>(ba.Requests, oldRequests[:firstWriteIdx])</div><div class="line">	ba.Requests[firstWriteIdx].MustSetInner(bt)</div><div class="line">	<span class="built_in">copy</span>(ba.Requests[firstWriteIdx+<span class="number">1</span>:], oldRequests[firstWriteIdx:])</div><div class="line">	<span class="comment">// We're going to be writing the transaction record by sending the</span></div><div class="line">	<span class="comment">// begin transaction request.</span></div><div class="line">	txn.mu.writingTxnRecord = <span class="literal">true</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2><span id="txn-mu-proto-chu-shi-hua">txn.mu.Proto初始化</span></h2>
+<p><code>pkg/internal/client/txn.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> <span class="built_in">len</span>(txn.mu.Proto.Key) == <span class="number">0</span> &#123;</div><div class="line">				txnAnchorKey := txn.mu.txnAnchorKey</div><div class="line">				<span class="keyword">if</span> <span class="built_in">len</span>(txnAnchorKey) == <span class="number">0</span> &#123;</div><div class="line">					txnAnchorKey = ba.Requests[<span class="number">0</span>].GetInner().Header().Key</div><div class="line">				&#125;</div><div class="line">				txn.mu.Proto.Key = txnAnchorKey</div><div class="line">			&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/15/crdb-set-session-vars/" rel="next" title="crdb session变量维护堆栈">
+                <i class="fa fa-chevron-left"></i> crdb session变量维护堆栈
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/22/docker/" rel="prev" title="docker使用">
+                docker使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Louis" />
+          <p class="site-author-name" itemprop="name">Louis</p>
+           
+              <p class="site-description motion-element" itemprop="description">记录工作和生活点滴</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">49</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">70</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/louishust" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">session.txnState初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.1.</span> <span class="nav-text">如果当前session不在事务中，则reset session的txnState</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.</span> <span class="nav-text">resetForNewSQLTxn 生成internal txn</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.3.</span> <span class="nav-text">e.cfg.DB的来源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.4.</span> <span class="nav-text">server初始化的clock, 赋值给所有的其它使用clock的地方</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">begin设置事务状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">transaction record</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">txn.mu.Proto初始化</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Louis</span>
+
+  
+</div>
+
+
+  <div class="powered-by">
+    由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+  </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">
+    主题 &mdash;
+    <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+      NexT.Mist
+    </a>
+  </div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/jquery/2.1.3/jquery.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/fastclick/1.0.6/fastclick.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.ui.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
