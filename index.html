@@ -281,6 +281,156 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/27/crdb-insert/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/11/27/crdb-insert/" itemprop="url">crdb insert流程</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-27T11:16:24+08:00">
+                2017-11-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="yu-ju"><a class="header-anchor" href="#语句"></a>语句</h2>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">database</span> <span class="keyword">test</span>;</div><div class="line"></div><div class="line"><span class="keyword">use</span> <span class="keyword">test</span>;</div><div class="line"></div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> t1(c1 <span class="built_in">int</span> primary <span class="keyword">key</span>, c2 <span class="built_in">varchar</span>(<span class="number">20</span>));</div><div class="line"></div><div class="line"><span class="keyword">begin</span>;</div><div class="line"></div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t1 <span class="keyword">values</span>(<span class="number">2</span>, <span class="string">'aaaaaaa'</span>);</div></pre></td></tr></table></figure>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/11/27/crdb-insert/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+    <div>
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/22/docker/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -373,37 +523,16 @@
 
       
         
-          
-            <h2><span id="image-xiang-guan-cao-zuo">image相关操作</span></h2>
-<h3><span id="sou-xun-image">搜寻image</span></h3>
+          <h2 id="image-xiang-guan-cao-zuo"><a class="header-anchor" href="#image相关操作"></a>image相关操作</h2>
+<h3 id="sou-xun-image"><a class="header-anchor" href="#搜寻image"></a>搜寻image</h3>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">➜  docker search  --<span class="built_in">limit</span> 10  cockroachdb/builder</div><div class="line">NAME                                DESCRIPTION                                     STARS               OFFICIAL            AUTOMATED</div><div class="line">cockroachdb/cockroach               CockroachDB is an open <span class="built_in">source</span>, survivable,...   39</div><div class="line">electronuserland/electron-builder   electron-builder                                14                                      [OK]</div><div class="line">deis/builder                        Docker-in-docker image builder <span class="keyword">for</span> the Dei...   5</div><div class="line">jekyll/builder                      Builder image                                   2                                       [OK]</div><div class="line">abcstartsiden/builder               Images <span class="keyword">for</span> builder                              1</div><div class="line">cockroachdb/builder                 Image containing tools <span class="keyword">for</span> building cockroach   1</div></pre></td></tr></table></figure>
-<h3><span id="pull-image">pull image</span></h3>
-<p>默认tag是latest，如果没有latest，需要指定tag。</p>
-<p><a href="https://hub.docker.com/r/cockroachdb/builder/tags/" target="_blank" rel="external">https://hub.docker.com/r/cockroachdb/builder/tags/</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">➜  docker pull cockroachdb/builder:20171023-115328</div></pre></td></tr></table></figure>
-<h3><span id="cha-kan-ben-di-image">查看本地image</span></h3>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">➜  docker image list</div><div class="line">REPOSITORY            TAG                 IMAGE ID            CREATED             SIZE</div><div class="line">louishust/crdb        v1                  7d8e342bab93        About an hour ago   3.74GB</div><div class="line">cockroachdb/builder   20171023-115328     fa959d75f5af        4 weeks ago         3.63GB</div></pre></td></tr></table></figure>
-<h3><span id="shan-chu-image">删除image</span></h3>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">➜  docker image rm imageid</div></pre></td></tr></table></figure>
-<h2><span id="container">container</span></h2>
-<h3><span id="sheng-cheng-rong-qi">生成容器</span></h3>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">➜  docker run -it -d -p 50002:22 --security-opt=seccomp:unconfined louishust/crdb:v1 /bin/bash</div></pre></td></tr></table></figure>
-<h3><span id="cha-kan-rong-qi">查看容器</span></h3>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">➜  docker container ls -a</div></pre></td></tr></table></figure>
-<h3><span id="ting-zhi-rong-qi">停止容器</span></h3>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">➜  docker container stop containerid</div></pre></td></tr></table></figure>
-<h3><span id="gen-ju-rong-qi-sheng-cheng-image">根据容器生成image</span></h3>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">➜  docker commit -m &quot;install ssh ,vim, setup 163 repo&quot; d4d9bbeefe0f louishust/crdb:v1</div><div class="line">➜  docker push louishust/crdb:v1</div></pre></td></tr></table></figure>
-<h3><span id="shan-chu-rong-qi">删除容器</span></h3>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">➜  docker container rm containerid</div></pre></td></tr></table></figure>
-<h2><span id="can-kao-lian-jie">参考链接</span></h2>
-<ol>
-<li><a href="https://yeasy.gitbooks.io/docker_practice/content/image/build.html" target="_blank" rel="external">Docker — 从入门到实践</a></li>
-<li><a href="http://www.voidcn.com/article/p-ztnhinta-pt.html" target="_blank" rel="external">上传docker镜像到hub.docker</a></li>
-<li><a href="https://hub.docker.com/r/cockroachdb/builder/tags/" target="_blank" rel="external">crdb docker hub</a></li>
-</ol>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/11/22/docker/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -523,34 +652,17 @@
 
       
         
-          
-            <h2><span id="session-txnstate-chu-shi-hua">session.txnState初始化</span></h2>
-<h3><span id="ru-guo-dang-qian-session-bu-zai-shi-wu-zhong-ze-reset-session-de-txnstate">如果当前session不在事务中，则reset session的txnState</span></h3>
+          <h2 id="session-txn-state-chu-shi-hua"><a class="header-anchor" href="#session-txnstate初始化"></a>session.txnState初始化</h2>
+<h3 id="ru-guo-dang-qian-session-bu-zai-shi-wu-zhong-ze-reset-session-de-txn-state"><a class="header-anchor" href="#如果当前session不在事务中-则reset-session的txnstate"></a>如果当前session不在事务中，则reset session的txnState</h3>
 <p><code>pkg/sql/executor.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">txnState.resetForNewSQLTxn(</div><div class="line">	e, session,</div><div class="line">	autoCommit, <span class="comment">/* implicitTxn */</span></div><div class="line">	<span class="literal">false</span>,      <span class="comment">/* retryIntent */</span></div><div class="line">	e.cfg.Clock.PhysicalTime(), <span class="comment">/* sqlTimestamp */</span></div><div class="line">	session.DefaultIsolationLevel,</div><div class="line">	roachpb.NormalUserPriority,</div></pre></td></tr></table></figure>
-<h3><span id="resetfornewsqltxn-sheng-cheng-internal-txn">resetForNewSQLTxn 生成internal txn</span></h3>
-<p><code>pkg/sql/session.go</code></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ts *txnState)</span> <span class="title">resetForNewSQLTxn</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params"></span></span></div><div class="line"><span class="function"><span class="params">	ts.retryIntent = retryIntent</span></span></div><div class="line"><span class="function"><span class="params">	// Reset state vars to defaults.</span></span></div><div class="line"><span class="function"><span class="params">	ts.commitSeen = <span class="literal">false</span></span></span></div><div class="line"><span class="function"><span class="params">	ts.sqlTimestamp = sqlTimestamp</span></span></div><div class="line"><span class="function"><span class="params">	ts.implicitTxn = implicitTxn</span></span></div><div class="line"><span class="function"><span class="params">	ts.txnResults = s.ResultsWriter.NewResultsGroup()</span></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function">    //设置状态为<span class="title">AutoRetry</span></span></div><div class="line"><span class="function">	<span class="title">ts</span>.<span class="title">SetState</span><span class="params">(AutoRetry)</span></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function">    // 生成<span class="title">internal</span> <span class="title">txn</span></span></div><div class="line"><span class="function">	<span class="title">ts</span>.<span class="title">mu</span>.<span class="title">txn</span> = <span class="title">client</span>.<span class="title">NewTxn</span><span class="params">(e.cfg.DB, e.cfg.NodeID.Get()</span>)</span></div></pre></td></tr></table></figure>
-<h3><span id="e-cfg-db-de-lai-yuan">e.cfg.DB的来源</span></h3>
-<p><code>pkg/server/server.go</code></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">NewServer</div><div class="line"></div><div class="line">    s.db = client.NewDB(s.txnCoordSender, s.clock)</div><div class="line"></div><div class="line">	execCfg := sql.ExecutorConfig&#123;</div><div class="line">		Settings:                s.st,</div><div class="line">		NodeInfo:                nodeInfo,</div><div class="line">		AmbientCtx:              s.cfg.AmbientCtx,</div><div class="line">		DB:                      s.db,</div><div class="line">		Gossip:                  s.gossip,</div><div class="line">		DistSender:              s.distSender,</div><div class="line">	</div><div class="line">	s.sqlExecutor = sql.NewExecutor(execCfg, s.stopper)</div></pre></td></tr></table></figure>
-<h3><span id="server-chu-shi-hua-de-clock-fu-zhi-gei-suo-you-de-qi-ta-shi-yong-clock-de-di-fang">server初始化的clock, 赋值给所有的其它使用clock的地方</span></h3>
-<p><code>pkg/server/server.go</code></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">s := &amp;Server&#123;</div><div class="line">	st:       st,</div><div class="line">	mux:      http.NewServeMux(),</div><div class="line">	clock:    hlc.NewClock(hlc.UnixNano, time.Duration(cfg.MaxOffset)),</div><div class="line">	stopper:  stopper,</div><div class="line">	cfg:      cfg,</div><div class="line">	registry: metric.NewRegistry(),</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p><code>pkg/base/constants.go</code></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">DefaultMaxClockOffset = <span class="number">500</span> * time.Millisecond</div></pre></td></tr></table></figure>
-<p>默认max clock offset是500ms</p>
-<h2><span id="begin-she-zhi-shi-wu-zhuang-tai">begin设置事务状态</span></h2>
-<p><code>pkg/sql/txn.go</code></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *planner)</span> <span class="title">BeginTransaction</span><span class="params">(n *parser.BeginTransaction)</span> <span class="params">(planNode, error)</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> p.session.TxnState.State() != AutoRetry || p.txn == <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, errors.Errorf(<span class="string">"the server should have already created a transaction. "</span>+</div><div class="line">			<span class="string">"state: %s"</span>, p.session.TxnState.State())</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> err := p.setTransactionModes(n.Modes); err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> &amp;zeroNode&#123;&#125;, <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2><span id="transaction-record">transaction record</span></h2>
-<p><code>pkg/internal/client/txn.go</code></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">needBeginTxn = !(txn.mu.Proto.Writing || txn.mu.writingTxnRecord) &amp;&amp; haveTxnWrite</div><div class="line">needEndTxn := txn.mu.Proto.Writing || txn.mu.writingTxnRecord || haveTxnWrite</div><div class="line">elideEndTxn = haveEndTxn &amp;&amp; !needEndTxn</div><div class="line"></div><div class="line"><span class="comment">// If we're not yet writing in this txn, but intend to, insert a</span></div><div class="line"><span class="comment">// begin transaction request before the first write command and update</span></div><div class="line"><span class="comment">// transaction state accordingly.</span></div><div class="line"><span class="keyword">if</span> needBeginTxn &#123;</div><div class="line">	<span class="comment">// Set txn key based on the key of the first transactional write if</span></div><div class="line">	<span class="comment">// not already set. If the transaction already has a key (we're in a</span></div><div class="line">	<span class="comment">// restart), make sure we keep the anchor key the same.</span></div><div class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(txn.mu.Proto.Key) == <span class="number">0</span> &#123;</div><div class="line">		txnAnchorKey := txn.mu.txnAnchorKey</div><div class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(txnAnchorKey) == <span class="number">0</span> &#123;</div><div class="line">			txnAnchorKey = ba.Requests[<span class="number">0</span>].GetInner().Header().Key</div><div class="line">		&#125;</div><div class="line">		txn.mu.Proto.Key = txnAnchorKey</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Set the key in the begin transaction request to the txn's anchor key.</span></div><div class="line">	bt := &amp;roachpb.BeginTransactionRequest&#123;</div><div class="line">		Span: roachpb.Span&#123;</div><div class="line">			Key: txn.mu.Proto.Key,</div><div class="line">		&#125;,</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Inject the new request before position firstWriteIdx, taking</span></div><div class="line">	<span class="comment">// care to avoid unnecessary allocations.</span></div><div class="line">	oldRequests := ba.Requests</div><div class="line">	ba.Requests = <span class="built_in">make</span>([]roachpb.RequestUnion, <span class="built_in">len</span>(ba.Requests)+<span class="number">1</span>)</div><div class="line">	<span class="built_in">copy</span>(ba.Requests, oldRequests[:firstWriteIdx])</div><div class="line">	ba.Requests[firstWriteIdx].MustSetInner(bt)</div><div class="line">	<span class="built_in">copy</span>(ba.Requests[firstWriteIdx+<span class="number">1</span>:], oldRequests[firstWriteIdx:])</div><div class="line">	<span class="comment">// We're going to be writing the transaction record by sending the</span></div><div class="line">	<span class="comment">// begin transaction request.</span></div><div class="line">	txn.mu.writingTxnRecord = <span class="literal">true</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2><span id="txn-mu-proto-chu-shi-hua">txn.mu.Proto初始化</span></h2>
-<p><code>pkg/internal/client/txn.go</code></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> <span class="built_in">len</span>(txn.mu.Proto.Key) == <span class="number">0</span> &#123;</div><div class="line">				txnAnchorKey := txn.mu.txnAnchorKey</div><div class="line">				<span class="keyword">if</span> <span class="built_in">len</span>(txnAnchorKey) == <span class="number">0</span> &#123;</div><div class="line">					txnAnchorKey = ba.Requests[<span class="number">0</span>].GetInner().Header().Key</div><div class="line">				&#125;</div><div class="line">				txn.mu.Proto.Key = txnAnchorKey</div><div class="line">			&#125;</div></pre></td></tr></table></figure>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/11/20/crdb-trx/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1645,156 +1757,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/06/grpc/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Louis">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小贝壳爸爸">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/11/06/grpc/" itemprop="url">gRPC使用</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-06T19:01:05+08:00">
-                2017-11-06
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/go/" itemprop="url" rel="index">
-                    <span itemprop="name">go</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="g-rpc-jian-jie"><a class="header-anchor" href="#grpc简介"></a>gRPC简介</h2>
-<p>grpc是google remote procedure call, 远程过程调用。多用于分布式服务。服务端定义服务的具体实现，客户端直接调用服务端的实现，得到对应的返回。gRPC以protocol buffer作为消息序列化工具，封装了客户端与服务器之间的消息通信，</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/11/06/grpc/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-    <div>
-      
-    </div>
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1845,7 +1807,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">49</span>
+                <span class="site-state-item-count">50</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1867,7 +1829,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">70</span>
+                <span class="site-state-item-count">71</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

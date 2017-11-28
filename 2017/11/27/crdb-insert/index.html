@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link href="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+  
+
+<link href="//cdn.staticfile.org/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="cockroachdb,insert," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="语句 123456789create database test;use test;create table t1(c1 int primary key, c2 varchar(20));begin;insert into t1 values(2, &apos;aaaaaaa&apos;);">
+<meta name="keywords" content="cockroachdb,insert">
+<meta property="og:type" content="article">
+<meta property="og:title" content="crdb insert流程">
+<meta property="og:url" content="http://yoursite.com/2017/11/27/crdb-insert/index.html">
+<meta property="og:site_name" content="小贝壳爸爸">
+<meta property="og:description" content="语句 123456789create database test;use test;create table t1(c1 int primary key, c2 varchar(20));begin;insert into t1 values(2, &apos;aaaaaaa&apos;);">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-11-28T07:03:07.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="crdb insert流程">
+<meta name="twitter:description" content="语句 123456789create database test;use test;create table t1(c1 int primary key, c2 varchar(20));begin;insert into t1 values(2, &apos;aaaaaaa&apos;);">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/11/27/crdb-insert/"/>
+
+
+
+
+
+  <title>crdb insert流程 | 小贝壳爸爸</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小贝壳爸爸</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">天桥扛把子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/27/crdb-insert/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">crdb insert流程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-27T11:16:24+08:00">
+                2017-11-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2><span id="yu-ju">语句</span></h2>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">database</span> <span class="keyword">test</span>;</div><div class="line"></div><div class="line"><span class="keyword">use</span> <span class="keyword">test</span>;</div><div class="line"></div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> t1(c1 <span class="built_in">int</span> primary <span class="keyword">key</span>, c2 <span class="built_in">varchar</span>(<span class="number">20</span>));</div><div class="line"></div><div class="line"><span class="keyword">begin</span>;</div><div class="line"></div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t1 <span class="keyword">values</span>(<span class="number">2</span>, <span class="string">'aaaaaaa'</span>);</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2><span id="ru-he-cha-kan-rocksdb-cun-chu-nei-rong">如何查看rocksdb存储内容</span></h2>
+<p>扫描node1数据目录下的rocksdb数据库</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cockroach debug rocksdb scan --value_hex  --db=./node1/ &gt; /tmp/b</div></pre></td></tr></table></figure>
+<h2><span id="insertrow-jiang-value-zhuan-huan-cheng-client-batch">InsertRow将value转换成Client.Batch</span></h2>
+<p>如果一条语句中包含多行insert，有利于批量传递修改</p>
+<h3><span id="she-ji-dao-de-wen-jian-he-jie-gou-ti">涉及到的文件和结构体</span></h3>
+<p><code>pkg/sql/insert.go insertNode</code><br>
+<code>pkg/sql/tablewriter.go tableInserter</code><br>
+<code>pkg/sql/sqlbase/rowwriter.go RowInserter</code><br>
+<code>pkg/internal/client/batch.go Batch</code><br>
+<code>pkg/roachpb/api.go Batch</code></p>
+<h3><span id="dui-zhan-dai-ma">堆栈代码</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="function"><span class="keyword">func</span> <span class="params">(n *insertNode)</span> <span class="title">internalNext</span></span></div><div class="line"><span class="function">| &gt; <span class="title">func</span> <span class="params">(ti *tableInserter)</span> <span class="title">row</span></span></div><div class="line"><span class="function">| | &gt; <span class="title">func</span> <span class="params">(ri *RowInserter)</span> <span class="title">InsertRow</span></span></div><div class="line"><span class="function">| | | &gt; <span class="title">ri</span>.<span class="title">Helper</span>.<span class="title">encodeIndexes</span> //生成<span class="title">primary</span> <span class="title">index</span> <span class="title">key</span> &amp; <span class="title">second</span> <span class="title">index</span> <span class="title">kv</span></span></div><div class="line"><span class="function">| | | &gt; <span class="title">func</span> <span class="title">EncodeTableValue</span>// <span class="title">encode</span> <span class="title">value</span></span></div><div class="line"><span class="function">| | | &gt; <span class="title">func</span> <span class="title">insertCPutFn</span> // 生成<span class="title">kv</span>请求</span></div><div class="line"><span class="function">| | | | &gt; <span class="title">func</span> <span class="params">(b *Batch)</span> <span class="title">CPut</span></span></div><div class="line"><span class="function">| | | | | &gt; <span class="title">func</span> <span class="title">NewConditionalPut</span> //生成<span class="title">conditionput</span> <span class="title">request</span></span></div></pre></td></tr></table></figure>
+<h3><span id="key-amp-value-jie-gou">key &amp; value结构</span></h3>
+<h4><span id="primary-index">Primary Index</span></h4>
+<p><code>key</code>: tableid, indexid, pk1, pk2 …<br>
+<code>value</code>: encoded values. <code>EncodeTableValue</code></p>
+<p><code>encoded value</code>: colid|Type, len, value</p>
+<h4><span id="secondary-index">Secondary Index</span></h4>
+<h5><span id="unique">Unique</span></h5>
+<p><code>key</code>: tableid, indexid, key1, key2…<br>
+<code>value</code>: pk1, pk2…</p>
+<h5><span id="non-unique">Non-Unique</span></h5>
+<p><code>key</code>: tableid, indexid, key1, key2…, pk1, pk2…<br>
+<code>value</code>: empty</p>
+<h2><span id="txn-run-jiang-client-batch-xie-ru-dao-rocksdb">txn.Run将client.batch写入到rocksdb</span></h2>
+<h3><span id="dui-zhan-dai-ma">堆栈代码</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">backtrace:</div><div class="line"></div><div class="line"> <span class="number">0</span>  pkg/storage/engine.mvccPutInternal at ./pkg/storage/engine/mvcc.<span class="keyword">go</span>:<span class="number">1168</span></div><div class="line"> <span class="number">1</span>  pkg/storage/engine.mvccPutUsingIter at ./pkg/storage/engine/mvcc.<span class="keyword">go</span>:<span class="number">963</span></div><div class="line"> <span class="number">2</span>  pkg/storage/engine.mvccConditionalPutUsingIter at ./pkg/storage/engine/mvcc.<span class="keyword">go</span>:<span class="number">1281</span></div><div class="line"> <span class="number">3</span>  pkg/storage/engine.MVCCConditionalPut at ./pkg/storage/engine/mvcc.<span class="keyword">go</span>:<span class="number">1249</span></div><div class="line"> <span class="number">4</span>  pkg/storage.evalConditionalPut at ./pkg/storage/replica_command.<span class="keyword">go</span>:<span class="number">334</span></div><div class="line"> <span class="number">5</span>  pkg/storage.evaluateCommand at ./pkg/storage/replica_command.<span class="keyword">go</span>:<span class="number">207</span></div><div class="line"> <span class="number">6</span>  pkg/storage.evaluateBatch at ./pkg/storage/replica.<span class="keyword">go</span>:<span class="number">5233</span></div><div class="line"> <span class="number">7</span>  pkg/storage.(*Replica).evaluateTxnWriteBatch at ./pkg/storage/replica.<span class="keyword">go</span>:<span class="number">5035</span></div><div class="line"> <span class="number">8</span>  pkg/storage.(*Replica).evaluateProposalInner at ./pkg/storage/replica.<span class="keyword">go</span>:<span class="number">4866</span></div><div class="line"> <span class="number">9</span>  pkg/storage.(*Replica).evaluateProposal at ./pkg/storage/replica.<span class="keyword">go</span>:<span class="number">2844</span></div><div class="line"><span class="number">10</span>  pkg/storage.(*Replica).requestToProposal at ./pkg/storage/replica.<span class="keyword">go</span>:<span class="number">2801</span></div><div class="line"><span class="number">11</span>  pkg/storage.(*Replica).propose at ./pkg/storage/replica.<span class="keyword">go</span>:<span class="number">2968</span></div><div class="line"><span class="number">12</span>  pkg/storage.(*Replica).tryExecuteWriteBatch at ./pkg/storage/replica.<span class="keyword">go</span>:<span class="number">2704</span></div><div class="line"><span class="number">13</span>  pkg/storage.(*Replica).executeWriteBatch at ./pkg/storage/replica.<span class="keyword">go</span>:<span class="number">2558</span></div><div class="line"><span class="number">14</span>  pkg/storage.(*Replica).Send at ./pkg/storage/replica.<span class="keyword">go</span>:<span class="number">1800</span></div><div class="line"><span class="number">15</span>  pkg/storage.(*Store).Send at ./pkg/storage/store.<span class="keyword">go</span>:<span class="number">2580</span></div><div class="line"><span class="number">16</span>  pkg/storage.(*Stores).Send at ./pkg/storage/stores.<span class="keyword">go</span>:<span class="number">215</span></div><div class="line"><span class="number">17</span>  pkg/server.(*Node).batchInternal.func1 at ./pkg/server/node.<span class="keyword">go</span>:<span class="number">850</span></div><div class="line"><span class="number">18</span>  pkg/util/stop.(*Stopper).RunTaskWithErr at ./pkg/util/stop/stopper.<span class="keyword">go</span>:<span class="number">246</span></div><div class="line"><span class="number">19</span>  pkg/server.(*Node).batchInternal at ./pkg/server/node.<span class="keyword">go</span>:<span class="number">837</span></div><div class="line"><span class="number">20</span>  pkg/server.(*Node).Batch at ./pkg/server/node.<span class="keyword">go</span>:<span class="number">878</span></div><div class="line"><span class="number">21</span>  pkg/kv.(*grpcTransport).send.func1 at ./pkg/kv/transport.<span class="keyword">go</span>:<span class="number">229</span></div><div class="line"><span class="number">22</span>  pkg/kv.(*grpcTransport).send at ./pkg/kv/transport.<span class="keyword">go</span>:<span class="number">242</span></div><div class="line"><span class="number">23</span>  pkg/kv.(*grpcTransport).SendNext at ./pkg/kv/transport.<span class="keyword">go</span>:<span class="number">194</span></div><div class="line"><span class="number">24</span>  pkg/kv.(*DistSender).sendToReplicas at ./pkg/kv/dist_sender.<span class="keyword">go</span>:<span class="number">1229</span></div><div class="line"><span class="number">25</span>  pkg/kv.(*DistSender).sendRPC at ./pkg/kv/dist_sender.<span class="keyword">go</span>:<span class="number">383</span></div><div class="line"><span class="number">26</span>  pkg/kv.(*DistSender).sendSingleRange at ./pkg/kv/dist_sender.<span class="keyword">go</span>:<span class="number">447</span></div><div class="line"><span class="number">27</span>  pkg/kv.(*DistSender).sendPartialBatch at ./pkg/kv/dist_sender.<span class="keyword">go</span>:<span class="number">1013</span></div><div class="line"><span class="number">28</span>  pkg/kv.(*DistSender).divideAndSendBatchToRanges at ./pkg/kv/dist_sender.<span class="keyword">go</span>:<span class="number">689</span></div><div class="line"><span class="number">29</span>  pkg/kv.(*DistSender).Send at ./pkg/kv/dist_sender.<span class="keyword">go</span>:<span class="number">619</span></div><div class="line"><span class="number">30</span>  pkg/kv.(*TxnCoordSender).Send at ./pkg/kv/txn_coord_sender.<span class="keyword">go</span>:<span class="number">444</span></div><div class="line"><span class="number">31</span>  pkg/internal/client.(*DB).send at ./pkg/internal/client/db.<span class="keyword">go</span>:<span class="number">551</span></div><div class="line"><span class="number">32</span>  pkg/internal/client.(*Txn).Send at ./pkg/internal/client/txn.<span class="keyword">go</span>:<span class="number">959</span></div><div class="line"><span class="number">33</span>  pkg/internal/client.(*Txn).Send-fm at ./pkg/internal/client/txn.<span class="keyword">go</span>:<span class="number">510</span></div><div class="line"><span class="number">34</span>  pkg/internal/client.sendAndFill at ./pkg/internal/client/db.<span class="keyword">go</span>:<span class="number">457</span></div><div class="line"><span class="number">35</span>  pkg/internal/client.(*Txn).Run at ./pkg/internal/client/txn.<span class="keyword">go</span>:<span class="number">510</span></div><div class="line"><span class="number">36</span>  pkg/sql.(*tableInserter).finalize at ./pkg/sql/tablewriter.<span class="keyword">go</span>:<span class="number">125</span></div></pre></td></tr></table></figure>
+<h3><span id="tian-jia-kai-shi-shi-wu-request">添加开始事务request</span></h3>
+<p>由于insert是写入操作，且是事务中的第一条写入操作，故需要在所有的request之前插入</p>
+<p><code>pkg/internal/client/txn.go Send</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(txn *Txn)</span> <span class="title">Send</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ctx context.Context, ba roachpb.BatchRequest,</span></span></div><div class="line"><span class="function"><span class="params">)</span> <span class="params">(*roachpb.BatchResponse, *roachpb.Error)</span></span> &#123;</div><div class="line">		...</div><div class="line">		needBeginTxn = !(txn.mu.Proto.Writing || txn.mu.writingTxnRecord) &amp;&amp; haveTxnWrite</div><div class="line">			<span class="keyword">if</span> <span class="built_in">len</span>(txn.mu.Proto.Key) == <span class="number">0</span> &#123;</div><div class="line">				txnAnchorKey := txn.mu.txnAnchorKey</div><div class="line">				<span class="keyword">if</span> <span class="built_in">len</span>(txnAnchorKey) == <span class="number">0</span> &#123;</div><div class="line">					txnAnchorKey = ba.Requests[<span class="number">0</span>].GetInner().Header().Key</div><div class="line">				&#125;</div><div class="line">				txn.mu.Proto.Key = txnAnchorKey</div><div class="line">			&#125;</div><div class="line">			<span class="comment">// Set the key in the begin transaction request to the txn's anchor key.</span></div><div class="line">			bt := &amp;roachpb.BeginTransactionRequest&#123;</div><div class="line">				Span: roachpb.Span&#123;</div><div class="line">					Key: txn.mu.Proto.Key,</div><div class="line">				&#125;,</div><div class="line">			&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>生成BeginTransactionRequest, key的取值和第一条write request的key一致, 此行数据即为<code>Transaction record</code>.</p>
+<h3><span id="txncoordsender-fu-ze-sheng-cheng-shi-wu-xiang-guan-de-yuan-shu-ju-bing-hou-tai-zhi-xing-heartbeat-request">TxnCoordSender负责生成事务相关的元数据，并后台执行heartbeat request</span></h3>
+<p><code>pkg/kv/txn_coord_sender.go Send</code></p>
+<h4><span id="xiu-gai-txnmeta-keys">修改txnMeta.keys</span></h4>
+<p>txnMeta.Keys记载修改了哪些key，方便之后commit或者rollback进行处理。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> txnMeta != <span class="literal">nil</span> &#123;</div><div class="line">	txnMeta.keys = et.IntentSpans</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4><span id="tian-jia-heartbeat-request">添加heartbeat request</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">hb := &amp;roachpb.HeartbeatTxnRequest&#123;</div><div class="line">	Now: tc.clock.Now(),</div><div class="line">&#125;</div><div class="line">hb.Key = txn.Key</div><div class="line">ba.Add(hb)</div><div class="line"></div><div class="line"><span class="keyword">if</span> pErr = tc.updateState(ctx, startNS, ba, br, pErr); pErr != <span class="literal">nil</span> &#123;</div></pre></td></tr></table></figure>
+<p>tc.updateState会调用<code>tc.heartbeatLoop</code>循环给transaction record发送heartbeat request。<br>
+默认心跳间隔为1秒。</p>
+<h3><span id="distsender-gen-ju-bu-tong-de-key-xuan-ze-bu-tong-de-range">DistSender根据不同的key，选择不同的range</span></h3>
+<p><code>pkg/kv/dist_sender.go DistSender</code></p>
+<h4><span id="huo-qu-bu-tong-range-miao-shu-de-dui-zhan">获取不同range描述的堆栈</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">| &gt; <span class="function"><span class="keyword">func</span> <span class="params">(ds *DistSender)</span> <span class="title">Send</span></span></div><div class="line"><span class="function">| | &gt; <span class="title">keys</span>.<span class="title">Range</span><span class="params">(ba)</span> //根据<span class="title">batch</span> <span class="title">request</span>，生成<span class="title">range</span> <span class="title">span</span></span>&#123;begin key, end key&#125;</div><div class="line">| | &gt; ds.divideAndSendBatchToRanges <span class="comment">// 将请求分配到不同的range</span></div><div class="line">| | | &gt; <span class="function"><span class="keyword">func</span> <span class="params">(ri *RangeIterator)</span> <span class="title">Seek</span> //获取<span class="title">begin</span> <span class="title">key</span>的<span class="title">range</span> <span class="title">descriptor</span></span></div><div class="line"><span class="function">| | | | &gt; <span class="title">func</span> <span class="params">(ds *DistSender)</span> <span class="title">getDescriptor</span></span></div><div class="line"><span class="function">| | | | | &gt; <span class="title">func</span> <span class="params">(rdc *RangeDescriptorCache)</span> <span class="title">LookupRangeDescriptor</span></span></div></pre></td></tr></table></figure>
+<h4><span id="fa-song-qing-qiu-dui-zhan">发送请求堆栈</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">| &gt; <span class="function"><span class="keyword">func</span> <span class="params">(ds *DistSender)</span> <span class="title">divideAndSendBatchToRanges</span></span></div><div class="line"><span class="function">| | &gt; <span class="title">ds</span>.<span class="title">sendPartialBatch</span></span></div><div class="line"><span class="function">| | | &gt; <span class="title">func</span> <span class="params">(ds *DistSender)</span> <span class="title">sendSingleRange</span></span></div><div class="line"><span class="function">| | | | &gt; <span class="title">func</span> <span class="params">(ds *DistSender)</span> <span class="title">sendRPC</span></span></div><div class="line"><span class="function">| | | | | &gt; <span class="title">func</span> <span class="params">(ds *DistSender)</span> <span class="title">sendToReplicas</span></span></div><div class="line"><span class="function">| | | | | | &gt; <span class="title">func</span> <span class="params">(gt *grpcTransport)</span> <span class="title">SendNext</span></span></div></pre></td></tr></table></figure>
+<h3><span id="grpc-transport">GRPC transport</span></h3>
+<h4><span id="chu-shi-hua">初始化</span></h4>
+<p><code>pkg/kv/transport.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">| &gt; <span class="function"><span class="keyword">func</span> <span class="title">NewDistSender</span><span class="params">(cfg DistSenderConfig, g *gossip.Gossip)</span> *<span class="title">DistSender</span></span></div><div class="line"><span class="function">| | &gt; <span class="title">ds</span>.<span class="title">transportFactory</span> = <span class="title">GRPCTransportFactory</span></span></div><div class="line"><span class="function">| | | &gt; <span class="title">func</span> <span class="title">grpcTransportFactoryImpl</span></span></div></pre></td></tr></table></figure>
+<h4><span id="grpc-fu-wu-ding-yi">GRPC服务定义</span></h4>
+<p><code>pkg/roachpb/api.proto</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">service Internal &#123;</div><div class="line">  rpc Batch (BatchRequest) returns (BatchResponse) &#123;&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4><span id="fu-wu-shi-xian">服务实现</span></h4>
+<p><code>pkg/server/node.go Batch</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *Node)</span> <span class="title">Batch</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ctx context.Context, args *roachpb.BatchRequest,</span></span></div><div class="line"><span class="function"><span class="params">)</span> <span class="params">(*roachpb.BatchResponse, error)</span></span> &#123;</div><div class="line">	growStack()</div><div class="line"></div><div class="line">	<span class="comment">// NB: Node.Batch is called directly for "local" calls. We don't want to</span></div><div class="line">	<span class="comment">// carry the associated log tags forward as doing so makes adding additional</span></div><div class="line">	<span class="comment">// log tags more expensive and makes local calls differ from remote calls.</span></div><div class="line">	ctx = n.storeCfg.AmbientCtx.ResetAndAnnotateCtx(ctx)</div><div class="line"></div><div class="line">	br, err := n.batchInternal(ctx, args)</div></pre></td></tr></table></figure>
+<h4><span id="grpc-diao-yong">gRPC调用</span></h4>
+<p><code>pkg/kv/transport.go func (gt *grpcTransport) send</code></p>
+<ol>
+<li>如果range在当前node，则直接使用localserver</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">return</span> localServer.Batch(localCtx, &amp;client.args)</div></pre></td></tr></table></figure>
+<ol start="2">
+<li>如果range不在当前node，则调用远程方法</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">reply, err := client.client.Batch(ctx, &amp;client.args)</div></pre></td></tr></table></figure>
+<h3><span id="node-store-range-chuan-di-batch-request">node, store, range传递Batch Request</span></h3>
+<p><code>pkg/server/node.go</code><br>
+<code>pkg/storage/stores.go</code><br>
+<code>pkg/storage/store.go</code></p>
+<h4><span id="diao-yong-dui-zhan">调用堆栈</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">| &gt; <span class="function"><span class="keyword">func</span> <span class="params">(n *Node)</span> <span class="title">Batch</span></span></div><div class="line"><span class="function">| | &gt; <span class="title">func</span> <span class="params">(n *Node)</span> <span class="title">batchInternal</span></span></div><div class="line"><span class="function">| | | &gt; <span class="title">func</span> <span class="params">(ls *Stores)</span> <span class="title">Send</span></span></div><div class="line"><span class="function">| | | | &gt; <span class="title">store</span>, <span class="title">err</span> := <span class="title">ls</span>.<span class="title">GetStore</span><span class="params">(ba.Replica.StoreID)</span> //获取具体的<span class="title">store</span></span></div><div class="line"><span class="function">| | | | | &gt; <span class="title">func</span> <span class="params">(s *Store)</span> <span class="title">Send</span></span></div><div class="line"><span class="function">| | | | | | &gt; <span class="title">repl</span>, <span class="title">err</span> := <span class="title">s</span>.<span class="title">GetReplica</span><span class="params">(ba.RangeID)</span> //获取具体的<span class="title">range</span>对应的<span class="title">replica</span></span></div><div class="line"><span class="function">| | | | | | | &gt; <span class="title">func</span> <span class="params">(r *Replica)</span> <span class="title">Send</span></span></div></pre></td></tr></table></figure>
+<h3><span id="replica-zhuan-huan-batch-request-wei-replica-command">replica转换batch request为replica command</span></h3>
+<p><code>pkg/storage/replica.go</code></p>
+<h4><span id="diao-yong-dui-zhan">调用堆栈</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">| &gt; <span class="function"><span class="keyword">func</span> <span class="params">(r *Replica)</span> <span class="title">Send</span></span></div><div class="line"><span class="function">| | &gt; <span class="title">func</span> <span class="params">(r *Replica)</span> <span class="title">executeWriteBatch</span></span></div><div class="line"><span class="function">| | | &gt; <span class="title">func</span> <span class="params">(r *Replica)</span> <span class="title">tryExecuteWriteBatch</span></span></div><div class="line"><span class="function">| | | | &gt; <span class="title">func</span> <span class="params">(r *Replica)</span> <span class="title">propose</span></span></div><div class="line"><span class="function">| | | | | &gt; <span class="title">func</span> <span class="params">(r *Replica)</span> <span class="title">requestToProposal</span></span></div><div class="line"><span class="function">| | | | | | &gt; <span class="title">func</span> <span class="params">(r *Replica)</span> <span class="title">evaluateProposal</span></span></div><div class="line"><span class="function">| | | | | | | &gt; <span class="title">func</span> <span class="params">(r *Replica)</span> <span class="title">evaluateProposalInner</span></span></div><div class="line"><span class="function">| | | | | | | | &gt; <span class="title">func</span> <span class="params">(r *Replica)</span> <span class="title">evaluateTxnWriteBatch</span></span></div><div class="line"><span class="function">| | | | | | | | | &gt; <span class="title">evaluateBatch</span><span class="params">(ctx, idKey, batch, rec, &amp;ms, ba)</span></span></div><div class="line"><span class="function">| | | | | | | | | | &gt; <span class="title">func</span> <span class="title">evaluateCommand</span></span></div><div class="line"><span class="function">| | | | | | | | | | | &gt; <span class="title">func</span> <span class="title">evalConditionalPut</span>  //转换成对应的<span class="title">replia</span> <span class="title">command</span></span></div><div class="line"><span class="function">| | | | | | | | | | | | &gt; <span class="title">func</span> <span class="title">MVCCConditionalPut</span> //调用底层<span class="title">engine</span>的<span class="title">mvcc</span>方法</span></div></pre></td></tr></table></figure>
+<h4><span id="batch-request-dao-replica-command-dui-ying-biao">batch request到replica command对应表</span></h4>
+<p><code>pkg/storage/replica_command.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> commands = <span class="keyword">map</span>[roachpb.Method]Command&#123;</div><div class="line">	roachpb.Get:                &#123;DeclareKeys: DefaultDeclareKeys, Eval: evalGet&#125;,</div><div class="line">	roachpb.Put:                &#123;DeclareKeys: DefaultDeclareKeys, Eval: evalPut&#125;,</div><div class="line">	roachpb.ConditionalPut:     &#123;DeclareKeys: DefaultDeclareKeys, Eval: evalConditionalPut&#125;,</div><div class="line">	roachpb.InitPut:            &#123;DeclareKeys: DefaultDeclareKeys, Eval: evalInitPut&#125;,</div><div class="line">...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3><span id="begintransactionrequest-dui-ying-de-engine-kv-cao-zuo">BeginTransactionRequest对应的engine KV操作</span></h3>
+<p><code>pkg/storage/replica_command.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">evalBeginTransaction</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ctx context.Context, batch engine.ReadWriter, cArgs CommandArgs, resp roachpb.Response,</span></span></div><div class="line"><span class="function"><span class="params">)</span> <span class="params">(EvalResult, error)</span></span> &#123;</div><div class="line">...</div><div class="line">	key := keys.TransactionKey(h.Txn.Key, h.Txn.ID)</div><div class="line">	clonedTxn := h.Txn.Clone()</div><div class="line">	reply.Txn = &amp;clonedTxn</div><div class="line"></div><div class="line">...</div><div class="line">	<span class="keyword">return</span> EvalResult&#123;&#125;, engine.MVCCPutProto(ctx, batch, cArgs.Stats, key, hlc.Timestamp&#123;&#125;, <span class="literal">nil</span>, reply.Txn)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>key</code>: 包含了TRX ID<br>
+<code>value</code>: reply.Txn包含了TxnMeta</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> TxnMeta <span class="keyword">struct</span> &#123;</div><div class="line">	<span class="comment">// id is a unique UUID value which identifies the transaction.</span></div><div class="line">	<span class="comment">// This field is always filled in.</span></div><div class="line">	ID        github_com_cockroachdb_cockroach_pkg_util_uuid.UUID <span class="string">`protobuf:"bytes,1,opt,name=id,proto3,customtype=github.com/cockroachdb/cockroach/pkg/util/uuid.UUID" json:"id"`</span></div><div class="line">	Isolation IsolationType                                       <span class="string">`protobuf:"varint,2,opt,name=isolation,proto3,enum=cockroach.storage.engine.enginepb.IsolationType" json:"isolation,omitempty"`</span></div><div class="line">	<span class="comment">// key is the key which anchors the transaction. This is typically</span></div><div class="line">	<span class="comment">// the first key read or written during the transaction and</span></div><div class="line">	<span class="comment">// determines which range in the cluster will hold the transaction</span></div><div class="line">	<span class="comment">// record.</span></div><div class="line">	Key []<span class="keyword">byte</span> <span class="string">`protobuf:"bytes,3,opt,name=key,proto3" json:"key,omitempty"`</span></div><div class="line">	<span class="comment">// Incremented on txn retry.</span></div><div class="line">	Epoch <span class="keyword">uint32</span> <span class="string">`protobuf:"varint,4,opt,name=epoch,proto3" json:"epoch,omitempty"`</span></div><div class="line">	<span class="comment">// The proposed timestamp for the transaction. This starts as the</span></div><div class="line">	<span class="comment">// current wall time on the txn coordinator. This is the timestamp</span></div><div class="line">	<span class="comment">// at which all of the transaction's writes are performed: even if</span></div><div class="line">	<span class="comment">// intents have been laid down at different timestamps, the process</span></div><div class="line">	<span class="comment">// of resolving them (e.g. when the txn commits) will bump them to</span></div><div class="line">	<span class="comment">// this timestamp. SERIALIZABLE transactions only commit when</span></div><div class="line">	<span class="comment">// timestamp == orig_timestamp. SNAPSHOT transactions can commit</span></div><div class="line">	<span class="comment">// even when they've performed their reads (at orig_timestamp) at a</span></div><div class="line">	<span class="comment">// different timestamp than their writes (at timestamp).</span></div><div class="line">	Timestamp cockroach_util_hlc.Timestamp <span class="string">`protobuf:"bytes,5,opt,name=timestamp" json:"timestamp"`</span></div><div class="line">	Priority  <span class="keyword">int32</span>                        <span class="string">`protobuf:"varint,6,opt,name=priority,proto3" json:"priority,omitempty"`</span></div><div class="line">	<span class="comment">// A one-indexed sequence number which is increased on each batch</span></div><div class="line">	<span class="comment">// sent as part of the transaction. Used to prevent replay and</span></div><div class="line">	<span class="comment">// out-of-order application protection (by means of a transaction</span></div><div class="line">	<span class="comment">// retry).</span></div><div class="line">	Sequence <span class="keyword">int32</span> <span class="string">`protobuf:"varint,7,opt,name=sequence,proto3" json:"sequence,omitempty"`</span></div><div class="line">	<span class="comment">// A zero-indexed sequence number indicating the index of a command</span></div><div class="line">	<span class="comment">// within a batch. This disambiguate Raft replays of a batch from</span></div><div class="line">	<span class="comment">// multiple commands in a batch which modify the same key.</span></div><div class="line">	BatchIndex <span class="keyword">int32</span> <span class="string">`protobuf:"varint,8,opt,name=batch_index,json=batchIndex,proto3" json:"batch_index,omitempty"`</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>Transaciton Record</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/Local/Range/Table/<span class="number">51</span>/<span class="number">1</span>/<span class="number">2</span>/<span class="number">0</span>/Transaction/<span class="string">"13bc3569-98e7-464e-b9ce-601ce49abe21"</span> : <span class="number">0x1204080010001800200028003270F868B036030A2A0A1013BC356998E7464EB9CE601CE49ABE211A04BB898A882A0A08F6BED5988EDF91FD143084EE4C3802120773716C2074786E2A0A08BDDF8D97A4E191FD14320A08F6BED5988EDF91FD143A0A08F6BED5988EDF91FD14420E0801120A08F6BED5988EDF91FD144801</span></div></pre></td></tr></table></figure>
+<p><code>key</code>: recordkey+ transaction uuid<br>
+<code>value</code>: trx meta</p>
+<h3><span id="conditionalputrequest-dui-ying-de-engine-kv-cao-zuo">ConditionalPutRequest对应的engine KV操作</span></h3>
+<p><code>pkg/storage/replica_command.go</code><br>
+<code>pkg/storage/engine/engine.go</code><br>
+<code>pkg/storage/engine/rocksdb.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">| &gt; <span class="function"><span class="keyword">func</span> <span class="title">evalConditionalPut</span></span></div><div class="line"><span class="function">| | &gt; <span class="title">func</span> <span class="title">MVCCConditionalPut</span></span></div><div class="line"><span class="function">| | | &gt; <span class="title">func</span> <span class="title">mvccConditionalPutUsingIter</span></span></div><div class="line"><span class="function">| | | | &gt; <span class="title">func</span> <span class="title">mvccPutUsingIter</span></span></div><div class="line"><span class="function">| | | | | &gt; <span class="title">func</span> <span class="title">mvccPutInternal</span></span></div><div class="line"><span class="function">| | | | | | &gt; <span class="title">engine</span>.<span class="title">Put</span><span class="params">(versionKey, value)</span> //写入数据<span class="title">kv</span></span></div><div class="line"><span class="function">| | | | | | | &gt; <span class="title">buf</span>.<span class="title">putMeta</span><span class="params">(engine, metaKey, newMeta)</span> // 写入<span class="title">intent</span></span></div><div class="line"><span class="function">&#125;</span></div></pre></td></tr></table></figure>
+<p><code>metaKey</code>:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">metaKey := MakeMVCCMetadataKey(key)</div></pre></td></tr></table></figure>
+<p><code>versionKey</code>:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">versionKey := metaKey</div><div class="line">versionKey.Timestamp = timestamp</div></pre></td></tr></table></figure>
+<p><code>newMeta</code>:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">newMeta := &amp;buf.newMeta</div><div class="line"><span class="keyword">if</span> newMeta.Txn != <span class="literal">nil</span> &#123;</div><div class="line">	metaKeySize, metaValSize, err = buf.putMeta(engine, metaKey, newMeta)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">/Table/51/1/2/0 : 0x0A2C0A1013BC356998E7464EB9CE601CE49ABE211A04BB898A882A0A08F6BED5988EDF91FD143084EE4C38024001120C08F6BED5988EDF91FD1410001800200C2810</div><div class="line">/Table/51/1/2/0/1511598659.711885174,0 : 0x84E19AD40A2609626262626262626262</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/11/27/crdb-insert/">crdb insert流程</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年11月27日 - 11:11</p>
+  <p><span>最后更新:</span>2017年11月28日 - 15:11</p>
+  <p><span>原始链接:</span><a href="/2017/11/27/crdb-insert/">/2017/11/27/crdb-insert/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/cockroachdb/" rel="tag"># cockroachdb</a>
+          
+            <a href="/tags/insert/" rel="tag"># insert</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/22/docker/" rel="next" title="docker使用">
+                <i class="fa fa-chevron-left"></i> docker使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Louis" />
+          <p class="site-author-name" itemprop="name">Louis</p>
+           
+              <p class="site-description motion-element" itemprop="description">记录工作和生活点滴</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">50</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">71</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/louishust" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">如何查看rocksdb存储内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">InsertRow将value转换成Client.Batch</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">涉及到的文件和结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text">堆栈代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text">key & value结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.1.</span> <span class="nav-text">Primary Index</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.</span> <span class="nav-text">Secondary Index</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.1.</span> <span class="nav-text">Unique</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.2.</span> <span class="nav-text">Non-Unique</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">txn.Run将client.batch写入到rocksdb</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text">堆栈代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text">添加开始事务request</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.</span> <span class="nav-text">TxnCoordSender负责生成事务相关的元数据，并后台执行heartbeat request</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.1.</span> <span class="nav-text">修改txnMeta.keys</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.2.</span> <span class="nav-text">添加heartbeat request</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.4.</span> <span class="nav-text">DistSender根据不同的key，选择不同的range</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.4.1.</span> <span class="nav-text">获取不同range描述的堆栈</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.4.2.</span> <span class="nav-text">发送请求堆栈</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.5.</span> <span class="nav-text">GRPC transport</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.5.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.5.2.</span> <span class="nav-text">GRPC服务定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.5.3.</span> <span class="nav-text">服务实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.5.4.</span> <span class="nav-text">gRPC调用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.6.</span> <span class="nav-text">node, store, range传递Batch Request</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.6.1.</span> <span class="nav-text">调用堆栈</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.7.</span> <span class="nav-text">replica转换batch request为replica command</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.7.1.</span> <span class="nav-text">调用堆栈</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.7.2.</span> <span class="nav-text">batch request到replica command对应表</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.8.</span> <span class="nav-text">BeginTransactionRequest对应的engine KV操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.9.</span> <span class="nav-text">ConditionalPutRequest对应的engine KV操作</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Louis</span>
+
+  
+</div>
+
+
+  <div class="powered-by">
+    由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+  </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">
+    主题 &mdash;
+    <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+      NexT.Mist
+    </a>
+  </div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/jquery/2.1.3/jquery.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/fastclick/1.0.6/fastclick.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.ui.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
