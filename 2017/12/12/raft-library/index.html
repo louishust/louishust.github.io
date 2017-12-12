@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link href="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+  
+
+<link href="//cdn.staticfile.org/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="raft," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="Raft library介绍 Raft library是etcd中的raft实现，只实现了Raft算法，使用者需要自己提供transportation层用于节点间通信，storage层用于持久化Raft log和state. Raft library实现如下特性：  Leader election Log replication Log compaction Membership changes">
+<meta name="keywords" content="raft">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Raft library使用">
+<meta property="og:url" content="http://yoursite.com/2017/12/12/raft-library/index.html">
+<meta property="og:site_name" content="小贝壳爸爸">
+<meta property="og:description" content="Raft library介绍 Raft library是etcd中的raft实现，只实现了Raft算法，使用者需要自己提供transportation层用于节点间通信，storage层用于持久化Raft log和state. Raft library实现如下特性：  Leader election Log replication Log compaction Membership changes">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-12T09:16:13.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Raft library使用">
+<meta name="twitter:description" content="Raft library介绍 Raft library是etcd中的raft实现，只实现了Raft算法，使用者需要自己提供transportation层用于节点间通信，storage层用于持久化Raft log和state. Raft library实现如下特性：  Leader election Log replication Log compaction Membership changes">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/12/12/raft-library/"/>
+
+
+
+
+
+  <title>Raft library使用 | 小贝壳爸爸</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小贝壳爸爸</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">天桥扛把子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/12/raft-library/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Raft library使用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-12T14:27:40+08:00">
+                2017-12-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/raft/" itemprop="url" rel="index">
+                    <span itemprop="name">raft</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2><span id="raft-library-jie-shao">Raft library介绍</span></h2>
+<p>Raft library是etcd中的raft实现，只实现了Raft算法，使用者需要自己提供transportation层用于节点间通信，storage层用于持久化Raft log和state.</p>
+<p>Raft library实现如下特性：</p>
+<ul>
+<li>Leader election</li>
+<li>Log replication</li>
+<li>Log compaction</li>
+<li>Membership changes</li>
+<li>Leadership transfer extension</li>
+</ul>
+<p>使用Raft library的项目：</p>
+<ul>
+<li>etcd</li>
+<li>tikv</li>
+<li>cockroachdb</li>
+<li>dgraph</li>
+</ul>
+<a id="more"></a>
+<h2><span id="shi-yong-fang-fa">使用方法</span></h2>
+<h3><span id="qi-dong-san-ge-jie-dian-de-ji-qun">启动三个节点的集群</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">storage := raft.NewMemoryStorage()</div><div class="line">c := &amp;Config&#123;</div><div class="line">  ID:              <span class="number">0x01</span>,</div><div class="line">  ElectionTick:    <span class="number">10</span>,</div><div class="line">  HeartbeatTick:   <span class="number">1</span>,</div><div class="line">  Storage:         storage,</div><div class="line">  MaxSizePerMsg:   <span class="number">4096</span>,</div><div class="line">  MaxInflightMsgs: <span class="number">256</span>,</div><div class="line">&#125;</div><div class="line"><span class="comment">// Set peer list to the other nodes in the cluster.</span></div><div class="line"><span class="comment">// Note that they need to be started separately as well.</span></div><div class="line">n := raft.StartNode(c, []raft.Peer&#123;&#123;ID: <span class="number">0x02</span>&#125;, &#123;ID: <span class="number">0x03</span>&#125;&#125;)</div></pre></td></tr></table></figure>
+<h3><span id="qi-dong-dan-jie-dian">启动单节点</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">peers := []raft.Peer&#123;&#123;ID: <span class="number">0x01</span>&#125;&#125;</div><div class="line">n := raft.StartNode(c, peers)</div></pre></td></tr></table></figure>
+<h3><span id="chong-qi-jie-dian">重启节点</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">storage := raft.NewMemoryStorage()</div><div class="line"></div><div class="line"><span class="comment">// Recover the in-memory storage from persistent snapshot, state and entries.</span></div><div class="line">storage.ApplySnapshot(snapshot)</div><div class="line">storage.SetHardState(state)</div><div class="line">storage.Append(entries)</div><div class="line"></div><div class="line">c := &amp;Config&#123;</div><div class="line">  ID:              <span class="number">0x01</span>,</div><div class="line">  ElectionTick:    <span class="number">10</span>,</div><div class="line">  HeartbeatTick:   <span class="number">1</span>,</div><div class="line">  Storage:         storage,</div><div class="line">  MaxSizePerMsg:   <span class="number">4096</span>,</div><div class="line">  MaxInflightMsgs: <span class="number">256</span>,</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Restart raft without peer information.</span></div><div class="line"><span class="comment">// Peer information is already included in the storage.</span></div><div class="line">n := raft.RestartNode(c)</div></pre></td></tr></table></figure>
+<h3><span id="propose-xin-de-qing-qiu">Propose新的请求</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">n.Propose(ctx, data)</div></pre></td></tr></table></figure>
+<h3><span id="qing-qiu-chu-li-luo-ji">请求处理逻辑</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span> &#123;</div><div class="line">  <span class="keyword">select</span> &#123;</div><div class="line">  <span class="keyword">case</span> &lt;-s.Ticker:</div><div class="line">    n.Tick()</div><div class="line">  <span class="keyword">case</span> rd := &lt;-s.Node.Ready():</div><div class="line">    saveToStorage(rd.State, rd.Entries, rd.Snapshot)</div><div class="line">    send(rd.Messages)</div><div class="line">    <span class="keyword">if</span> !raft.IsEmptySnap(rd.Snapshot) &#123;</div><div class="line">      processSnapshot(rd.Snapshot)</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> _, entry := <span class="keyword">range</span> rd.CommittedEntries &#123;</div><div class="line">      process(entry)</div><div class="line">      <span class="keyword">if</span> entry.Type == raftpb.EntryConfChange &#123;</div><div class="line">        <span class="keyword">var</span> cc raftpb.ConfChange</div><div class="line">        cc.Unmarshal(entry.Data)</div><div class="line">        s.Node.ApplyConfChange(cc)</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">    s.Node.Advance()</div><div class="line">  <span class="keyword">case</span> &lt;-s.done:</div><div class="line">    <span class="keyword">return</span></div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>等待s.Node.Ready channel新的请求</li>
+<li>append日志</li>
+<li>发送给其它节点</li>
+<li>apply日志</li>
+<li>调用s.Node.Advance继续接收新的请求</li>
+</ol>
+<p>定期循环调用<code>Node.Tick()</code>,用于发送心跳消息和选举消息.</p>
+<h3><span id="xiao-xi-chu-li">消息处理</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">recvRaftRPC</span><span class="params">(ctx context.Context, m raftpb.Message)</span></span> &#123;</div><div class="line">	n.Step(ctx, m)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>接收消息后，调用Step方法触发Ready处理逻辑。</p>
+<h2><span id="raft-example">Raft Example</span></h2>
+<p>分为三个部分</p>
+<ol>
+<li>对外展示的kv存储层</li>
+<li>用于raft library的存储层</li>
+<li>raft library</li>
+</ol>
+<h3><span id="kv-storage">kv storage</span></h3>
+<p>kv层通过RESTFul接口可以进行PUT/GET操作。</p>
+<p><code>raftexample/httpapi.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(h *httpKVAPI)</span> <span class="title">ServeHTTP</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</div><div class="line">    key := r.RequestURI</div><div class="line">    <span class="keyword">switch</span> &#123;</div><div class="line">    <span class="keyword">case</span> r.Method == <span class="string">"PUT"</span>:</div><div class="line">        v, err := ioutil.ReadAll(r.Body)</div><div class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">            log.Printf(<span class="string">"Failed to read on PUT (%v)\n"</span>, err)</div><div class="line">            http.Error(w, <span class="string">"Failed on PUT"</span>, http.StatusBadRequest)</div><div class="line">            <span class="keyword">return</span></div><div class="line">        &#125;</div><div class="line"></div><div class="line">        log.Printf(<span class="string">"PUT (%v):(%v)\n"</span>, key, <span class="keyword">string</span>(v))</div><div class="line">        h.store.Propose(key, <span class="keyword">string</span>(v))</div><div class="line"></div><div class="line">        <span class="comment">// Optimistic-- no waiting for ack from raft. Value is not yet</span></div><div class="line">        <span class="comment">// committed so a subsequent GET on the key may return old value</span></div><div class="line">        w.WriteHeader(http.StatusNoContent)</div><div class="line">    <span class="keyword">case</span> r.Method == <span class="string">"GET"</span>:</div><div class="line">        log.Printf(<span class="string">"GET (%v)\n"</span>, key)</div><div class="line">        <span class="keyword">if</span> v, ok := h.store.Lookup(key); ok &#123;</div><div class="line">            w.Write([]<span class="keyword">byte</span>(v))</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            http.Error(w, <span class="string">"Failed to GET"</span>, http.StatusNotFound)</div><div class="line">        &#125;</div></pre></td></tr></table></figure>
+<p>PUT通过Propose方法，进行raft请求。</p>
+<p><code>kvstore.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *kvstore)</span> <span class="title">readCommits</span><span class="params">(commitC &lt;-<span class="keyword">chan</span> *<span class="keyword">string</span>, errorC &lt;-<span class="keyword">chan</span> error)</span></span> &#123;</div><div class="line">	<span class="keyword">for</span> data := <span class="keyword">range</span> commitC &#123;</div><div class="line">		<span class="keyword">if</span> data == <span class="literal">nil</span> &#123;</div><div class="line">			<span class="comment">// done replaying log; new data incoming</span></div><div class="line">			<span class="comment">// OR signaled to load snapshot</span></div><div class="line">			snapshot, err := s.snapshotter.Load()</div><div class="line">			<span class="keyword">if</span> err == snap.ErrNoSnapshot &#123;</div><div class="line">				<span class="keyword">return</span></div><div class="line">			&#125;</div><div class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &amp;&amp; err != snap.ErrNoSnapshot &#123;</div><div class="line">				log.Panic(err)</div><div class="line">			&#125;</div><div class="line">			log.Printf(<span class="string">"loading snapshot at term %d and index %d"</span>, snapshot.Metadata.Term, snapshot.Metadata.Index)</div><div class="line">			<span class="keyword">if</span> err := s.recoverFromSnapshot(snapshot.Data); err != <span class="literal">nil</span> &#123;</div><div class="line">				log.Panic(err)</div><div class="line">			&#125;</div><div class="line">			<span class="keyword">continue</span></div><div class="line">		&#125;</div><div class="line"></div><div class="line">		<span class="keyword">var</span> dataKv kv</div><div class="line">		dec := gob.NewDecoder(bytes.NewBufferString(*data))</div><div class="line">		<span class="keyword">if</span> err := dec.Decode(&amp;dataKv); err != <span class="literal">nil</span> &#123;</div><div class="line">			log.Fatalf(<span class="string">"raftexample: could not decode message (%v)"</span>, err)</div><div class="line">		&#125;</div><div class="line">		s.mu.Lock()</div><div class="line">		s.kvStore[dataKv.Key] = dataKv.Val</div><div class="line">		s.mu.Unlock()</div><div class="line">		log.Printf(<span class="string">"add kv (%v):(%v)"</span>, dataKv.Key, dataKv.Val)</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> err, ok := &lt;-errorC; ok &#123;</div><div class="line">		log.Fatal(err)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>应用raft log，写到kv store里面。对于空信号，表示初始化，需要从snapshot中装载数据</p>
+<h3><span id="transport">Transport</span></h3>
+<p>用于raft节点间通信</p>
+<p><code>raftexample/raft.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">rc.transport = &amp;rafthttp.Transport&#123;</div><div class="line">	ID:          types.ID(rc.id),</div><div class="line">	ClusterID:   <span class="number">0x1000</span>,</div><div class="line">	Raft:        rc,</div><div class="line">	ServerStats: ss,</div><div class="line">	LeaderStats: stats.NewLeaderStats(strconv.Itoa(rc.id)),</div><div class="line">	ErrorC:      <span class="built_in">make</span>(<span class="keyword">chan</span> error),</div><div class="line">&#125;</div><div class="line"></div><div class="line">rc.transport.Start()</div><div class="line"><span class="keyword">for</span> i := <span class="keyword">range</span> rc.peers &#123;</div><div class="line">	<span class="keyword">if</span> i+<span class="number">1</span> != rc.id &#123;</div><div class="line">		rc.transport.AddPeer(types.ID(i+<span class="number">1</span>), []<span class="keyword">string</span>&#123;rc.peers[i]&#125;)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>以及接收消息后的处理逻辑：</p>
+<p><code>coreos/etcd/rafthttp/peer.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="keyword">for</span> &#123;</div><div class="line">		<span class="keyword">select</span> &#123;</div><div class="line">		<span class="keyword">case</span> mm := &lt;-p.recvc:</div><div class="line">			<span class="keyword">if</span> err := r.Process(ctx, mm); err != <span class="literal">nil</span> &#123;</div><div class="line">				plog.Warningf(<span class="string">"failed to process raft message (%v)"</span>, err)</div><div class="line">			&#125;</div><div class="line">		<span class="keyword">case</span> &lt;-p.stopc:</div><div class="line">			<span class="keyword">return</span></div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;()</div></pre></td></tr></table></figure>
+<p><code>raftexample/raft.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rc *raftNode)</span> <span class="title">Process</span><span class="params">(ctx context.Context, m raftpb.Message)</span> <span class="title">error</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> rc.node.Step(ctx, m)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3><span id="raft-storage">raft storage</span></h3>
+<p>raft storage层借助<code>snap</code>，<code>wal</code>，<code>MemoryStorage</code>,完成日志，快照以及内存存储。</p>
+<h4><span id="replay-wal">Replay WAL</span></h4>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rc *raftNode)</span> <span class="title">replayWAL</span><span class="params">()</span> *<span class="title">wal</span>.<span class="title">WAL</span></span> &#123;</div><div class="line">	log.Printf(<span class="string">"replaying WAL of member %d"</span>, rc.id)</div><div class="line">	snapshot := rc.loadSnapshot()</div><div class="line">	w := rc.openWAL(snapshot)</div><div class="line">	_, st, ents, err := w.ReadAll()</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Fatalf(<span class="string">"raftexample: failed to read WAL (%v)"</span>, err)</div><div class="line">	&#125;</div><div class="line">	rc.raftStorage = raft.NewMemoryStorage()</div><div class="line">	<span class="keyword">if</span> snapshot != <span class="literal">nil</span> &#123;</div><div class="line">		log.Printf(<span class="string">"Applysnpshot %v"</span>, *snapshot)</div><div class="line">		rc.raftStorage.ApplySnapshot(*snapshot)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	log.Printf(<span class="string">"replaying WAL st:(%v)"</span>, st)</div><div class="line">	rc.raftStorage.SetHardState(st)</div><div class="line"></div><div class="line">	<span class="comment">// append to storage so raft starts at the right place in log</span></div><div class="line">	log.Printf(<span class="string">"replaying WAL ents:(%d)"</span>, <span class="built_in">len</span>(ents))</div><div class="line">	rc.raftStorage.Append(ents)</div></pre></td></tr></table></figure>
+<h4><span id="chu-li-qing-qiu">处理请求</span></h4>
+<p><code>raft.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// store raft entries to wal, then publish over commit channel</span></div><div class="line"><span class="keyword">case</span> rd := &lt;-rc.node.Ready():</div><div class="line">	rc.wal.Save(rd.HardState, rd.Entries)</div><div class="line">	<span class="keyword">if</span> !raft.IsEmptySnap(rd.Snapshot) &#123;</div><div class="line">		log.Printf(<span class="string">"rd.Snapshot (%v)"</span>, rd.Snapshot)</div><div class="line">		rc.saveSnap(rd.Snapshot)</div><div class="line">		rc.raftStorage.ApplySnapshot(rd.Snapshot)</div><div class="line">		rc.publishSnapshot(rd.Snapshot)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	log.Printf(<span class="string">"rd.Entries (%v)"</span>, rd.Entries)</div><div class="line">	rc.raftStorage.Append(rd.Entries)</div><div class="line">	log.Printf(<span class="string">"rd.Messages (%v)"</span>, rd.Messages)</div><div class="line">	rc.transport.Send(rd.Messages)</div><div class="line">	<span class="keyword">if</span> ok := rc.publishEntries(rc.entriesToApply(rd.CommittedEntries)); !ok &#123;</div><div class="line">		rc.stop()</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line">	rc.maybeTriggerSnapshot()</div><div class="line">	rc.node.Advance()</div></pre></td></tr></table></figure>
+<p>先写WAL，然后append日志，Send给其它节点，最后publishEntries进行应用。</p>
+<h2><span id="can-kao-lian-jie">参考链接</span></h2>
+<ol>
+<li><a href="https://github.com/coreos/etcd/tree/master/raft" target="_blank" rel="external">raft library</a></li>
+<li><a href="https://github.com/coreos/etcd/tree/master/contrib/raftexample" target="_blank" rel="external">raft example</a></li>
+<li><a href="http://www.jianshu.com/p/138b4d267084" target="_blank" rel="external">pincap raft</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/12/12/raft-library/">Raft library使用</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年12月12日 - 14:12</p>
+  <p><span>最后更新:</span>2017年12月12日 - 17:12</p>
+  <p><span>原始链接:</span><a href="/2017/12/12/raft-library/">/2017/12/12/raft-library/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/raft/" rel="tag"># raft</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/30/critique-ansi-sql-isolation/" rel="next" title="A Critique of ANSI SQL Isolation Levels">
+                <i class="fa fa-chevron-left"></i> A Critique of ANSI SQL Isolation Levels
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Louis" />
+          <p class="site-author-name" itemprop="name">Louis</p>
+           
+              <p class="site-description motion-element" itemprop="description">记录工作和生活点滴</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">52</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">74</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/louishust" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">Raft library介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">使用方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text">启动三个节点的集群</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text">启动单节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text">重启节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.4.</span> <span class="nav-text">Propose新的请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.5.</span> <span class="nav-text">请求处理逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.6.</span> <span class="nav-text">消息处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">Raft Example</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">kv storage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text">Transport</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text">raft storage</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.1.</span> <span class="nav-text">Replay WAL</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.</span> <span class="nav-text">处理请求</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Louis</span>
+
+  
+</div>
+
+
+  <div class="powered-by">
+    由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+  </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">
+    主题 &mdash;
+    <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+      NexT.Mist
+    </a>
+  </div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/jquery/2.1.3/jquery.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/fastclick/1.0.6/fastclick.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.ui.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
