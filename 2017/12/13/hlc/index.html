@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link href="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+  
+
+<link href="//cdn.staticfile.org/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="hlc," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="HLC HLC是Hybrid Logical Clock的缩写，混合逻辑时钟。时钟分为物理时钟和逻辑时钟。 物理时钟: 电子设备，计算有固定频率晶体的震荡次数，存在时钟偏移和时钟漂移，会导致时钟不连续的变化，比如时间回退等, 以及长时间使用导致时钟存在偏差，普通石英晶体时钟漂移率在(10)-6s/s, 即每1 000 000s会导致1s的偏差。 原子钟的偏倚率在(10)-13. 逻辑时钟: 时间发">
+<meta name="keywords" content="hlc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="crdb HLC 实现">
+<meta property="og:url" content="http://yoursite.com/2017/12/13/hlc/index.html">
+<meta property="og:site_name" content="小贝壳爸爸">
+<meta property="og:description" content="HLC HLC是Hybrid Logical Clock的缩写，混合逻辑时钟。时钟分为物理时钟和逻辑时钟。 物理时钟: 电子设备，计算有固定频率晶体的震荡次数，存在时钟偏移和时钟漂移，会导致时钟不连续的变化，比如时间回退等, 以及长时间使用导致时钟存在偏差，普通石英晶体时钟漂移率在(10)-6s/s, 即每1 000 000s会导致1s的偏差。 原子钟的偏倚率在(10)-13. 逻辑时钟: 时间发">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-13T06:45:55.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="crdb HLC 实现">
+<meta name="twitter:description" content="HLC HLC是Hybrid Logical Clock的缩写，混合逻辑时钟。时钟分为物理时钟和逻辑时钟。 物理时钟: 电子设备，计算有固定频率晶体的震荡次数，存在时钟偏移和时钟漂移，会导致时钟不连续的变化，比如时间回退等, 以及长时间使用导致时钟存在偏差，普通石英晶体时钟漂移率在(10)-6s/s, 即每1 000 000s会导致1s的偏差。 原子钟的偏倚率在(10)-13. 逻辑时钟: 时间发">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/12/13/hlc/"/>
+
+
+
+
+
+  <title>crdb HLC 实现 | 小贝壳爸爸</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小贝壳爸爸</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">天桥扛把子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/13/hlc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">crdb HLC 实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-13T13:36:43+08:00">
+                2017-12-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2><span id="hlc">HLC</span></h2>
+<p>HLC是Hybrid Logical Clock的缩写，混合逻辑时钟。时钟分为物理时钟和逻辑时钟。</p>
+<p><code>物理时钟</code>: 电子设备，计算有固定频率晶体的震荡次数，存在时钟偏移和时钟漂移，会导致时钟不连续的变化，比如时间回退等, 以及长时间使用导致时钟存在偏差，普通石英晶体时钟漂移率在(10)-6s/s, 即每1 000 000s会导致1s的偏差。 原子钟的偏倚率在(10)-13.</p>
+<p><code>逻辑时钟</code>: 时间发生的逻辑顺序，可以是顺序的序号，和物理时间相对。</p>
+<p>HLC同时使用了物理时钟和逻辑时钟，能够保证单点的时间发生器是单调递增的，同时能够尽量控制不同节点之间的时钟偏差在规定的误差范围内。主要用于分布式系统中。</p>
+<a id="more"></a>
+<h2><span id="hlc-shi-xian">HLC实现</span></h2>
+<p><code>pkg/util/hlc/hlc.go</code></p>
+<h3><span id="jie-gou-ti">结构体</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Timestamp <span class="keyword">struct</span> &#123;</div><div class="line">	<span class="comment">// Holds a wall time, typically a unix epoch time expressed in</span></div><div class="line">	<span class="comment">// nanoseconds.</span></div><div class="line">	WallTime <span class="keyword">int64</span> <span class="string">`protobuf:"varint,1,opt,name=wall_time,json=wallTime,proto3" json:"wall_time,omitempty"`</span></div><div class="line">	<span class="comment">// The logical component captures causality for events whose wall</span></div><div class="line">	<span class="comment">// times are equal. It is effectively bounded by (maximum clock</span></div><div class="line">	<span class="comment">// skew)/(minimal ns between events) and nearly impossible to</span></div><div class="line">	<span class="comment">// overflow.</span></div><div class="line">	Logical <span class="keyword">int32</span> <span class="string">`protobuf:"varint,2,opt,name=logical,proto3" json:"logical,omitempty"`</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>分为两部分，WallTime表示物理时钟，单位是纳秒，Logical表示逻辑时钟，用于在WallTime相同的时候，进行递增。 Timestamp是绝对单调递增的，单点内不存在相同的Timestamp，不存在时钟的回退。</p>
+<h3><span id="wu-li-shi-zhong-de-huo-qu">物理时钟的获取</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Clock)</span> <span class="title">PhysicalNow</span><span class="params">()</span> <span class="title">int64</span></span> &#123;</div><div class="line">	c.mu.Lock()</div><div class="line">	<span class="keyword">defer</span> c.mu.Unlock()</div><div class="line">	<span class="keyword">return</span> c.getPhysicalClockLocked()</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Clock)</span> <span class="title">getPhysicalClockLocked</span><span class="params">()</span> <span class="title">int64</span></span> &#123;</div><div class="line">	newTime := c.physicalClock()</div><div class="line"></div><div class="line">	<span class="keyword">if</span> c.mu.lastPhysicalTime != <span class="number">0</span> &#123;</div><div class="line">		interval := c.mu.lastPhysicalTime - newTime</div><div class="line">		<span class="keyword">if</span> interval &gt; <span class="keyword">int64</span>(c.maxOffset/<span class="number">10</span>) &#123;</div><div class="line">			c.mu.monotonicityErrorsCount++</div><div class="line">			log.Warningf(context.TODO(), <span class="string">"backward time jump detected (%f seconds)"</span>, <span class="keyword">float64</span>(-interval)/<span class="number">1e9</span>)</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	c.mu.lastPhysicalTime = newTime</div><div class="line">	<span class="keyword">return</span> newTime</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// UnixNano returns the local machine's physical nanosecond</span></div><div class="line"><span class="comment">// unix epoch timestamp as a convenience to create a HLC via</span></div><div class="line"><span class="comment">// c := hlc.NewClock(hlc.UnixNano, ...).</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">UnixNano</span><span class="params">()</span> <span class="title">int64</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> timeutil.Now().UnixNano()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中c.physicalClock()即调用函数UnixNano(), 直接获取当前操作系统的时间。</p>
+<h3><span id="luo-ji-shi-zhong-de-huo-qu-luo-ji">逻辑时钟的获取逻辑</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Clock)</span> <span class="title">Now</span><span class="params">()</span> <span class="title">Timestamp</span></span> &#123;</div><div class="line">	c.mu.Lock()</div><div class="line">	<span class="keyword">defer</span> c.mu.Unlock()</div><div class="line">	<span class="keyword">if</span> physicalClock := c.getPhysicalClockLocked(); c.mu.timestamp.WallTime &gt;= physicalClock &#123;</div><div class="line">		<span class="comment">// The wall time is ahead, so the logical clock ticks.</span></div><div class="line">		c.mu.timestamp.Logical++</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		<span class="comment">// Use the physical clock, and reset the logical one.</span></div><div class="line">		c.mu.timestamp.WallTime = physicalClock</div><div class="line">		c.mu.timestamp.Logical = <span class="number">0</span></div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>如果获取的物理时钟小于之前的WallTime，则只进行逻辑时钟的递增。否则，重置WallTime为最新的physicalClock。</p>
+<h3><span id="bu-tong-jie-dian-jian-shi-zhong-tong-bu">不同节点间时钟同步</span></h3>
+<p>分布式系统中，每个节点的时间是不精确的，各个节点的HLC也无法准确判断先后顺序，故分布式系统时间处理上出现了两种方式：</p>
+<ol>
+<li><code>Timestamp oracle</code>: 专门的一台机器用于生成时间戳。优点是时间全局排序唯一，缺点是TO存在单点问题, 跨机房问题，以及性能瓶颈问题。</li>
+<li><code>Spanner</code>: 通过高精度物理时钟，如原子钟、GPS，保证节点间的时钟误差在合理范围，比如Spanner能保证节点间时间误差在10ms以内。优点是完全分布式，无单点，缺点是无全局排序唯一的时间生成。</li>
+</ol>
+<p>crdb使用类似snapper的方式，但是没有使用专用硬件，需要通过节点间通信来控制节点间的时钟误差。</p>
+<p>所有节点间的gRPC消息都会把时间戳带入到消息中，接收到消息的节点会通过消息中的时间戳更新自己的时间, 从而达到节点间时间同步的效果。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Clock)</span> <span class="title">updateLocked</span><span class="params">(rt Timestamp, updateIfMaxOffsetExceeded <span class="keyword">bool</span>)</span> <span class="params">(Timestamp, error)</span></span> &#123;</div><div class="line">	<span class="keyword">var</span> err error</div><div class="line">	physicalClock := c.getPhysicalClockLocked()</div><div class="line"></div><div class="line">	<span class="keyword">if</span> physicalClock &gt; c.mu.timestamp.WallTime &amp;&amp; physicalClock &gt; rt.WallTime &#123;</div><div class="line">		<span class="comment">// Our physical clock is ahead of both wall times. It is used</span></div><div class="line">		<span class="comment">// as the new wall time and the logical clock is reset.</span></div><div class="line">		c.mu.timestamp.WallTime = physicalClock</div><div class="line">		c.mu.timestamp.Logical = <span class="number">0</span></div><div class="line">		<span class="keyword">return</span> c.mu.timestamp, <span class="literal">nil</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	offset := time.Duration(rt.WallTime - physicalClock)</div><div class="line">	<span class="keyword">if</span> c.maxOffset &gt; <span class="number">0</span> &amp;&amp; c.maxOffset != timeutil.ClocklessMaxOffset &amp;&amp; offset &gt; c.maxOffset &#123;</div><div class="line">		err = fmt.Errorf(<span class="string">"remote wall time is too far ahead (%s) to be trustworthy"</span>, offset)</div><div class="line">		<span class="keyword">if</span> !updateIfMaxOffsetExceeded &#123;</div><div class="line">			<span class="keyword">return</span> Timestamp&#123;&#125;, err</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// In the remaining cases, our physical clock plays no role</span></div><div class="line">	<span class="comment">// as it is behind the local or remote wall times. Instead,</span></div><div class="line">	<span class="comment">// the logical clock comes into play.</span></div><div class="line">	<span class="keyword">if</span> rt.WallTime &gt; c.mu.timestamp.WallTime &#123;</div><div class="line">		<span class="comment">// The remote clock is ahead of ours, and we update</span></div><div class="line">		<span class="comment">// our own logical clock with theirs.</span></div><div class="line">		c.mu.timestamp.WallTime = rt.WallTime</div><div class="line">		c.mu.timestamp.Logical = rt.Logical + <span class="number">1</span></div><div class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> c.mu.timestamp.WallTime &gt; rt.WallTime &#123;</div><div class="line">		<span class="comment">// Our wall time is larger, so it remains but we tick</span></div><div class="line">		<span class="comment">// the logical clock.</span></div><div class="line">		c.mu.timestamp.Logical++</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		<span class="comment">// Both wall times are equal, and the larger logical</span></div><div class="line">		<span class="comment">// clock is used for the update.</span></div><div class="line">		<span class="keyword">if</span> rt.Logical &gt; c.mu.timestamp.Logical &#123;</div><div class="line">			c.mu.timestamp.Logical = rt.Logical</div><div class="line">		&#125;</div><div class="line">		c.mu.timestamp.Logical++</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> c.mu.timestamp, err</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>rt表示rpc中消息的时间戳， 更新逻辑如下：</p>
+<ol>
+<li>
+<p>获取本地物理时间pt</p>
+</li>
+<li>
+<p>如果pt大于之前的<code>c.mu.timestamp.WallTime</code>本地时间，且pt大于rt，则使用pt时间</p>
+</li>
+<li>
+<p>如果rt时间大于<code>c.mu.timestamp.WallTime</code><br>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">c.mu.timestamp.WallTime = rt.WallTime</div><div class="line">c.mu.timestamp.Logical = rt.Logical + 1</div></pre></td></tr></table></figure></p>
+</li>
+<li>
+<p>如果rt时间小于<code>c.mu.timestamp.WallTime</code><br>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">c.mu.timestamp.Logical = rt.Logical + 1</div></pre></td></tr></table></figure></p>
+</li>
+<li>
+<p>如果rt时间等于<code>c.mu.timestamp.WallTime</code><br>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">if rt.Logical &gt; c.mu.timestamp.Logical &#123;</div><div class="line">	c.mu.timestamp.Logical = rt.Logical</div><div class="line">&#125;</div><div class="line">c.mu.timestamp.Logical++</div></pre></td></tr></table></figure></p>
+</li>
+</ol>
+<p>总之就是比较pt，rt, <code>c.mu.timestamp</code>，取其最大者作为最新时间。</p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/12/13/hlc/">crdb HLC 实现</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年12月13日 - 13:12</p>
+  <p><span>最后更新:</span>2017年12月13日 - 14:12</p>
+  <p><span>原始链接:</span><a href="/2017/12/13/hlc/">/2017/12/13/hlc/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/hlc/" rel="tag"># hlc</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/12/raft-library/" rel="next" title="Raft library使用">
+                <i class="fa fa-chevron-left"></i> Raft library使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Louis" />
+          <p class="site-author-name" itemprop="name">Louis</p>
+           
+              <p class="site-description motion-element" itemprop="description">记录工作和生活点滴</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">53</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">75</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/louishust" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">HLC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">HLC实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text">结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text">物理时钟的获取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text">逻辑时钟的获取逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.4.</span> <span class="nav-text">不同节点间时钟同步</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Louis</span>
+
+  
+</div>
+
+
+  <div class="powered-by">
+    由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+  </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">
+    主题 &mdash;
+    <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+      NexT.Mist
+    </a>
+  </div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/jquery/2.1.3/jquery.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/fastclick/1.0.6/fastclick.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.ui.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
