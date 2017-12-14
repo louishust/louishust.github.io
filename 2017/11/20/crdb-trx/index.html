@@ -105,7 +105,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="session.txnState初始化 如果当前session不在事务中，则reset session的txnState pkg/sql/executor.go 1234567txnState.resetForNewSQLTxn(	e, session,	autoCommit, /* implicitTxn */	false,      /* retryIntent */	e.cfg.Clock.">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-12-11T05:43:46.000Z">
+<meta property="og:updated_time" content="2017-12-14T02:11:47.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="crdb-trx">
 <meta name="twitter:description" content="session.txnState初始化 如果当前session不在事务中，则reset session的txnState pkg/sql/executor.go 1234567txnState.resetForNewSQLTxn(	e, session,	autoCommit, /* implicitTxn */	false,      /* retryIntent */	e.cfg.Clock.">
@@ -329,6 +329,11 @@
           
 
           
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
 
           
 
@@ -355,6 +360,10 @@
 <h3><span id="resetfornewsqltxn-sheng-cheng-internal-txn">resetForNewSQLTxn 生成internal txn</span></h3>
 <p><code>pkg/sql/session.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ts *txnState)</span> <span class="title">resetForNewSQLTxn</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params"></span></span></div><div class="line"><span class="function"><span class="params">	ts.retryIntent = retryIntent</span></span></div><div class="line"><span class="function"><span class="params">	// Reset state vars to defaults.</span></span></div><div class="line"><span class="function"><span class="params">	ts.commitSeen = <span class="literal">false</span></span></span></div><div class="line"><span class="function"><span class="params">	ts.sqlTimestamp = sqlTimestamp</span></span></div><div class="line"><span class="function"><span class="params">	ts.implicitTxn = implicitTxn</span></span></div><div class="line"><span class="function"><span class="params">	ts.txnResults = s.ResultsWriter.NewResultsGroup()</span></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function">    //设置状态为<span class="title">AutoRetry</span></span></div><div class="line"><span class="function">	<span class="title">ts</span>.<span class="title">SetState</span><span class="params">(AutoRetry)</span></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function">    // 生成<span class="title">internal</span> <span class="title">txn</span></span></div><div class="line"><span class="function">	<span class="title">ts</span>.<span class="title">mu</span>.<span class="title">txn</span> = <span class="title">client</span>.<span class="title">NewTxn</span><span class="params">(e.cfg.DB, e.cfg.NodeID.Get()</span>)</span></div></pre></td></tr></table></figure>
+<h3><span id="txn-shi-jian-chuo">txn时间戳</span></h3>
+<p><code>pkg/internal/client/txn.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewTxn</span><span class="params">(db *DB, gatewayNodeID roachpb.NodeID)</span> *<span class="title">Txn</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> NewTxnWithProto(db, gatewayNodeID, roachpb.MakeTransaction(</div><div class="line">		<span class="string">"unnamed"</span>,</div><div class="line">		<span class="literal">nil</span>, <span class="comment">// baseKey</span></div><div class="line">		roachpb.NormalUserPriority,</div><div class="line">		enginepb.SERIALIZABLE,</div><div class="line">		db.clock.Now(),</div><div class="line">		db.clock.MaxOffset().Nanoseconds(),</div><div class="line">	))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>使用HLC <code>clock.Now</code>获取当前时间戳。</p>
 <h3><span id="e-cfg-db-de-lai-yuan">e.cfg.DB的来源</span></h3>
 <p><code>pkg/server/server.go</code></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">NewServer</div><div class="line"></div><div class="line">    s.db = client.NewDB(s.txnCoordSender, s.clock)</div><div class="line"></div><div class="line">	execCfg := sql.ExecutorConfig&#123;</div><div class="line">		Settings:                s.st,</div><div class="line">		NodeInfo:                nodeInfo,</div><div class="line">		AmbientCtx:              s.cfg.AmbientCtx,</div><div class="line">		DB:                      s.db,</div><div class="line">		Gossip:                  s.gossip,</div><div class="line">		DistSender:              s.distSender,</div><div class="line">	</div><div class="line">	s.sqlExecutor = sql.NewExecutor(execCfg, s.stopper)</div></pre></td></tr></table></figure>
@@ -607,7 +616,7 @@ tid,indexid,2,0 familyid</p>
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">session.txnState初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.1.</span> <span class="nav-text">如果当前session不在事务中，则reset session的txnState</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.</span> <span class="nav-text">resetForNewSQLTxn 生成internal txn</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.3.</span> <span class="nav-text">e.cfg.DB的来源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.4.</span> <span class="nav-text">server初始化的clock, 赋值给所有的其它使用clock的地方</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">begin设置事务状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">transaction record</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">txn.mu.Proto初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">value存储</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text">MarshalColumnValue</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">IndexKeyPrefix  key前缀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">7.</span> <span class="nav-text">BatchRequest初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">7.1.</span> <span class="nav-text">BA Header初始化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">8.</span> <span class="nav-text">BatchRequest转为command</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">9.</span> <span class="nav-text">选择engine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">10.</span> <span class="nav-text">rocksdb encode key</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">11.</span> <span class="nav-text">ba.txn初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">12.</span> <span class="nav-text">transaction record</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">13.</span> <span class="nav-text">sendtfunc (ds *DistSender) sendToReplicas(</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">session.txnState初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.1.</span> <span class="nav-text">如果当前session不在事务中，则reset session的txnState</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.</span> <span class="nav-text">resetForNewSQLTxn 生成internal txn</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.3.</span> <span class="nav-text">txn时间戳</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.4.</span> <span class="nav-text">e.cfg.DB的来源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.5.</span> <span class="nav-text">server初始化的clock, 赋值给所有的其它使用clock的地方</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">begin设置事务状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">transaction record</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">txn.mu.Proto初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">value存储</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text">MarshalColumnValue</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">IndexKeyPrefix  key前缀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">7.</span> <span class="nav-text">BatchRequest初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">7.1.</span> <span class="nav-text">BA Header初始化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">8.</span> <span class="nav-text">BatchRequest转为command</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">9.</span> <span class="nav-text">选择engine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">10.</span> <span class="nav-text">rocksdb encode key</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">11.</span> <span class="nav-text">ba.txn初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">12.</span> <span class="nav-text">transaction record</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">13.</span> <span class="nav-text">sendtfunc (ds *DistSender) sendToReplicas(</span></a></li></ol></div>
             
 
           </div>
@@ -662,6 +671,26 @@ tid,indexid,2,0 familyid</p>
 
 
         
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
 
 
 
