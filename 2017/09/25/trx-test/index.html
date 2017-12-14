@@ -102,7 +102,7 @@
 <meta name="keywords" content="mysql,cockroachdb,transaction,pg,snapshot isolation">
 <meta property="og:type" content="article">
 <meta property="og:title" content="事务快照行为对比测试">
-<meta property="og:url" content="http://yoursite.com/2017/09/25/trx-test/index.html">
+<meta property="og:url" content="http://louishust.github.io/2017/09/25/trx-test/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="snapshot vs RR RR隔离级别属于正式规定的四种隔离级别中的一种，SS属于一种衍生的隔离级别。 两者均通过MVCC实现快照读，读不上锁，写上锁。 两者的区别是在出现冲突写的情况时：  RR只会阻塞冲突写，待一方事务结束(commit或rollback)，等待的事务继续执行。 SS会阻塞冲突写，持有锁的事务COMMIT提交后，等待的事务必须回滚。  SS隔离级别更高。">
 <meta property="og:locale" content="zh-Hans">
@@ -138,7 +138,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/09/25/trx-test/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/09/25/trx-test/"/>
 
 
 
@@ -281,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/25/trx-test/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/09/25/trx-test/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -353,7 +353,7 @@
 
           
             <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Viewed
             <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
             </span>
           
@@ -443,8 +443,8 @@
 <p>pg</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SET</span> <span class="keyword">TRANSACTION</span> <span class="keyword">ISOLATION</span> <span class="keyword">LEVEL</span> REPEATABLE <span class="keyword">READ</span>;</div></pre></td></tr></table></figure>
 <h2><span id="can-kao-lian-jie">参考链接</span></h2>
-<p>*<a href="https://en.wikipedia.org/wiki/Isolation_(database_systems)" target="_blank" rel="external">trx isolation</a><br>
-*<a href="https://en.wikipedia.org/wiki/Snapshot_isolation" target="_blank" rel="external">snapshot isolation</a></p>
+<p>*<a href="https://en.wikipedia.org/wiki/Isolation_(database_systems)" target="_blank" rel="noopener">trx isolation</a><br>
+*<a href="https://en.wikipedia.org/wiki/Snapshot_isolation" target="_blank" rel="noopener">snapshot isolation</a></p>
 
       
     </div>
@@ -663,7 +663,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">snapshot vs RR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">准备数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">测试用例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">测试结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">测试脚本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="snapshot-vs-rr">snapshot vs RR</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="zhun-bei-shu-ju">&#x51C6;&#x5907;&#x6570;&#x636E;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="ce-shi-yong-li">&#x6D4B;&#x8BD5;&#x7528;&#x4F8B;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="ce-shi-jie-guo">&#x6D4B;&#x8BD5;&#x7ED3;&#x679C;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text"><span id="ce-shi-jiao-ben">&#x6D4B;&#x8BD5;&#x811A;&#x672C;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text"><span id="can-kao-lian-jie">&#x53C2;&#x8003;&#x94FE;&#x63A5;</span></span></a></li></ol></div>
             
 
           </div>

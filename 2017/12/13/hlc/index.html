@@ -102,7 +102,7 @@
 <meta name="keywords" content="hlc">
 <meta property="og:type" content="article">
 <meta property="og:title" content="crdb HLC 实现">
-<meta property="og:url" content="http://yoursite.com/2017/12/13/hlc/index.html">
+<meta property="og:url" content="http://louishust.github.io/2017/12/13/hlc/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="HLC HLC是Hybrid Logical Clock的缩写，混合逻辑时钟。时钟分为物理时钟和逻辑时钟。 物理时钟: 电子设备，计算有固定频率晶体的震荡次数，存在时钟偏移和时钟漂移，会导致时钟不连续的变化，比如时间回退等, 以及长时间使用导致时钟存在偏差，普通石英晶体时钟漂移率在(10)-6s/s, 即每1 000 000s会导致1s的偏差。 原子钟的偏倚率在(10)-13. 逻辑时钟: 时间发">
 <meta property="og:locale" content="zh-Hans">
@@ -138,7 +138,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/12/13/hlc/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/12/13/hlc/"/>
 
 
 
@@ -281,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/13/hlc/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/12/13/hlc/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -353,7 +353,7 @@
 
           
             <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Viewed
             <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
             </span>
           
@@ -633,7 +633,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">HLC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">HLC实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text">结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text">物理时钟的获取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text">逻辑时钟的获取逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.4.</span> <span class="nav-text">不同节点间时钟同步</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="hlc">HLC</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="hlc-shi-xian">HLC&#x5B9E;&#x73B0;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text"><span id="jie-gou-ti">&#x7ED3;&#x6784;&#x4F53;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text"><span id="wu-li-shi-zhong-de-huo-qu">&#x7269;&#x7406;&#x65F6;&#x949F;&#x7684;&#x83B7;&#x53D6;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text"><span id="luo-ji-shi-zhong-de-huo-qu-luo-ji">&#x903B;&#x8F91;&#x65F6;&#x949F;&#x7684;&#x83B7;&#x53D6;&#x903B;&#x8F91;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.4.</span> <span class="nav-text"><span id="bu-tong-jie-dian-jian-shi-zhong-tong-bu">&#x4E0D;&#x540C;&#x8282;&#x70B9;&#x95F4;&#x65F6;&#x949F;&#x540C;&#x6B65;</span></span></a></li></ol></li></ol></div>
             
 
           </div>

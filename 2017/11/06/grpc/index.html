@@ -102,7 +102,7 @@
 <meta name="keywords" content="grpc">
 <meta property="og:type" content="article">
 <meta property="og:title" content="gRPC使用">
-<meta property="og:url" content="http://yoursite.com/2017/11/06/grpc/index.html">
+<meta property="og:url" content="http://louishust.github.io/2017/11/06/grpc/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="gRPC简介 grpc是google remote procedure call, 远程过程调用。多用于分布式服务。服务端定义服务的具体实现，客户端直接调用服务端的实现，得到对应的返回。gRPC以protocol buffer作为消息序列化工具，封装了客户端与服务器之间的消息通信，">
 <meta property="og:locale" content="zh-Hans">
@@ -138,7 +138,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/11/06/grpc/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/11/06/grpc/"/>
 
 
 
@@ -281,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/06/grpc/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/11/06/grpc/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -353,7 +353,7 @@
 
           
             <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Viewed
             <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
             </span>
           
@@ -404,9 +404,9 @@
 </ol>
 <h2><span id="xiang-guan-lian-jie">相关链接</span></h2>
 <ol>
-<li><a href="https://grpc.io/docs/guides/" target="_blank" rel="external">What is gRPC?</a></li>
-<li><a href="https://grpc.io/docs/quickstart/go.html" target="_blank" rel="external">Go Quick Start</a></li>
-<li><a href="https://github.com/louishust/grpc-example" target="_blank" rel="external">Example</a></li>
+<li><a href="https://grpc.io/docs/guides/" target="_blank" rel="noopener">What is gRPC?</a></li>
+<li><a href="https://grpc.io/docs/quickstart/go.html" target="_blank" rel="noopener">Go Quick Start</a></li>
+<li><a href="https://github.com/louishust/grpc-example" target="_blank" rel="noopener">Example</a></li>
 </ol>
 
       
@@ -618,7 +618,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">gRPC简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">服务定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">将proto文件转化为go代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">编写服务器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text">实现rpc方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text">监听端口&开启服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">编写客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="grpc-jian-jie">gRPC&#x7B80;&#x4ECB;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="fu-wu-ding-yi">&#x670D;&#x52A1;&#x5B9A;&#x4E49;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="jiang-proto-wen-jian-zhuan-hua-wei-go-dai-ma">&#x5C06;proto&#x6587;&#x4EF6;&#x8F6C;&#x5316;&#x4E3A;go&#x4EE3;&#x7801;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="bian-xie-fu-wu-qi">&#x7F16;&#x5199;&#x670D;&#x52A1;&#x5668;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text"><span id="shi-xian-rpc-fang-fa">&#x5B9E;&#x73B0;rpc&#x65B9;&#x6CD5;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text"><span id="jian-ting-duan-kou-amp-kai-qi-fu-wu">&#x76D1;&#x542C;&#x7AEF;&#x53E3;&amp;&#x5F00;&#x542F;&#x670D;&#x52A1;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text"><span id="bian-xie-ke-hu-duan">&#x7F16;&#x5199;&#x5BA2;&#x6237;&#x7AEF;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text"><span id="xiang-guan-lian-jie">&#x76F8;&#x5173;&#x94FE;&#x63A5;</span></span></a></li></ol></div>
             
 
           </div>

@@ -102,7 +102,7 @@
 <meta name="keywords" content="mysql,install,compile">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL源码学习001--Mac下MySQL 5.7.18源码安装">
-<meta property="og:url" content="http://yoursite.com/2017/09/01/install-mysql-5-7-18/index.html">
+<meta property="og:url" content="http://louishust.github.io/2017/09/01/install-mysql-5-7-18/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="下载源码包 1234567➜  src pwd/home/vagrant/src➜  src wget https://cdn.mysql.com//Downloads/MySQL-5.7/mysql-boost-5.7.18.tar.gz➜  src tar -xzvf mysql-boost-5.7.18.tar.gz➜  src ln -s mysql-5.7.18 mysql➜  src">
 <meta property="og:locale" content="zh-Hans">
@@ -138,7 +138,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/09/01/install-mysql-5-7-18/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/09/01/install-mysql-5-7-18/"/>
 
 
 
@@ -281,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/01/install-mysql-5-7-18/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/09/01/install-mysql-5-7-18/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -364,7 +364,7 @@
 
           
             <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Viewed
             <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
             </span>
           
@@ -403,10 +403,10 @@
 <h2><span id="can-kao-wen-dang">参考文档</span></h2>
 <ul>
 <li>
-<p><a href="https://dev.mysql.com/doc/refman/5.7/en/source-installation.html" target="_blank" rel="external">https://dev.mysql.com/doc/refman/5.7/en/source-installation.html</a></p>
+<p><a href="https://dev.mysql.com/doc/refman/5.7/en/source-installation.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/source-installation.html</a></p>
 </li>
 <li>
-<p><a href="https://dev.mysql.com/doc/refman/5.7/en/data-directory-initialization-mysqld.html" target="_blank" rel="external">https://dev.mysql.com/doc/refman/5.7/en/data-directory-initialization-mysqld.html</a></p>
+<p><a href="https://dev.mysql.com/doc/refman/5.7/en/data-directory-initialization-mysqld.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/data-directory-initialization-mysqld.html</a></p>
 </li>
 </ul>
 
@@ -623,7 +623,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">下载源码包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">安装依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">编译DEBUG版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">初始化数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">手动生成配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">调试MySQL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">7.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="xia-zai-yuan-ma-bao">&#x4E0B;&#x8F7D;&#x6E90;&#x7801;&#x5305;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="an-zhuang-yi-lai">&#x5B89;&#x88C5;&#x4F9D;&#x8D56;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="bian-yi-debug-ban-ben">&#x7F16;&#x8BD1;DEBUG&#x7248;&#x672C;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="chu-shi-hua-shu-ju-ku">&#x521D;&#x59CB;&#x5316;&#x6570;&#x636E;&#x5E93;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text"><span id="shou-dong-sheng-cheng-pei-zhi-wen-jian">&#x624B;&#x52A8;&#x751F;&#x6210;&#x914D;&#x7F6E;&#x6587;&#x4EF6;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text"><span id="diao-shi-mysql">&#x8C03;&#x8BD5;MySQL</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">7.</span> <span class="nav-text"><span id="can-kao-wen-dang">&#x53C2;&#x8003;&#x6587;&#x6863;</span></span></a></li></ol></div>
             
 
           </div>

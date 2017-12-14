@@ -102,7 +102,7 @@
 <meta name="keywords" content="raft">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Raft library使用">
-<meta property="og:url" content="http://yoursite.com/2017/12/12/raft-library/index.html">
+<meta property="og:url" content="http://louishust.github.io/2017/12/12/raft-library/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="Raft library介绍 Raft library是etcd中的raft实现，只实现了Raft算法，使用者需要自己提供transportation层用于节点间通信，storage层用于持久化Raft log和state. Raft library实现如下特性：  Leader election Log replication Log compaction Membership changes">
 <meta property="og:locale" content="zh-Hans">
@@ -138,7 +138,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/12/12/raft-library/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/12/12/raft-library/"/>
 
 
 
@@ -281,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/12/raft-library/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/12/12/raft-library/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -353,7 +353,7 @@
 
           
             <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Viewed
             <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
             </span>
           
@@ -449,9 +449,9 @@
 <p>先写WAL，然后append日志，Send给其它节点，最后publishEntries进行应用。</p>
 <h2><span id="can-kao-lian-jie">参考链接</span></h2>
 <ol>
-<li><a href="https://github.com/coreos/etcd/tree/master/raft" target="_blank" rel="external">raft library</a></li>
-<li><a href="https://github.com/coreos/etcd/tree/master/contrib/raftexample" target="_blank" rel="external">raft example</a></li>
-<li><a href="http://www.jianshu.com/p/138b4d267084" target="_blank" rel="external">pincap raft</a></li>
+<li><a href="https://github.com/coreos/etcd/tree/master/raft" target="_blank" rel="noopener">raft library</a></li>
+<li><a href="https://github.com/coreos/etcd/tree/master/contrib/raftexample" target="_blank" rel="noopener">raft example</a></li>
+<li><a href="http://www.jianshu.com/p/138b4d267084" target="_blank" rel="noopener">pincap raft</a></li>
 </ol>
 
       
@@ -663,7 +663,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">Raft library介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">使用方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text">启动三个节点的集群</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text">启动单节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text">重启节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.4.</span> <span class="nav-text">Propose新的请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.5.</span> <span class="nav-text">请求处理逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.6.</span> <span class="nav-text">消息处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">Raft Example</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">kv storage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text">Transport</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text">raft storage</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.1.</span> <span class="nav-text">Replay WAL</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.</span> <span class="nav-text">处理请求</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="raft-library-jie-shao">Raft library&#x4ECB;&#x7ECD;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="shi-yong-fang-fa">&#x4F7F;&#x7528;&#x65B9;&#x6CD5;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text"><span id="qi-dong-san-ge-jie-dian-de-ji-qun">&#x542F;&#x52A8;&#x4E09;&#x4E2A;&#x8282;&#x70B9;&#x7684;&#x96C6;&#x7FA4;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text"><span id="qi-dong-dan-jie-dian">&#x542F;&#x52A8;&#x5355;&#x8282;&#x70B9;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text"><span id="chong-qi-jie-dian">&#x91CD;&#x542F;&#x8282;&#x70B9;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.4.</span> <span class="nav-text"><span id="propose-xin-de-qing-qiu">Propose&#x65B0;&#x7684;&#x8BF7;&#x6C42;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.5.</span> <span class="nav-text"><span id="qing-qiu-chu-li-luo-ji">&#x8BF7;&#x6C42;&#x5904;&#x7406;&#x903B;&#x8F91;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.6.</span> <span class="nav-text"><span id="xiao-xi-chu-li">&#x6D88;&#x606F;&#x5904;&#x7406;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="raft-example">Raft Example</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text"><span id="kv-storage">kv storage</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text"><span id="transport">Transport</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text"><span id="raft-storage">raft storage</span></span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.1.</span> <span class="nav-text"><span id="replay-wal">Replay WAL</span></span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.</span> <span class="nav-text"><span id="chu-li-qing-qiu">&#x5904;&#x7406;&#x8BF7;&#x6C42;</span></span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="can-kao-lian-jie">&#x53C2;&#x8003;&#x94FE;&#x63A5;</span></span></a></li></ol></div>
             
 
           </div>

@@ -102,16 +102,16 @@
 <meta name="keywords" content="mapreduce,paper">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MapReduce: Simpliﬁed Data Processing on Large Clusters">
-<meta property="og:url" content="http://yoursite.com/2017/09/18/mapreduce/index.html">
+<meta property="og:url" content="http://louishust.github.io/2017/09/18/mapreduce/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="摘要 MapReduce是用于大规模数据的新的编程模型，map对KV数据进行处理，生成中间KV结果，reduce对中间结果按照KEY进行分组操作。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/images/paper/mapreduce_execute_flow.png">
+<meta property="og:image" content="http://louishust.github.io/images/paper/mapreduce_execute_flow.png">
 <meta property="og:updated_time" content="2017-09-25T06:38:52.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MapReduce: Simpliﬁed Data Processing on Large Clusters">
 <meta name="twitter:description" content="摘要 MapReduce是用于大规模数据的新的编程模型，map对KV数据进行处理，生成中间KV结果，reduce对中间结果按照KEY进行分组操作。">
-<meta name="twitter:image" content="http://yoursite.com/images/paper/mapreduce_execute_flow.png">
+<meta name="twitter:image" content="http://louishust.github.io/images/paper/mapreduce_execute_flow.png">
 
 
 
@@ -140,7 +140,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/09/18/mapreduce/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/09/18/mapreduce/"/>
 
 
 
@@ -283,7 +283,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/18/mapreduce/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/09/18/mapreduce/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -355,7 +355,7 @@
 
           
             <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Viewed
             <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
             </span>
           
@@ -665,7 +665,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">编程模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text">执行流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text">Master数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.</span> <span class="nav-text">容错</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.1.</span> <span class="nav-text">worker failure</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.2.</span> <span class="nav-text">master failure</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.3.</span> <span class="nav-text">出错的处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.4.</span> <span class="nav-text">本地计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.5.</span> <span class="nav-text">任务粒度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.6.</span> <span class="nav-text">备份任务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text">分区函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text">中间结果排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.</span> <span class="nav-text">Combiner函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.4.</span> <span class="nav-text">副作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.5.</span> <span class="nav-text">跳过错误记录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.6.</span> <span class="nav-text">本地执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.7.</span> <span class="nav-text">个人观点</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="zhai-yao">&#x6458;&#x8981;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="jian-jie">&#x7B80;&#x4ECB;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="bian-cheng-mo-xing">&#x7F16;&#x7A0B;&#x6A21;&#x578B;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text"><span id="shi-li">&#x793A;&#x4F8B;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="shi-xian">&#x5B9E;&#x73B0;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text"><span id="zhi-xing-liu-cheng">&#x6267;&#x884C;&#x6D41;&#x7A0B;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text"><span id="master-shu-ju-jie-gou">Master&#x6570;&#x636E;&#x7ED3;&#x6784;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.</span> <span class="nav-text"><span id="rong-cuo">&#x5BB9;&#x9519;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.1.</span> <span class="nav-text"><span id="worker-failure">worker failure</span></span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.2.</span> <span class="nav-text"><span id="master-failure">master failure</span></span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.3.</span> <span class="nav-text"><span id="chu-cuo-de-chu-li">&#x51FA;&#x9519;&#x7684;&#x5904;&#x7406;</span></span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.4.</span> <span class="nav-text"><span id="ben-di-ji-suan">&#x672C;&#x5730;&#x8BA1;&#x7B97;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.5.</span> <span class="nav-text"><span id="ren-wu-li-du">&#x4EFB;&#x52A1;&#x7C92;&#x5EA6;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.6.</span> <span class="nav-text"><span id="bei-fen-ren-wu">&#x5907;&#x4EFD;&#x4EFB;&#x52A1;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text"><span id="you-hua">&#x4F18;&#x5316;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text"><span id="fen-qu-han-shu">&#x5206;&#x533A;&#x51FD;&#x6570;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text"><span id="zhong-jian-jie-guo-pai-xu">&#x4E2D;&#x95F4;&#x7ED3;&#x679C;&#x6392;&#x5E8F;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.</span> <span class="nav-text"><span id="combiner-han-shu">Combiner&#x51FD;&#x6570;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.4.</span> <span class="nav-text"><span id="fu-zuo-yong">&#x526F;&#x4F5C;&#x7528;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.5.</span> <span class="nav-text"><span id="tiao-guo-cuo-wu-ji-lu">&#x8DF3;&#x8FC7;&#x9519;&#x8BEF;&#x8BB0;&#x5F55;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.6.</span> <span class="nav-text"><span id="ben-di-zhi-xing">&#x672C;&#x5730;&#x6267;&#x884C;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.7.</span> <span class="nav-text"><span id="ge-ren-guan-dian">&#x4E2A;&#x4EBA;&#x89C2;&#x70B9;</span></span></a></li></ol></li></ol></div>
             
 
           </div>

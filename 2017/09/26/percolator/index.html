@@ -102,21 +102,21 @@
 <meta name="keywords" content="paper,distributed transaction,percolator">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Percolator">
-<meta property="og:url" content="http://yoursite.com/2017/09/26/percolator/index.html">
+<meta property="og:url" content="http://louishust.github.io/2017/09/26/percolator/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="引入原因 Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/images/paper/percolator.png">
-<meta property="og:image" content="http://yoursite.com/images/paper/percolator1.png">
-<meta property="og:image" content="http://yoursite.com/images/paper/percolator2.png">
-<meta property="og:image" content="http://yoursite.com/images/paper/percolator3.png">
-<meta property="og:image" content="http://yoursite.com/images/paper/percolator4.png">
-<meta property="og:image" content="http://yoursite.com/images/paper/percolator5.png">
+<meta property="og:image" content="http://louishust.github.io/images/paper/percolator.png">
+<meta property="og:image" content="http://louishust.github.io/images/paper/percolator1.png">
+<meta property="og:image" content="http://louishust.github.io/images/paper/percolator2.png">
+<meta property="og:image" content="http://louishust.github.io/images/paper/percolator3.png">
+<meta property="og:image" content="http://louishust.github.io/images/paper/percolator4.png">
+<meta property="og:image" content="http://louishust.github.io/images/paper/percolator5.png">
 <meta property="og:updated_time" content="2017-11-28T08:06:35.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Percolator">
 <meta name="twitter:description" content="引入原因 Google索引系统上百PB的数据量，每天更新量在数十亿。目前使用了bigtable进行存储，但是更新效率不高，MR基本用于全量更新。故开发了Percolator系统，用于增量数据的更新。">
-<meta name="twitter:image" content="http://yoursite.com/images/paper/percolator.png">
+<meta name="twitter:image" content="http://louishust.github.io/images/paper/percolator.png">
 
 
 
@@ -145,7 +145,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/09/26/percolator/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/09/26/percolator/"/>
 
 
 
@@ -288,7 +288,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/26/percolator/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/09/26/percolator/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -360,7 +360,7 @@
 
           
             <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Viewed
             <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
             </span>
           
@@ -684,7 +684,7 @@ TRX2 SET1 SET2</p>
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">引入原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">分布式事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text">MVCC基本逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text">写入举例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text">写入逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.1.</span> <span class="nav-text">Prepare</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.</span> <span class="nav-text">两阶段Commit</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.4.</span> <span class="nav-text">读取逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.5.</span> <span class="nav-text">一个事务中的两个GET如何保证读取的数据是一致的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.6.</span> <span class="nav-text">事务清理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">个人观点</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="yin-ru-yuan-yin">&#x5F15;&#x5165;&#x539F;&#x56E0;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="jia-gou">&#x67B6;&#x6784;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="fen-bu-shi-shi-wu">&#x5206;&#x5E03;&#x5F0F;&#x4E8B;&#x52A1;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text"><span id="mvcc-ji-ben-luo-ji">MVCC&#x57FA;&#x672C;&#x903B;&#x8F91;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text"><span id="xie-ru-ju-li">&#x5199;&#x5165;&#x4E3E;&#x4F8B;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text"><span id="xie-ru-luo-ji">&#x5199;&#x5165;&#x903B;&#x8F91;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.1.</span> <span class="nav-text"><span id="prepare">Prepare</span></span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.</span> <span class="nav-text"><span id="liang-jie-duan-commit">&#x4E24;&#x9636;&#x6BB5;Commit</span></span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.4.</span> <span class="nav-text"><span id="du-qu-luo-ji">&#x8BFB;&#x53D6;&#x903B;&#x8F91;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.5.</span> <span class="nav-text"><span id="yi-ge-shi-wu-zhong-de-liang-ge-get-ru-he-bao-zheng-du-qu-de-shu-ju-shi-yi-zhi-de">&#x4E00;&#x4E2A;&#x4E8B;&#x52A1;&#x4E2D;&#x7684;&#x4E24;&#x4E2A;GET&#x5982;&#x4F55;&#x4FDD;&#x8BC1;&#x8BFB;&#x53D6;&#x7684;&#x6570;&#x636E;&#x662F;&#x4E00;&#x81F4;&#x7684;&#xFF1F;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.6.</span> <span class="nav-text"><span id="shi-wu-qing-li">&#x4E8B;&#x52A1;&#x6E05;&#x7406;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="ge-ren-guan-dian">&#x4E2A;&#x4EBA;&#x89C2;&#x70B9;</span></span></a></li></ol></div>
             
 
           </div>

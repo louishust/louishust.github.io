@@ -102,20 +102,20 @@
 <meta name="keywords" content="mysql,replication,row">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL无索引行级复制延迟巨大">
-<meta property="og:url" content="http://yoursite.com/2017/09/26/mysql-replication-row-slow/index.html">
+<meta property="og:url" content="http://louishust.github.io/2017/09/26/mysql-replication-row-slow/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="现场问题">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/images/mysql/row-rep-slow.png">
-<meta property="og:image" content="http://yoursite.com/images/mysql/row-rep-slow1.png">
-<meta property="og:image" content="http://yoursite.com/images/mysql/row-rep-slow2.png">
-<meta property="og:image" content="http://yoursite.com/images/mysql/row-rep-slow3.png">
-<meta property="og:image" content="http://yoursite.com/images/mysql/row-rep-slow4.png">
+<meta property="og:image" content="http://louishust.github.io/images/mysql/row-rep-slow.png">
+<meta property="og:image" content="http://louishust.github.io/images/mysql/row-rep-slow1.png">
+<meta property="og:image" content="http://louishust.github.io/images/mysql/row-rep-slow2.png">
+<meta property="og:image" content="http://louishust.github.io/images/mysql/row-rep-slow3.png">
+<meta property="og:image" content="http://louishust.github.io/images/mysql/row-rep-slow4.png">
 <meta property="og:updated_time" content="2017-09-28T14:40:40.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL无索引行级复制延迟巨大">
 <meta name="twitter:description" content="现场问题">
-<meta name="twitter:image" content="http://yoursite.com/images/mysql/row-rep-slow.png">
+<meta name="twitter:image" content="http://louishust.github.io/images/mysql/row-rep-slow.png">
 
 
 
@@ -144,7 +144,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/09/26/mysql-replication-row-slow/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/09/26/mysql-replication-row-slow/"/>
 
 
 
@@ -287,7 +287,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/26/mysql-replication-row-slow/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/09/26/mysql-replication-row-slow/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -370,7 +370,7 @@
 
           
             <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Viewed
             <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
             </span>
           
@@ -446,7 +446,7 @@
 </ol>
 <p>一般情况下，如果复制延迟出现本次故障的情况，sql_thread肯定是把所有event已经分配出去了，因为分配是很快的动作，复制延迟是因为worker线程执行慢才会堵住的。</p>
 <p>所以出现这种情况，执行完stop slave sql_thread之后，等待即可。</p>
-<p>请参考<a href="https://louishust.github.io/2017/09/27/mysql-replication/" target="_blank" rel="external">MySQL复制原理</a></p>
+<p>请参考<a href="https://louishust.github.io/2017/09/27/mysql-replication/">MySQL复制原理</a></p>
 
       
     </div>
@@ -661,7 +661,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">现场问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">排查问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">解决问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">stop slave sql_thread逻辑是什么？</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="xian-chang-wen-ti">&#x73B0;&#x573A;&#x95EE;&#x9898;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="pai-cha-wen-ti">&#x6392;&#x67E5;&#x95EE;&#x9898;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="jie-jue-wen-ti">&#x89E3;&#x51B3;&#x95EE;&#x9898;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="stop-slave-sql-thread-luo-ji-shi-shi-me">stop slave sql_thread&#x903B;&#x8F91;&#x662F;&#x4EC0;&#x4E48;&#xFF1F;</span></span></a></li></ol></div>
             
 
           </div>

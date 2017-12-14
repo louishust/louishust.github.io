@@ -102,7 +102,7 @@
 <meta name="keywords" content="cockroachdb,benchmarksql,tpcc">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TPCC测试cockroachdb方法">
-<meta property="og:url" content="http://yoursite.com/2017/10/12/cock-benchmarksql/index.html">
+<meta property="og:url" content="http://louishust.github.io/2017/10/12/cock-benchmarksql/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="目前cockroachdb没有专门的TPC-C测试工具，开发人员正在开发过程中：  @louishust there’s a work-in-progress program here: http://github.com/cockroachdb/loadgen - however there are several strong caveats that you should know abou">
 <meta property="og:locale" content="zh-Hans">
@@ -138,7 +138,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/10/12/cock-benchmarksql/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/10/12/cock-benchmarksql/"/>
 
 
 
@@ -281,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/12/cock-benchmarksql/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/10/12/cock-benchmarksql/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -353,7 +353,7 @@
 
           
             <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Viewed
             <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
             </span>
           
@@ -377,7 +377,7 @@
       
         <p>目前cockroachdb没有专门的TPC-C测试工具，开发人员正在开发过程中：</p>
 <blockquote>
-<p>@louishust there’s a work-in-progress program here: <a href="http://github.com/cockroachdb/loadgen" target="_blank" rel="external">http://github.com/cockroachdb/loadgen</a> - however there are several strong caveats that you should know about. it doesn’t implement think-time or wait-time yet, nor does it cap the number of workers per warehouse, so it’s not really quite tpc-c. you can think of it as “tpcc at maximum concurrency”, or a benchmark that stresses contention more than scalability.<br>
+<p>@louishust there’s a work-in-progress program here: <a href="http://github.com/cockroachdb/loadgen" target="_blank" rel="noopener">http://github.com/cockroachdb/loadgen</a> - however there are several strong caveats that you should know about. it doesn’t implement think-time or wait-time yet, nor does it cap the number of workers per warehouse, so it’s not really quite tpc-c. you can think of it as “tpcc at maximum concurrency”, or a benchmark that stresses contention more than scalability.<br>
 If you’re really looking to check how CockroachDB performs on tpc-c as the world understands it, you’ll need to wait a little bit until we finish up the work of making the benchmark accurate<br>
 we’re actively working on improving the benchmark so it shouldn’t be too long - maybe a week or two</p>
 </blockquote>
@@ -391,8 +391,8 @@ we’re actively working on improving the benchmark so it shouldn’t be too lon
 </ol>
 <p>测试过程有些语句不兼容，比如<code>select for update</code>。虽然cockroachdb不支持这个语句，<br>
 但是cockroachdb的SSI隔离级别可以达到同等效果，故只需要去掉测试中的<code>for update</code>语句即可。</p>
-<p><a href="https://github.com/louishust/benchmarksql-cockroachdb" target="_blank" rel="external">修改的benchmarksql for cockroachdb</a><br>
-<a href="https://www.cockroachlabs.com/docs/stable/import-data.html" target="_blank" rel="external">cockroachdb import data</a></p>
+<p><a href="https://github.com/louishust/benchmarksql-cockroachdb" target="_blank" rel="noopener">修改的benchmarksql for cockroachdb</a><br>
+<a href="https://www.cockroachlabs.com/docs/stable/import-data.html" target="_blank" rel="noopener">cockroachdb import data</a></p>
 
       
     </div>

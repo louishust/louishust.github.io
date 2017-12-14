@@ -102,16 +102,16 @@
 <meta name="keywords" content="HDFS,recovery,namenode,datanode,lease,replica">
 <meta property="og:type" content="article">
 <meta property="og:title" content="HDFS故障恢复技术">
-<meta property="og:url" content="http://yoursite.com/2017/09/20/hdfs-recovery/index.html">
+<meta property="og:url" content="http://louishust.github.io/2017/09/20/hdfs-recovery/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="什么是lease? client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。 如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/images/hdfs/write_pipeline.png">
+<meta property="og:image" content="http://louishust.github.io/images/hdfs/write_pipeline.png">
 <meta property="og:updated_time" content="2017-09-25T06:39:06.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HDFS故障恢复技术">
 <meta name="twitter:description" content="什么是lease? client write请求之前需要申请一个lease，类似于一个锁，此锁有超时时间，如果client需要持续更新的话，需要定期renew lease，达到长期占有写锁的期望。 如果client lease到期，但是没有正常close文件，那么master就会强制关闭client的连接，并对之前client操作的replica进行lease recovery.">
-<meta name="twitter:image" content="http://yoursite.com/images/hdfs/write_pipeline.png">
+<meta name="twitter:image" content="http://louishust.github.io/images/hdfs/write_pipeline.png">
 
 
 
@@ -140,7 +140,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/09/20/hdfs-recovery/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/09/20/hdfs-recovery/"/>
 
 
 
@@ -283,7 +283,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/20/hdfs-recovery/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/09/20/hdfs-recovery/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -355,7 +355,7 @@
 
           
             <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Viewed
             <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
             </span>
           
@@ -647,7 +647,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">什么是lease?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">lease recovery</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">HDFS write pipeline</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">DataNode recovery</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text">Recovery from Pipeline Setup Failure</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text">Recovery from Data Streaming Failure</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.</span> <span class="nav-text">Recovery from Close Failure</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">个人思考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="shi-me-shi-lease">&#x4EC0;&#x4E48;&#x662F;lease?</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="lease-recovery">lease recovery</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="hdfs-write-pipeline">HDFS write pipeline</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="datanode-recovery">DataNode recovery</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text"><span id="recovery-from-pipeline-setup-failure">Recovery from Pipeline Setup Failure</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text"><span id="recovery-from-data-streaming-failure">Recovery from Data Streaming Failure</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.</span> <span class="nav-text"><span id="recovery-from-close-failure">Recovery from Close Failure</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text"><span id="ge-ren-si-kao">&#x4E2A;&#x4EBA;&#x601D;&#x8003;</span></span></a></li></ol></div>
             
 
           </div>

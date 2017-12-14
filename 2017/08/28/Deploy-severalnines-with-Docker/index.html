@@ -102,7 +102,7 @@
 <meta name="keywords" content="severalnines,mysql">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Deploy ClusterControl with Docker">
-<meta property="og:url" content="http://yoursite.com/2017/08/28/Deploy-severalnines-with-Docker/index.html">
+<meta property="og:url" content="http://louishust.github.io/2017/08/28/Deploy-severalnines-with-Docker/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="部署集群结构 12345678910             +------------+                               +================+             |  proxysql  |   &amp;lt;- - - - - deploy/manage - -| ClusterControl |             +------------+">
 <meta property="og:locale" content="zh-Hans">
@@ -138,7 +138,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/08/28/Deploy-severalnines-with-Docker/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/08/28/Deploy-severalnines-with-Docker/"/>
 
 
 
@@ -281,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/28/Deploy-severalnines-with-Docker/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/08/28/Deploy-severalnines-with-Docker/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -364,7 +364,7 @@
 
           
             <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Viewed
             <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
             </span>
           
@@ -411,7 +411,7 @@
 <h2><span id="wei-ji-qun-tian-jia-proxysql-guan-li">为集群添加proxysql管理</span></h2>
 <p>ClusterControl -&gt; choose the cluster -&gt; Manage -&gt; Load Balancers -&gt; ProxySQL -&gt; Deploy ProxySQL.</p>
 <h2><span id="can-kao-wen-dang">参考文档</span></h2>
-<p><a href="https://github.com/severalnines/docker/tree/master/examples/docker" target="_blank" rel="external">Example Deployment on Standalone Docker</a></p>
+<p><a href="https://github.com/severalnines/docker/tree/master/examples/docker" target="_blank" rel="noopener">Example Deployment on Standalone Docker</a></p>
 
       
     </div>
@@ -624,7 +624,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">部署集群结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">获取所需镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">创建Network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">创建clustercontrol容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">创建master&slave容器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text">创建master容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text">创建slave容器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text">通过clustercontrol部署master&slave</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">7.</span> <span class="nav-text">创建proxysql容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">8.</span> <span class="nav-text">为集群添加proxysql管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">9.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="bu-shu-ji-qun-jie-gou">&#x90E8;&#x7F72;&#x96C6;&#x7FA4;&#x7ED3;&#x6784;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="huo-qu-suo-xu-jing-xiang">&#x83B7;&#x53D6;&#x6240;&#x9700;&#x955C;&#x50CF;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="chuang-jian-network">&#x521B;&#x5EFA;Network</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="chuang-jian-clustercontrol-rong-qi">&#x521B;&#x5EFA;clustercontrol&#x5BB9;&#x5668;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text"><span id="chuang-jian-master-amp-slave-rong-qi">&#x521B;&#x5EFA;master&amp;slave&#x5BB9;&#x5668;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text"><span id="chuang-jian-master-rong-qi">&#x521B;&#x5EFA;master&#x5BB9;&#x5668;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text"><span id="chuang-jian-slave-rong-qi">&#x521B;&#x5EFA;slave&#x5BB9;&#x5668;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text"><span id="tong-guo-clustercontrol-bu-shu-master-amp-slave">&#x901A;&#x8FC7;clustercontrol&#x90E8;&#x7F72;master&amp;slave</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">7.</span> <span class="nav-text"><span id="chuang-jian-proxysql-rong-qi">&#x521B;&#x5EFA;proxysql&#x5BB9;&#x5668;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">8.</span> <span class="nav-text"><span id="wei-ji-qun-tian-jia-proxysql-guan-li">&#x4E3A;&#x96C6;&#x7FA4;&#x6DFB;&#x52A0;proxysql&#x7BA1;&#x7406;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">9.</span> <span class="nav-text"><span id="can-kao-wen-dang">&#x53C2;&#x8003;&#x6587;&#x6863;</span></span></a></li></ol></div>
             
 
           </div>

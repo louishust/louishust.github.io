@@ -102,7 +102,7 @@
 <meta name="keywords" content="cockroachdb,snapshot isolation,read snapshot,write snapshot">
 <meta property="og:type" content="article">
 <meta property="og:title" content="A Critique of Snapshot Isolation">
-<meta property="og:url" content="http://yoursite.com/2017/10/19/write-snaptshot/index.html">
+<meta property="og:url" content="http://louishust.github.io/2017/10/19/write-snaptshot/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="正常所说的snapshot isolation只对冲突写进行约束，由于会有write skew一些问题，到不了serialization级别。">
 <meta property="og:locale" content="zh-Hans">
@@ -138,7 +138,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/10/19/write-snaptshot/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/10/19/write-snaptshot/"/>
 
 
 
@@ -281,7 +281,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/19/write-snaptshot/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/10/19/write-snaptshot/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -353,7 +353,7 @@
 
           
             <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Viewed
             <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
             </span>
           
@@ -375,7 +375,7 @@
       
 
       
-        <p>正常所说的<a href="https://louishust.github.io/2017/10/17/omid/" target="_blank" rel="external">snapshot isolation</a>只对冲突写进行约束，由于会有write skew一些问题，到不了serialization级别。</p>
+        <p>正常所说的<a href="https://louishust.github.io/2017/10/17/omid/">snapshot isolation</a>只对冲突写进行约束，由于会有write skew一些问题，到不了serialization级别。</p>
 <a id="more"></a>
 <p>本文提出了一个新的概念<code>write snapshot isolation</code>的概念，区别普通的<code>snapshot isolation</code>，之前的<code>snapshot isolation</code>这里称之为<code>read snapshot isolation</code>。</p>
 <p>符合以下两点的事务在<code>write snapshot isolation</code>隔离级别下是冲突的，必须回滚一个事务:</p>
