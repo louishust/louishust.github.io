@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link href="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+  
+
+<link href="//cdn.staticfile.org/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="cockroachdb,txn," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="session.txnState初始化 如果当前session不在事务中，则reset session的txnState pkg/sql/executor.go 1234567txnState.resetForNewSQLTxn(	e, session,	autoCommit, /* implicitTxn */	false,      /* retryIntent */	e.cfg.Clock.">
+<meta name="keywords" content="cockroachdb,txn">
+<meta property="og:type" content="article">
+<meta property="og:title" content="crdb事务处理流程">
+<meta property="og:url" content="http://louishust.github.io/2017/12/14/crdb-trx/index.html">
+<meta property="og:site_name" content="小贝壳爸爸">
+<meta property="og:description" content="session.txnState初始化 如果当前session不在事务中，则reset session的txnState pkg/sql/executor.go 1234567txnState.resetForNewSQLTxn(	e, session,	autoCommit, /* implicitTxn */	false,      /* retryIntent */	e.cfg.Clock.">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-15T08:01:55.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="crdb事务处理流程">
+<meta name="twitter:description" content="session.txnState初始化 如果当前session不在事务中，则reset session的txnState pkg/sql/executor.go 1234567txnState.resetForNewSQLTxn(	e, session,	autoCommit, /* implicitTxn */	false,      /* retryIntent */	e.cfg.Clock.">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"right","display":"hide","offset":12,"b2t":true,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://louishust.github.io/2017/12/14/crdb-trx/"/>
+
+
+
+
+
+  <title>crdb事务处理流程 | 小贝壳爸爸</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小贝壳爸爸</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">天桥扛把子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/12/14/crdb-trx/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">crdb事务处理流程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-14T14:36:50+08:00">
+                2017-12-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-eye"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2><span id="session-txnstate-chu-shi-hua">session.txnState初始化</span></h2>
+<p>如果当前session不在事务中，则reset session的txnState</p>
+<p><code>pkg/sql/executor.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">txnState.resetForNewSQLTxn(</div><div class="line">	e, session,</div><div class="line">	autoCommit, <span class="comment">/* implicitTxn */</span></div><div class="line">	<span class="literal">false</span>,      <span class="comment">/* retryIntent */</span></div><div class="line">	e.cfg.Clock.PhysicalTime(), <span class="comment">/* sqlTimestamp */</span></div><div class="line">	session.DefaultIsolationLevel,</div><div class="line">	roachpb.NormalUserPriority,</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>begin设置session事务状态</p>
+<p><code>pkg/sql/txn.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *planner)</span> <span class="title">BeginTransaction</span><span class="params">(n *parser.BeginTransaction)</span> <span class="params">(planNode, error)</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> p.session.TxnState.State() != AutoRetry || p.txn == <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, errors.Errorf(<span class="string">"the server should have already created a transaction. "</span>+</div><div class="line">			<span class="string">"state: %s"</span>, p.session.TxnState.State())</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> err := p.setTransactionModes(n.Modes); err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> &amp;zeroNode&#123;&#125;, <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2><span id="sheng-cheng-internal-txn">生成internal txn</span></h2>
+<p><code>pkg/sql/session.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ts *txnState)</span> <span class="title">resetForNewSQLTxn</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params"></span></span></div><div class="line"><span class="function"><span class="params">	ts.retryIntent = retryIntent</span></span></div><div class="line"><span class="function"><span class="params">	// Reset state vars to defaults.</span></span></div><div class="line"><span class="function"><span class="params">	ts.commitSeen = <span class="literal">false</span></span></span></div><div class="line"><span class="function"><span class="params">	ts.sqlTimestamp = sqlTimestamp</span></span></div><div class="line"><span class="function"><span class="params">	ts.implicitTxn = implicitTxn</span></span></div><div class="line"><span class="function"><span class="params">	ts.txnResults = s.ResultsWriter.NewResultsGroup()</span></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function">    //设置状态为<span class="title">AutoRetry</span></span></div><div class="line"><span class="function">	<span class="title">ts</span>.<span class="title">SetState</span><span class="params">(AutoRetry)</span></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function">    // 生成<span class="title">internal</span> <span class="title">txn</span></span></div><div class="line"><span class="function">	<span class="title">ts</span>.<span class="title">mu</span>.<span class="title">txn</span> = <span class="title">client</span>.<span class="title">NewTxn</span><span class="params">(e.cfg.DB, e.cfg.NodeID.Get()</span>)</span></div></pre></td></tr></table></figure>
+<h3><span id="internal-txn-shi-jian-chuo-txn-begin-timestamp">internal txn时间戳——txn begin timestamp</span></h3>
+<p><code>pkg/internal/client/txn.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewTxn</span><span class="params">(db *DB, gatewayNodeID roachpb.NodeID)</span> *<span class="title">Txn</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> NewTxnWithProto(db, gatewayNodeID, roachpb.MakeTransaction(</div><div class="line">		<span class="string">"unnamed"</span>,</div><div class="line">		<span class="literal">nil</span>, <span class="comment">// baseKey</span></div><div class="line">		roachpb.NormalUserPriority,</div><div class="line">		enginepb.SERIALIZABLE,</div><div class="line">		db.clock.Now(),</div><div class="line">		db.clock.MaxOffset().Nanoseconds(),</div><div class="line">	))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>使用HLC <code>clock.Now</code>获取当前时间戳。</p>
+<h2><span id="insert-kv-xie-dao-client-batch">Insert KV写到client.Batch</span></h2>
+<h3><span id="chu-shi-hua-client-batch">初始化client.Batch</span></h3>
+<p><code>pkg/sql/tablewriter.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ti *tableInserter)</span> <span class="title">init</span><span class="params">(txn *client.Txn)</span> <span class="title">error</span></span> &#123;</div><div class="line">	ti.txn = txn</div><div class="line">	ti.b = txn.NewBatch()</div><div class="line">	<span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ti *tableInserter)</span> <span class="title">row</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ctx context.Context, values tree.Datums, traceKV <span class="keyword">bool</span>,</span></span></div><div class="line"><span class="function"><span class="params">)</span> <span class="params">(tree.Datums, error)</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, ti.ri.InsertRow(ctx, ti.b, values, <span class="literal">false</span>, traceKV)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>tableInsert初始化client.Batch, 同时调用InsertRow插入KV数据。</p>
+<h3><span id="diao-yong-client-batch-de-cput-fang-fa">调用client.Batch的Cput方法</span></h3>
+<p><code>pkg/sql/sqlbase/rowwriter.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">insertCPutFn</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ctx context.Context, b putter, key *roachpb.Key, value *roachpb.Value, traceKV <span class="keyword">bool</span>,</span></span></div><div class="line"><span class="function"><span class="params">)</span></span> &#123;</div><div class="line">	<span class="comment">// TODO(dan): We want do this V(2) log everywhere in sql. Consider making a</span></div><div class="line">	<span class="comment">// client.Batch wrapper instead of inlining it everywhere.</span></div><div class="line">	<span class="keyword">if</span> traceKV &#123;</div><div class="line">		log.VEventfDepth(ctx, <span class="number">1</span>, <span class="number">2</span>, <span class="string">"CPut %s -&gt; %s"</span>, *key, value.PrettyPrint())</div><div class="line">	&#125;</div><div class="line">	b.CPut(key, value, <span class="literal">nil</span> <span class="comment">/* expValue */</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>pkg/internal/client/batch.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Batch)</span> <span class="title">CPut</span><span class="params">(key, value, expValue <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</div><div class="line">	k, err := marshalKey(key)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		b.initResult(<span class="number">0</span>, <span class="number">1</span>, notRaw, err)</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line">	v, err := marshalValue(value)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		b.initResult(<span class="number">0</span>, <span class="number">1</span>, notRaw, err)</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line">	ev, err := marshalValue(expValue)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		b.initResult(<span class="number">0</span>, <span class="number">1</span>, notRaw, err)</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line">	b.appendReqs(roachpb.NewConditionalPut(k, v, ev))</div><div class="line">	b.initResult(<span class="number">1</span>, <span class="number">1</span>, notRaw, <span class="literal">nil</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2><span id="client-batch-chuan-di-gei-roachpb-batchrequest">client.Batch传递给roachpb.BatchRequest</span></h2>
+<h3><span id="roachpb-batchrequest-chu-shi-hua">roachpb.BatchRequest初始化</span></h3>
+<p><code>pkg/internal/client/db.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">sendAndFill</span><span class="params">(ctx context.Context, send SenderFunc, b *Batch)</span> <span class="title">error</span></span> &#123;</div><div class="line">	<span class="keyword">var</span> ba roachpb.BatchRequest</div><div class="line">	ba.Requests = b.reqs</div><div class="line">	ba.Header = b.Header</div><div class="line">	b.response, b.pErr = send(ctx, ba)</div></pre></td></tr></table></figure>
+<p>这里将<code>client.Batch</code>中的请求直接赋给了ba.Requests.</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ba.Requests = b.reqs</div></pre></td></tr></table></figure>
+<h3><span id="roachpb-batchrequest-header-chu-shi-hua">roachpb.BatchRequest Header初始化</span></h3>
+<p><code>pkg/internal/client/txn.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(txn *Txn)</span> <span class="title">Send</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ctx context.Context, ba roachpb.BatchRequest,</span></span></div><div class="line"><span class="function"><span class="params">)</span> <span class="params">(*roachpb.BatchResponse, *roachpb.Error)</span></span> &#123;</div><div class="line">	<span class="comment">// It doesn't make sense to use inconsistent reads in a transaction. However,</span></div><div class="line">	<span class="comment">// we still need to accept it as a parameter for this to compile.</span></div><div class="line">	<span class="keyword">if</span> ba.ReadConsistency != roachpb.CONSISTENT &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, roachpb.NewErrorf(<span class="string">"cannot use %s ReadConsistency in txn"</span>,</div><div class="line">			ba.ReadConsistency)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// Fill in the GatewayNodeID on the batch if the txn knows it.</span></div><div class="line">	<span class="comment">// NOTE(andrei): It seems a bit ugly that we're filling in the batches here as</span></div><div class="line">	<span class="comment">// opposed to the point where the requests are being created, but</span></div><div class="line">	<span class="comment">// unfortunately requests are being created in many ways and this was the best</span></div><div class="line">	<span class="comment">// place I found to set this field.</span></div><div class="line">	<span class="keyword">if</span> txn.gatewayNodeID != <span class="number">0</span> &#123;</div><div class="line">		ba.Header.GatewayNodeID = txn.gatewayNodeID</div><div class="line">	&#125;</div></pre></td></tr></table></figure>
+<h3><span id="roachpb-batchrequest-tian-jia-roachpb-begintransactionrequest">roachpb.BatchRequest添加roachpb.BeginTransactionRequest</span></h3>
+<p><code>pkg/internal/client/txn.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">needBeginTxn = !(txn.mu.Proto.Writing || txn.mu.writingTxnRecord) &amp;&amp; haveTxnWrite</div><div class="line">needEndTxn := txn.mu.Proto.Writing || txn.mu.writingTxnRecord || haveTxnWrite</div><div class="line">elideEndTxn = haveEndTxn &amp;&amp; !needEndTxn</div><div class="line"></div><div class="line"><span class="comment">// If we're not yet writing in this txn, but intend to, insert a</span></div><div class="line"><span class="comment">// begin transaction request before the first write command and update</span></div><div class="line"><span class="comment">// transaction state accordingly.</span></div><div class="line"><span class="keyword">if</span> needBeginTxn &#123;</div><div class="line">	<span class="comment">// Set txn key based on the key of the first transactional write if</span></div><div class="line">	<span class="comment">// not already set. If the transaction already has a key (we're in a</span></div><div class="line">	<span class="comment">// restart), make sure we keep the anchor key the same.</span></div><div class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(txn.mu.Proto.Key) == <span class="number">0</span> &#123;</div><div class="line">		txnAnchorKey := txn.mu.txnAnchorKey</div><div class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(txnAnchorKey) == <span class="number">0</span> &#123;</div><div class="line">			txnAnchorKey = ba.Requests[<span class="number">0</span>].GetInner().Header().Key</div><div class="line">		&#125;</div><div class="line">		txn.mu.Proto.Key = txnAnchorKey</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Set the key in the begin transaction request to the txn's anchor key.</span></div><div class="line">	bt := &amp;roachpb.BeginTransactionRequest&#123;</div><div class="line">		Span: roachpb.Span&#123;</div><div class="line">			Key: txn.mu.Proto.Key,</div><div class="line">		&#125;,</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Inject the new request before position firstWriteIdx, taking</span></div><div class="line">	<span class="comment">// care to avoid unnecessary allocations.</span></div><div class="line">	oldRequests := ba.Requests</div><div class="line">	ba.Requests = <span class="built_in">make</span>([]roachpb.RequestUnion, <span class="built_in">len</span>(ba.Requests)+<span class="number">1</span>)</div><div class="line">	<span class="built_in">copy</span>(ba.Requests, oldRequests[:firstWriteIdx])</div><div class="line">	ba.Requests[firstWriteIdx].MustSetInner(bt)</div><div class="line">	<span class="built_in">copy</span>(ba.Requests[firstWriteIdx+<span class="number">1</span>:], oldRequests[firstWriteIdx:])</div><div class="line">	<span class="comment">// We're going to be writing the transaction record by sending the</span></div><div class="line">	<span class="comment">// begin transaction request.</span></div><div class="line">	txn.mu.writingTxnRecord = <span class="literal">true</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>txn.mu.Proto.Key</code>使用<code>client.Batch</code>里面第一个请求的key作为txn的key,<br>
+新生成一个<code>rochpb.BeginTransactionRequest</code>作为transaction record.</p>
+<h2><span id="zhao-dao-dui-ying-replica">找到对应replica</span></h2>
+<p><a href="https://louishust.github.io/2017/11/27/crdb-insert/">请参考</a>中的<strong>DistSender根据不同的key，选择不同的range</strong></p>
+<h2><span id="roachpb-batchrequest-zhuan-hua-wei-raft-command">roachpb.BatchRequest转化为Raft Command</span></h2>
+<p>单个replica接收的请求不能直接执行，直接执行可能出现多个副本数据不一致的情况。<br>
+必须走Raft Group去执行。这里需要把<code>roachpb.BatchRequest</code>请求转化为<code>Raft Command</code>.</p>
+<h3><span id="chu-shi-hua-rocksdbbatch">初始化rocksdbBatch</span></h3>
+<p>rocksdbBatch是rocksdb提供的batch操作方式，用于进行批量操作，可以看成一个事务集合内的操作。<br>
+rocksdbBatch主要用于将request转化为command，转化之后，会将rocksdbBatch close, 而不是commit。</p>
+<p><code>pkg/storage/replica.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *Replica)</span> <span class="title">evaluateTxnWriteBatch</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">...</span></span></div><div class="line"><span class="function"><span class="params">	batch := r.store.Engine()</span>.<span class="title">NewBatch</span><span class="params">()</span></span></div></pre></td></tr></table></figure>
+<p><code>pkg/storage/engine/rocksdb.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *RocksDB)</span> <span class="title">NewBatch</span><span class="params">()</span> <span class="title">Batch</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> newRocksDBBatch(r, <span class="literal">false</span> <span class="comment">/* writeOnly */</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">newRocksDBBatch</span><span class="params">(parent *RocksDB, writeOnly <span class="keyword">bool</span>)</span> *<span class="title">rocksDBBatch</span></span> &#123;</div><div class="line">	r := &amp;rocksDBBatch&#123;</div><div class="line">		parent:    parent,</div><div class="line">		writeOnly: writeOnly,</div><div class="line">	&#125;</div><div class="line">	r.distinct.rocksDBBatch = r</div><div class="line">	<span class="keyword">return</span> r</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3><span id="mei-ge-request-dui-ying-de-eval-han-shu">每个request对应的eval函数</span></h3>
+<p><code>pkg/storage/replica.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">evaluateBatch</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">...</span></span></div><div class="line"><span class="function"><span class="params">	<span class="keyword">for</span> index, union := <span class="keyword">range</span> ba.Requests &#123;</span></span></div><div class="line"><span class="function"><span class="params">		// Execute the command.</span></span></div><div class="line"><span class="function"><span class="params">		args := union.GetInner()</span></span></div><div class="line"><span class="function">		<span class="title">if</span> <span class="title">ba</span>.<span class="title">Txn</span> != <span class="title">nil</span></span> &#123;</div><div class="line">			ba.Txn.BatchIndex = <span class="keyword">int32</span>(index)</div><div class="line">		&#125;</div><div class="line">		<span class="comment">// Note that responses are populated even when an error is returned.</span></div><div class="line">		<span class="comment">// TODO(tschottdorf): Change that. IIRC there is nontrivial use of it currently.</span></div><div class="line">		reply := br.Responses[index].GetInner()</div><div class="line">		curResult, pErr := evaluateCommand(ctx, idKey, index, batch, rec, ms, ba.Header, maxKeys, args, reply)</div></pre></td></tr></table></figure>
+<p><code>pkg/storage/replica_command.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> cmd, ok := batcheval.LookupCommand(args.Method()); ok &#123;</div><div class="line">		cArgs := batcheval.CommandArgs&#123;</div><div class="line">			EvalCtx: rec,</div><div class="line">			Header:  h,</div><div class="line">			Args:    args.ShallowCopy(),</div><div class="line">			MaxKeys: maxKeys,</div><div class="line">			Stats:   ms,</div><div class="line">		&#125;</div><div class="line">		pd, err = cmd.Eval(ctx, batch, cArgs, reply)</div></pre></td></tr></table></figure>
+<p>根据request的方法类型，找到对应的cmd，并进行Eval方法调用。</p>
+<h3><span id="cmds-chu-shi-hua">cmds初始化</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> cmds = <span class="built_in">make</span>(<span class="keyword">map</span>[roachpb.Method]Command)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">RegisterCommand</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	method roachpb.Method,</span></span></div><div class="line"><span class="function"><span class="params">	declare <span class="keyword">func</span>(roachpb.RangeDescriptor, roachpb.Header, roachpb.Request, *spanset.SpanSet)</span>,</span></div><div class="line"><span class="function">	<span class="title">impl</span> <span class="title">func</span><span class="params">(context.Context, engine.ReadWriter, CommandArgs, roachpb.Response)</span> <span class="params">(result.Result, error)</span>,</span></div><div class="line"><span class="function">)</span> &#123;</div><div class="line">	<span class="keyword">if</span> _, ok := cmds[method]; ok &#123;</div><div class="line">		log.Fatalf(context.TODO(), <span class="string">"cannot overwrite previously registered method %v"</span>, method)</div><div class="line">	&#125;</div><div class="line">	cmds[method] = Command&#123;</div><div class="line">		DeclareKeys: declare,</div><div class="line">		Eval:        impl,</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4><span id="begintransaction-zhu-ce-dao-cmds">BeginTransaction注册到cmds</span></h4>
+<p><code>pkg/storage/batcheval/cmd_begin_transaction.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</div><div class="line">	RegisterCommand(roachpb.BeginTransaction, declareKeysBeginTransaction, BeginTransaction)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4><span id="conditionput-zhu-ce-dao-cmds">ConditionPut注册到cmds</span></h4>
+<p><code>pkg/storage/batcheval/cmd_conditional_put.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</div><div class="line">	RegisterCommand(roachpb.ConditionalPut, DefaultDeclareKeys, ConditionalPut)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3><span id="begintransaction-eval-fang-fa">BeginTransaction Eval方法</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">BeginTransaction</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ctx context.Context, batch engine.ReadWriter, cArgs CommandArgs, resp roachpb.Response,</span></span></div><div class="line"><span class="function"><span class="params">)</span> <span class="params">(result.Result, error)</span></span> &#123;</div><div class="line">	<span class="comment">// Verify transaction does not already exist.</span></div><div class="line">	tmpTxn := roachpb.Transaction&#123;&#125;</div><div class="line">	ok, err := engine.MVCCGetProto(ctx, batch, key, hlc.Timestamp&#123;&#125;, <span class="literal">true</span>, <span class="literal">nil</span>, &amp;tmpTxn)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> result.Result&#123;&#125;, err</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Write the txn record.</span></div><div class="line">	reply.Txn.Writing = <span class="literal">true</span></div><div class="line">	<span class="keyword">return</span> result.Result&#123;&#125;, engine.MVCCPutProto(ctx, batch, cArgs.Stats, key, hlc.Timestamp&#123;&#125;, <span class="literal">nil</span>, reply.Txn)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3><span id="zhuan-hua-wei-raft-command">转化为raft command</span></h3>
+<p><code>pkg/storage/replica.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *Replica)</span> <span class="title">requestToProposal</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	proposal := &amp;ProposalData&#123;</span></span></div><div class="line"><span class="function"><span class="params">		ctx:     ctx,</span></span></div><div class="line"><span class="function"><span class="params">		idKey:   idKey,</span></span></div><div class="line"><span class="function"><span class="params">		endCmds: endCmds,</span></span></div><div class="line"><span class="function"><span class="params">		doneCh:  <span class="built_in">make</span>(<span class="keyword">chan</span> proposalResult, 1)</span>,</span></div><div class="line"><span class="function">		<span class="title">Request</span>: &amp;<span class="title">ba</span>,</span></div><div class="line"><span class="function">	&#125;</span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function">	<span class="title">result</span>, <span class="title">pErr</span> = <span class="title">r</span>.<span class="title">evaluateProposal</span><span class="params">(ctx, idKey, ba, spans)</span></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function">	// <span class="title">Fill</span> <span class="title">out</span> <span class="title">the</span> <span class="title">results</span> <span class="title">even</span> <span class="title">if</span> <span class="title">pErr</span> != <span class="title">nil</span>; <span class="title">we</span>'<span class="title">ll</span> <span class="title">return</span> <span class="title">the</span> <span class="title">error</span> <span class="title">below</span>.</span></div><div class="line"><span class="function">	<span class="title">proposal</span>.<span class="title">Local</span> = &amp;<span class="title">result</span>.<span class="title">Local</span></span></div><div class="line"><span class="function">	<span class="title">proposal</span>.<span class="title">command</span> = <span class="title">storagebase</span>.<span class="title">RaftCommand</span></span>&#123;</div><div class="line">		ReplicatedEvalResult: result.Replicated,</div><div class="line">		WriteBatch:           result.WriteBatch,</div><div class="line">	&#125;</div></pre></td></tr></table></figure>
+<p>proposal会有一个doneCh，用于等待raft group应用完成，其中result就是eval之后的raftcommand。</p>
+<h2><span id="proposal-yu-raft-group">proposal与raft group</span></h2>
+<h3><span id="proposal-ti-jiao-gei-raft-group">proposal提交给raft group</span></h3>
+<p><code>pkg/storage/replica.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *Replica)</span> <span class="title">propose</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">...</span></span></div><div class="line"><span class="function"><span class="params">    r.insertProposalLocked(proposal, repDesc, lease)</span></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function">	<span class="title">if</span> <span class="title">err</span> := <span class="title">r</span>.<span class="title">submitProposalLocked</span><span class="params">(proposal)</span>; <span class="title">err</span> != <span class="title">nil</span></span> &#123;</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">defaultSubmitProposalLocked</span><span class="params">(r *Replica, p *ProposalData)</span> <span class="title">error</span></span> &#123;</div><div class="line">	data, err := protoutil.Marshal(&amp;p.command)</div><div class="line"></div><div class="line">	<span class="keyword">return</span> r.withRaftGroupLocked(<span class="literal">true</span>, <span class="function"><span class="keyword">func</span><span class="params">(raftGroup *raft.RawNode)</span> <span class="params">(<span class="keyword">bool</span>, error)</span></span> &#123;</div><div class="line">		encode := encodeRaftCommandV1</div><div class="line">		<span class="keyword">if</span> p.command.ReplicatedEvalResult.AddSSTable != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">if</span> p.command.ReplicatedEvalResult.AddSSTable.Data == <span class="literal">nil</span> &#123;</div><div class="line">				<span class="keyword">return</span> <span class="literal">false</span>, errors.New(<span class="string">"cannot sideload empty SSTable"</span>)</div><div class="line">			&#125;</div><div class="line">			encode = encodeRaftCommandV2</div><div class="line">			r.store.metrics.AddSSTableProposals.Inc(<span class="number">1</span>)</div><div class="line">			log.Event(p.ctx, <span class="string">"sideloadable proposal detected"</span>)</div><div class="line">		&#125;</div><div class="line"></div><div class="line">		<span class="keyword">if</span> log.V(<span class="number">4</span>) &#123;</div><div class="line">			log.Infof(p.ctx, <span class="string">"proposing command %x: %s"</span>, p.idKey, p.Request.Summary())</div><div class="line">		&#125;</div><div class="line">		<span class="comment">// We're proposing a command so there is no need to wake the leader if we</span></div><div class="line">		<span class="comment">// were quiesced.</span></div><div class="line">		r.unquiesceLocked()</div><div class="line">		<span class="keyword">return</span> <span class="literal">false</span> <span class="comment">/* unquiesceAndWakeLeader */</span>, raftGroup.Propose(encode(p.idKey, data))</div><div class="line">	&#125;)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>insertProposalLocked</code>将proposal设置到replica的proposal map中，以备后面使用。<br>
+最后调用<code>raftGroup.Propose(encode(p.idKey, data)</code>给raft group提交propose。</p>
+<h3><span id="zhi-xing-xian-cheng-gua-qi">执行线程挂起</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *Replica)</span> <span class="title">tryExecuteWriteBatch</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">...</span></span></div><div class="line"><span class="function"><span class="params">	ch, tryAbandon, undoQuotaAcquisition, pErr := r.propose(ctx, lease, ba, endCmds, spans)</span></span></div><div class="line"><span class="function">		<span class="title">case</span> <span class="title">propResult</span> := &lt;-<span class="title">ch</span>:</span></div></pre></td></tr></table></figure>
+<p>执行线程等待proposal.doneCh.</p>
+<h3><span id="raft-group-ready-zhi-xing-raft-command">raft group Ready，执行Raft Command</span></h3>
+<p><code>pkg/storage/store.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Store)</span> <span class="title">processReady</span><span class="params">(ctx context.Context, rangeID roachpb.RangeID)</span></span> &#123;</div><div class="line">	value, ok := s.mu.replicas.Load(<span class="keyword">int64</span>(rangeID))</div><div class="line">	<span class="keyword">if</span> !ok &#123;</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	start := timeutil.Now()</div><div class="line">	r := (*Replica)(value)</div><div class="line">	stats, expl, err := r.handleRaftReady(noSnap)</div></pre></td></tr></table></figure>
+<p><code>pkg/storage/replica.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *Replica)</span> <span class="title">handleRaftReadyRaftMuLocked</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">...</span></span></div><div class="line"><span class="function"><span class="params"></span></span></div><div class="line"><span class="function"><span class="params">	err := r.withRaftGroupLocked(<span class="literal">false</span>, <span class="keyword">func</span>(raftGroup *raft.RawNode)</span> <span class="params">(<span class="keyword">bool</span>, error)</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> hasReady = raftGroup.HasReady(); hasReady &#123;</div><div class="line">			rd = raftGroup.Ready() <span class="comment">//获取ready的命令</span></div><div class="line">		&#125;</div><div class="line">		<span class="keyword">return</span> hasReady <span class="comment">/* unquiesceAndWakeLeader */</span>, <span class="literal">nil</span></div><div class="line">	&#125;)</div><div class="line"></div><div class="line">	<span class="keyword">for</span> _, e := <span class="keyword">range</span> rd.CommittedEntries &#123;</div><div class="line">		<span class="keyword">switch</span> e.Type &#123;</div><div class="line">		<span class="keyword">case</span> raftpb.EntryNormal:</div><div class="line"></div><div class="line">			<span class="keyword">if</span> changedRepl := r.processRaftCommand(ctx, commandID, e.Term, e.Index, command); changedRepl &#123;</div></pre></td></tr></table></figure>
+<h3><span id="processraftcommand-zhi-xing-command-huan-xing-client-wait-donechannel"><code>processRaftCommand</code>执行command, 唤醒client wait doneChannel</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *Replica)</span> <span class="title">processRaftCommand</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ctx context.Context,</span></span></div><div class="line"><span class="function"><span class="params">	idKey storagebase.CmdIDKey,</span></span></div><div class="line"><span class="function"><span class="params">	term, raftIndex <span class="keyword">uint64</span>,</span></span></div><div class="line"><span class="function"><span class="params">	raftCmd storagebase.RaftCommand,</span></span></div><div class="line"><span class="function"><span class="params">)</span> <span class="title">bool</span></span> &#123;</div><div class="line">	</div><div class="line"></div><div class="line">	proposal, proposedLocally := r.mu.proposals[idKey]</div><div class="line"></div><div class="line"></div><div class="line">			delta, err = r.applyRaftCommand(</div><div class="line">				ctx, idKey, raftCmd.ReplicatedEvalResult, raftIndex, leaseIndex, writeBatch)</div><div class="line">			raftCmd.ReplicatedEvalResult.Delta = delta.ToNetworkStats()</div><div class="line"></div><div class="line">	<span class="keyword">if</span> proposedLocally &#123;</div><div class="line">		proposal.finishRaftApplication(response)</div></pre></td></tr></table></figure>
+<p><code>proposal.finishRaftApplication</code>向doneCh中写入数据,唤醒客户线程的channel等待.</p>
+<p><code>applyRaftCommand</code>写入rocksdb，并commit.</p>
+<h3><span id="applyraftcommand-zhen-zheng-xiang-rocksdb-xie-ru-shu-ju">applyRaftCommand真正向rocksdb写入数据</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *Replica)</span> <span class="title">applyRaftCommand</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params"></span></span></div><div class="line"><span class="function"><span class="params">	batch := r.store.Engine()</span>.<span class="title">NewWriteOnlyBatch</span><span class="params">()</span></span></div><div class="line"><span class="function">	<span class="title">if</span> <span class="title">writeBatch</span> != <span class="title">nil</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> err := batch.ApplyBatchRepr(writeBatch.Data, <span class="literal">false</span>); err != <span class="literal">nil</span> &#123;</div><div class="line"></div><div class="line">	<span class="keyword">if</span> err := batch.Commit(<span class="literal">false</span>); err != <span class="literal">nil</span> &#123;</div></pre></td></tr></table></figure>
+<p>此处Commit真正提交数据.</p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/12/14/crdb-trx/">crdb事务处理流程</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年12月14日 - 14:12</p>
+  <p><span>最后更新:</span>2017年12月15日 - 16:12</p>
+  <p><span>原始链接:</span><a href="/2017/12/14/crdb-trx/">/2017/12/14/crdb-trx/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/cockroachdb/" rel="tag"># cockroachdb</a>
+          
+            <a href="/tags/txn/" rel="tag"># txn</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/13/golang-underscore/" rel="next" title="golang underscore下划线作用">
+                <i class="fa fa-chevron-left"></i> golang underscore下划线作用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Louis" />
+            
+              <p class="site-author-name" itemprop="name">Louis</p>
+              <p class="site-description motion-element" itemprop="description">记录工作和生活点滴</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">54</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/louishust" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="session-txnstate-chu-shi-hua">session.txnState&#x521D;&#x59CB;&#x5316;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="sheng-cheng-internal-txn">&#x751F;&#x6210;internal txn</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text"><span id="internal-txn-shi-jian-chuo-txn-begin-timestamp">internal txn&#x65F6;&#x95F4;&#x6233;&#x2014;&#x2014;txn begin timestamp</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="insert-kv-xie-dao-client-batch">Insert KV&#x5199;&#x5230;client.Batch</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text"><span id="chu-shi-hua-client-batch">&#x521D;&#x59CB;&#x5316;client.Batch</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text"><span id="diao-yong-client-batch-de-cput-fang-fa">&#x8C03;&#x7528;client.Batch&#x7684;Cput&#x65B9;&#x6CD5;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="client-batch-chuan-di-gei-roachpb-batchrequest">client.Batch&#x4F20;&#x9012;&#x7ED9;roachpb.BatchRequest</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text"><span id="roachpb-batchrequest-chu-shi-hua">roachpb.BatchRequest&#x521D;&#x59CB;&#x5316;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text"><span id="roachpb-batchrequest-header-chu-shi-hua">roachpb.BatchRequest Header&#x521D;&#x59CB;&#x5316;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.3.</span> <span class="nav-text"><span id="roachpb-batchrequest-tian-jia-roachpb-begintransactionrequest">roachpb.BatchRequest&#x6DFB;&#x52A0;roachpb.BeginTransactionRequest</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text"><span id="zhao-dao-dui-ying-replica">&#x627E;&#x5230;&#x5BF9;&#x5E94;replica</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text"><span id="roachpb-batchrequest-zhuan-hua-wei-raft-command">roachpb.BatchRequest&#x8F6C;&#x5316;&#x4E3A;Raft Command</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">6.1.</span> <span class="nav-text"><span id="chu-shi-hua-rocksdbbatch">&#x521D;&#x59CB;&#x5316;rocksdbBatch</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">6.2.</span> <span class="nav-text"><span id="mei-ge-request-dui-ying-de-eval-han-shu">&#x6BCF;&#x4E2A;request&#x5BF9;&#x5E94;&#x7684;eval&#x51FD;&#x6570;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">6.3.</span> <span class="nav-text"><span id="cmds-chu-shi-hua">cmds&#x521D;&#x59CB;&#x5316;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">6.3.1.</span> <span class="nav-text"><span id="begintransaction-zhu-ce-dao-cmds">BeginTransaction&#x6CE8;&#x518C;&#x5230;cmds</span></span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">6.3.2.</span> <span class="nav-text"><span id="conditionput-zhu-ce-dao-cmds">ConditionPut&#x6CE8;&#x518C;&#x5230;cmds</span></span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">6.4.</span> <span class="nav-text"><span id="begintransaction-eval-fang-fa">BeginTransaction Eval&#x65B9;&#x6CD5;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">6.5.</span> <span class="nav-text"><span id="zhuan-hua-wei-raft-command">&#x8F6C;&#x5316;&#x4E3A;raft command</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">7.</span> <span class="nav-text"><span id="proposal-yu-raft-group">proposal&#x4E0E;raft group</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">7.1.</span> <span class="nav-text"><span id="proposal-ti-jiao-gei-raft-group">proposal&#x63D0;&#x4EA4;&#x7ED9;raft group</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">7.2.</span> <span class="nav-text"><span id="zhi-xing-xian-cheng-gua-qi">&#x6267;&#x884C;&#x7EBF;&#x7A0B;&#x6302;&#x8D77;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">7.3.</span> <span class="nav-text"><span id="raft-group-ready-zhi-xing-raft-command">raft group Ready&#xFF0C;&#x6267;&#x884C;Raft Command</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">7.4.</span> <span class="nav-text"><span id="processraftcommand-zhi-xing-command-huan-xing-client-wait-donechannel"><code>processRaftCommand</code>&#x6267;&#x884C;command, &#x5524;&#x9192;client wait doneChannel</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">7.5.</span> <span class="nav-text"><span id="applyraftcommand-zhen-zheng-xiang-rocksdb-xie-ru-shu-ju">applyRaftCommand&#x771F;&#x6B63;&#x5411;rocksdb&#x5199;&#x5165;&#x6570;&#x636E;</span></span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">true</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/fastclick/1.0.6/fastclick.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
