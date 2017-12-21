@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link href="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+  
+
+<link href="//cdn.staticfile.org/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="cockroachdb,txn,write intent," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="举个栗子 1234567create table test.t1(c1 int primary key, c2 int);insert into t1 values(1,1);txn1: begin;txn2: begin;txn1: update t1 set c2=2 where c1=1;txn2: select * from t1; (hang here)">
+<meta name="keywords" content="cockroachdb,txn,write intent">
+<meta property="og:type" content="article">
+<meta property="og:title" content="crdb事务冲突处理">
+<meta property="og:url" content="http://louishust.github.io/2017/12/18/crdb-txn-txnwait/index.html">
+<meta property="og:site_name" content="小贝壳爸爸">
+<meta property="og:description" content="举个栗子 1234567create table test.t1(c1 int primary key, c2 int);insert into t1 values(1,1);txn1: begin;txn2: begin;txn1: update t1 set c2=2 where c1=1;txn2: select * from t1; (hang here)">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-21T03:16:49.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="crdb事务冲突处理">
+<meta name="twitter:description" content="举个栗子 1234567create table test.t1(c1 int primary key, c2 int);insert into t1 values(1,1);txn1: begin;txn2: begin;txn1: update t1 set c2=2 where c1=1;txn2: select * from t1; (hang here)">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"right","display":"hide","offset":12,"b2t":true,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://louishust.github.io/2017/12/18/crdb-txn-txnwait/"/>
+
+
+
+
+
+  <title>crdb事务冲突处理 | 小贝壳爸爸</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小贝壳爸爸</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">天桥扛把子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/12/18/crdb-txn-txnwait/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">crdb事务冲突处理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-18T14:09:12+08:00">
+                2017-12-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-eye"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2><span id="ju-ge-li-zi">举个栗子</span></h2>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> test.t1(c1 <span class="built_in">int</span> primary <span class="keyword">key</span>, c2 <span class="built_in">int</span>);</div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t1 <span class="keyword">values</span>(<span class="number">1</span>,<span class="number">1</span>);</div><div class="line"></div><div class="line">txn1: <span class="keyword">begin</span>;</div><div class="line">txn2: <span class="keyword">begin</span>;</div><div class="line">txn1: <span class="keyword">update</span> t1 <span class="keyword">set</span> c2=<span class="number">2</span> <span class="keyword">where</span> c1=<span class="number">1</span>;</div><div class="line">txn2: <span class="keyword">select</span> * <span class="keyword">from</span> t1; (hang here)</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>txn2会hang住，因为txn1的时间戳&lt; txn2，txn2需要等待txn1事务结束。<br>
+此处就是出现了Read <code>write intent</code>冲突。</p>
+<h2><span id="zai-ju-ge-li-zi">再举个栗子</span></h2>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">txn1: <span class="keyword">begin</span>;</div><div class="line">txn2: <span class="keyword">begin</span>;</div><div class="line">txn1: <span class="keyword">update</span> t1 <span class="keyword">set</span> c2=<span class="number">2</span> <span class="keyword">where</span> c1=<span class="number">1</span>;</div><div class="line">txn2: <span class="keyword">update</span> t1 <span class="keyword">set</span> c2=<span class="number">3</span> <span class="keyword">where</span> c1=<span class="number">1</span>; (hang here)</div></pre></td></tr></table></figure>
+<h2><span id="bei-jing-zhi-shi">背景知识</span></h2>
+<h3><span id="intent-vs-value">Intent VS Value</span></h3>
+<ul>
+<li>Intent</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">/Table/51/1/1/0 : 0x0A2C0A10BD276E6B3F8748E29CA39DACE11EA1E61A04BB8989882A0A08CCF3DD868BDBD4801530DBC53138024001120C08CCF3DD868BDBD4801510001800200C2816</div><div class="line">/Table/51/1/1/0/1513582040.406522316,0 : 0x6F4DC47A0A260F616161616161616161616161616161</div></pre></td></tr></table></figure>
+<p>Intent没有时间戳，value对应的是txn meta.</p>
+<ul>
+<li>Value</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/Table/51/1/1/0/1513582040.406522316,0 : 0x6F4DC47A0A260F616161616161616161616161616161</div></pre></td></tr></table></figure>
+<p>Value包含时间戳，value对应的是真实的记录值。</p>
+<h3><span id="mvccgetinternal-luo-ji">mvccGetInternal逻辑</span></h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">mvccGetInternal</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	_ context.Context,</span></span></div><div class="line"><span class="function"><span class="params">	iter Iterator,</span></span></div><div class="line"><span class="function"><span class="params">	metaKey MVCCKey,</span></span></div><div class="line"><span class="function"><span class="params">	timestamp hlc.Timestamp,</span></span></div><div class="line"><span class="function"><span class="params">	consistent <span class="keyword">bool</span>,</span></span></div><div class="line"><span class="function"><span class="params">	allowedSafety valueSafety,</span></span></div><div class="line"><span class="function"><span class="params">	txn *roachpb.Transaction,</span></span></div><div class="line"><span class="function"><span class="params">	buf *getBuffer,</span></span></div><div class="line"><span class="function"><span class="params">)</span> <span class="params">(*roachpb.Value, []roachpb.Intent, valueSafety, error)</span></span> &#123;</div></pre></td></tr></table></figure>
+<p>mvccGetInternal用于根据事务的时间戳和key获取对应的value。</p>
+<ul>
+<li><code>timestamp</code> : 表示本事务时间戳，</li>
+<li><code>metaTimestamp</code> : 表示数据的时间戳</li>
+<li><code>MaxTimestamp</code> : 表示本事务最大时间戳, = <code>timestamp + maxoffset(500ms)</code></li>
+</ul>
+<ol>
+<li>
+<p>遇到write intent</p>
+<ul>
+<li>属于本身事务的intent, 直接读取intent对应的value.</li>
+<li>不属于本事务
+<ul>
+<li><code>metaTimestamp &lt;= timestamp</code>: 表示读取到了未完成的old写事务，返回WriteIntentError</li>
+<li>`timestamp &lt; metaTimestamp &lt;= MaxTimestamp: 数据处于不确定的时间间隔中，存在write intent实际发生时间&lt; timestamp的可能性，返回NewReadWithinUncertaintyIntervalError, 事务需要以更大的时间戳重试</li>
+<li><code>timestamp &lt; MaxTimestamp &lt; metaTimestamp</code>: <code>seekKey.Timestamp = txn.MaxTimestamp</code> 读取old value</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>遇到value</p>
+<ul>
+<li><code>metaTimestamp &lt;= timestamp</code>: 直接读取Value</li>
+<li>`timestamp &lt; metaTimestamp &lt;= MaxTimestamp: 数据处于不确定的时间间隔中，存在write intent实际发生时间&lt; timestamp的可能性，返回NewReadWithinUncertaintyIntervalError, 事务需要以更大的时间戳重试</li>
+<li><code>timestamp &lt; MaxTimestamp &lt; metaTimestamp</code>: <code>seekKey.Timestamp = txn.MaxTimestamp</code> 读取old记录</li>
+</ul>
+</li>
+</ol>
+<h3><span id="txn-record-heartbeat">Txn Record HeartBeat</span></h3>
+<p>HeartBeat用于更新txn record的状态和心跳时间戳，<br>
+如果事务超过<code>2x heartbeat interval</code>，而且处于Pending状态，<br>
+则此事务可以被冲突事务强制Abort。</p>
+<h4><span id="txn-coordinator-ding-qi-fa-song-heartbeat-shi-jian">txn coordinator定期发送heartbeat事件</span></h4>
+<p><code>pkg/kv/txn_coord_sender.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(tc *TxnCoordSender)</span> <span class="title">Send</span></span></div><div class="line"><span class="function">    <span class="title">func</span> <span class="params">(tc *TxnCoordSender)</span> <span class="title">updateState</span></span></div><div class="line"><span class="function">        <span class="title">func</span> <span class="params">(tc *TxnCoordSender)</span> <span class="title">heartbeatLoop</span></span></div><div class="line"><span class="function">            <span class="title">func</span> <span class="params">(tc *TxnCoordSender)</span> <span class="title">heartbeat</span></span></div><div class="line"><span class="function">                <span class="title">hb</span> := &amp;<span class="title">roachpb</span>.<span class="title">HeartbeatTxnRequest</span></span>&#123;</div><div class="line">                              Now: tc.clock.Now(),</div><div class="line">                     &#125;</div><div class="line">DefaultHeartbeatInterval = <span class="number">1</span> * time.Second</div></pre></td></tr></table></figure>
+<p>每隔1秒进行心跳更新txn record.</p>
+<h4><span id="heartbeat-shi-jian-zhi-xing-luo-ji">HeartBeat事件执行逻辑</span></h4>
+<p><code>pkg/storage/batcheval/cmd_heartbeat_txn.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> ok, err := engine.MVCCGetProto(ctx, batch, key, hlc.Timestamp&#123;&#125;, <span class="literal">true</span>, <span class="literal">nil</span>, &amp;txn); err != <span class="literal">nil</span> &#123;</div><div class="line">	<span class="keyword">return</span> result.Result&#123;&#125;, err</div><div class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> !ok &#123;</div><div class="line">	<span class="comment">// If no existing transaction record was found, skip heartbeat.</span></div><div class="line">	<span class="comment">// This could mean the heartbeat is a delayed relic or it could</span></div><div class="line">	<span class="comment">// mean that the BeginTransaction call was delayed. In either</span></div><div class="line">	<span class="comment">// case, there's no reason to persist a new transaction record.</span></div><div class="line">	<span class="keyword">return</span> result.Result&#123;&#125;, errors.Errorf(<span class="string">"heartbeat for transaction %s failed; record not present"</span>, h.Txn)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">if</span> txn.Status == roachpb.PENDING &#123;</div><div class="line">	txn.LastHeartbeat.Forward(args.Now)</div><div class="line">	<span class="keyword">if</span> err := engine.MVCCPutProto(ctx, batch, cArgs.Stats, key, hlc.Timestamp&#123;&#125;, <span class="literal">nil</span>, &amp;txn); err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> result.Result&#123;&#125;, err</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>获取txn record</li>
+<li>更新txn.LastHearbeat</li>
+<li>更新txn record</li>
+</ol>
+<h3><span id="store-send-zhi-xing-liu-cheng">store.Send执行流程</span></h3>
+<p><code>pkg/storage/store.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Store)</span> <span class="title">Send</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">...</span></span></div><div class="line"><span class="function"><span class="params">	<span class="keyword">for</span> &#123;</span></span></div><div class="line"><span class="function"><span class="params">...</span></span></div><div class="line"><span class="function"><span class="params">		s.maybeWaitForPushee(ctx, &amp;ba, repl)</span>; <span class="title">br</span> != <span class="title">nil</span> || <span class="title">pErr</span> != <span class="title">nil</span> </span></div><div class="line"><span class="function">...</span></div><div class="line"><span class="function">		<span class="title">br</span>, <span class="title">pErr</span> = <span class="title">repl</span>.<span class="title">Send</span><span class="params">(ctx, ba)</span></span></div><div class="line"><span class="function">...</span></div><div class="line"><span class="function">		<span class="title">switch</span> <span class="title">pErr</span>.<span class="title">GetDetail</span><span class="params">()</span>.<span class="params">(<span class="keyword">type</span>)</span></span> &#123;</div><div class="line">		<span class="keyword">case</span> *roachpb.TransactionPushError:</div><div class="line">			dontRetry := s.cfg.DontRetryPushTxnFailures</div><div class="line">			<span class="keyword">if</span> !dontRetry &amp;&amp; ba.IsSinglePushTxnRequest() &#123;</div><div class="line">				pushReq := ba.Requests[<span class="number">0</span>].GetInner().(*roachpb.PushTxnRequest)</div><div class="line">				dontRetry = txnwait.ShouldPushImmediately(pushReq)</div><div class="line">			&#125;</div><div class="line">			<span class="keyword">if</span> dontRetry &#123;</div><div class="line">				<span class="comment">// If we're not retrying on push txn failures return a txn retry error</span></div><div class="line">				<span class="comment">// after the first failure to guarantee a retry.</span></div><div class="line">				<span class="keyword">if</span> ba.Txn != <span class="literal">nil</span> &#123;</div><div class="line">					err := roachpb.NewTransactionRetryError(roachpb.RETRY_REASON_UNKNOWN)</div><div class="line">					<span class="keyword">return</span> <span class="literal">nil</span>, roachpb.NewErrorWithTxn(err, ba.Txn)</div><div class="line">				&#125;</div><div class="line">				<span class="keyword">return</span> <span class="literal">nil</span>, pErr</div><div class="line">			&#125;</div><div class="line">			pErr = <span class="literal">nil</span> <span class="comment">// retry command</span></div></pre></td></tr></table></figure>
+<ol>
+<li><code>maybeWaitForPushee</code>: PushTxnRequest retry后可能会等在这个地方</li>
+<li><code>repl.Send</code>: 调用底层replica，处理request</li>
+<li>错误处理: <code>TransactionPushError</code>和<code>WriteIntentError</code>.</li>
+</ol>
+<h2><span id="writeintenterror-chu-li-liu-cheng">WriteIntentError处理流程</span></h2>
+<p><code>pkg/storage/store.go</code></p>
+<p>概念：</p>
+<ol>
+<li><code>pushee</code>: 被push的事务</li>
+</ol>
+<blockquote>
+<p>the pushee txn whose intent(s) caused the // conflict</p>
+</blockquote>
+<ol start="2">
+<li><code>pusher</code>: 主动提出push txn的事务</li>
+</ol>
+<blockquote>
+<p>pusher the writer trying to abort a conflicting txn or the<br>
+// reader trying to push a conflicting txn’s commit timestamp<br>
+// forward</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> ba.IsWrite() &#123;</div><div class="line">	pushType = roachpb.PUSH_ABORT</div><div class="line">&#125; <span class="keyword">else</span> &#123;</div><div class="line">	pushType = roachpb.PUSH_TIMESTAMP</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>根据操作类型，确定冲突处理手段：</p>
+<ol>
+<li>写操作: <code>roachpb.PUSH_ABORT</code> 尝试abort pushee</li>
+<li>读操作: <code>roachpb.PUSH_TIMESTAMP</code>, 尝试将pushee的timestamp提升, 从而消除WriteIntentError，可以直接读取old value了。</li>
+</ol>
+<h3><span id="sheng-cheng-pushtxnrequest">生成PushTxnRequest</span></h3>
+<p><code>pkg/storage/intent_resolver.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ir *intentResolver)</span> <span class="title">maybePushTransactions</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">...</span></span></div><div class="line"><span class="function"><span class="params">	<span class="keyword">for</span> _, pushTxn := <span class="keyword">range</span> pushTxns &#123;</span></span></div><div class="line"><span class="function"><span class="params">		pushReqs = <span class="built_in">append</span>(pushReqs, &amp;roachpb.PushTxnRequest&#123;</span></span></div><div class="line"><span class="function"><span class="params">			Span: roachpb.Span&#123;</span></span></div><div class="line"><span class="function"><span class="params">				Key: pushTxn.Key,</span></span></div><div class="line"><span class="function"><span class="params">			&#125;,</span></span></div><div class="line"><span class="function"><span class="params">			PusherTxn: *partialPusherTxn,</span></span></div><div class="line"><span class="function"><span class="params">			PusheeTxn: pushTxn,</span></span></div><div class="line"><span class="function"><span class="params">			PushTo:    h.Timestamp,</span></span></div><div class="line"><span class="function"><span class="params">			// The timestamp is used by PushTxn <span class="keyword">for</span> figuring out whether the</span></span></div><div class="line">			// transaction is abandoned. If we used the argument's timestamp</div><div class="line">			<span class="comment">// here, we would run into busy loops because that timestamp</span></div><div class="line">			<span class="comment">// usually stays fixed among retries, so it will never realize</span></div><div class="line">			<span class="comment">// that a transaction has timed out. See #877.</span></div><div class="line">			Now:      now,</div><div class="line">			PushType: pushType,</div><div class="line">		&#125;)</div><div class="line">	&#125;</div><div class="line">	b := &amp;client.Batch&#123;&#125;</div><div class="line">	b.AddRawRequest(pushReqs...)</div><div class="line">	<span class="keyword">var</span> pErr *roachpb.Error</div><div class="line">	<span class="keyword">if</span> err := ir.store.db.Run(ctx, b); err != <span class="literal">nil</span> &#123;</div><div class="line">		pErr = b.MustPErr()</div><div class="line">	&#125;</div></pre></td></tr></table></figure>
+<h3><span id="pushtxnrequest-zhi-xing-luo-ji">PushTxnRequest执行逻辑</span></h3>
+<p><code>pkg/storage/batcheval/cmd_push_txn.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">PushTxn</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ctx context.Context, batch engine.ReadWriter, cArgs CommandArgs, resp roachpb.Response,</span></span></div><div class="line"><span class="function"><span class="params">)</span> <span class="params">(result.Result, error)</span></span> &#123;</div></pre></td></tr></table></figure>
+<ol>
+<li>获取txn record</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">existTxn := &amp;roachpb.Transaction&#123;&#125;</div><div class="line">ok, err := engine.MVCCGetProto(ctx, batch, key, hlc.Timestamp&#123;&#125;,</div></pre></td></tr></table></figure>
+<ol start="2">
+<li>如果Status已经不是pending状态了，返回成功</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> reply.PusheeTxn.Status != roachpb.PENDING &#123;</div><div class="line">		<span class="comment">// Trivial noop.</span></div><div class="line">		<span class="keyword">return</span> result.Result&#123;&#125;, <span class="literal">nil</span></div></pre></td></tr></table></figure>
+<ol start="3">
+<li>如果<code>roachpb.PUSH_TIMESTAMP</code> &amp; <code>args.PushTo.Less(reply.PusheeTxn.Timestamp)</code>, 直接返回成功</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> args.PushType == roachpb.PUSH_TIMESTAMP &amp;&amp; args.PushTo.Less(reply.PusheeTxn.Timestamp) &#123;</div><div class="line">	<span class="comment">// Trivial noop.</span></div><div class="line">	<span class="keyword">return</span> result.Result&#123;&#125;, <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol start="4">
+<li>
+<p>pusherWins逻辑判断</p>
+<ol>
+<li>pushee长时间没有心跳了，pusherWins=true, abort pushee</li>
+</ol>
+</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">case</span> txnwait.IsExpired(args.Now, &amp;reply.PusheeTxn):</div><div class="line">	reason = <span class="string">"pushee is expired"</span></div><div class="line">	<span class="comment">// When cleaning up, actually clean up (as opposed to simply pushing</span></div><div class="line">	<span class="comment">// the garbage in the path of future writers).</span></div><div class="line">	args.PushType = roachpb.PUSH_ABORT</div><div class="line">	pusherWins = <span class="literal">true</span></div></pre></td></tr></table></figure>
+<pre><code>2. `roachpb.PUSH_TIMESTAMP`且pushee隔离级别为SNAPSHOT, pusherWins = true
+</code></pre>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">case</span> args.PushType == roachpb.PUSH_TIMESTAMP &amp;&amp;</div><div class="line">	reply.PusheeTxn.Isolation == enginepb.SNAPSHOT:</div><div class="line">	<span class="comment">// Can always push a SNAPSHOT txn's timestamp.</span></div><div class="line">	reason = <span class="string">"pushee is SNAPSHOT"</span></div><div class="line">	pusherWins = <span class="literal">true</span></div></pre></td></tr></table></figure>
+<pre><code>3. pusher Priority 高于 pushee
+</code></pre>
+<ol start="5">
+<li>pushWins=false,返回NewTransactionPushError</li>
+<li>根据结果修改<code>txn record</code></li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> err := engine.MVCCPutProto(ctx, batch, cArgs.Stats, key, hlc.Timestamp&#123;&#125;, <span class="literal">nil</span>, &amp;reply.PusheeTxn); err != <span class="literal">nil</span> &#123;</div></pre></td></tr></table></figure>
+<h2><span id="transactionpusherror-chu-li-liu-cheng">TransactionPushError处理流程</span></h2>
+<h3><span id="txnwait-queue-jie-gou">txnwait.Queue结构</span></h3>
+<p><code>pkg/storage/txnwait/queue.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Queue <span class="keyword">struct</span> &#123;</div><div class="line">	store StoreInterface</div><div class="line">	mu    <span class="keyword">struct</span> &#123;</div><div class="line">		syncutil.Mutex</div><div class="line">		txns    <span class="keyword">map</span>[uuid.UUID]*pendingTxn</div><div class="line">		queries <span class="keyword">map</span>[uuid.UUID][]*waitingQuery</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> pendingTxn <span class="keyword">struct</span> &#123;</div><div class="line">	txn           atomic.Value <span class="comment">// the most recent txn record</span></div><div class="line">	waitingPushes []*waitingPush</div></pre></td></tr></table></figure>
+<p>txns存储出现TransactionPushError的pushee txn.</p>
+<p>Enqueue函数入口：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(q *Queue)</span> <span class="title">Enqueue</span><span class="params">(txn *roachpb.Transaction)</span></span> &#123;</div><div class="line">	q.mu.Lock()</div><div class="line">	<span class="keyword">defer</span> q.mu.Unlock()</div><div class="line">	<span class="keyword">if</span> q.mu.txns == <span class="literal">nil</span> &#123;</div><div class="line">		<span class="comment">// Not enabled; do nothing.</span></div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line">	<span class="comment">// If the txn which failed to push is already pending, update the</span></div><div class="line">	<span class="comment">// transaction status.</span></div><div class="line">	<span class="keyword">if</span> pt, ok := q.mu.txns[txn.ID]; ok &#123;</div><div class="line">		pt.txn.Store(txn)</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		pt = &amp;pendingTxn&#123;&#125;</div><div class="line">		pt.txn.Store(txn)</div><div class="line">		q.mu.txns[txn.ID] = pt</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3><span id="transactionpusherror-pushee-txn-enqueue">TransactionPushError pushee txn Enqueue</span></h3>
+<p>PushTxnRequest执行失败后，出现<code>TransactionPushError</code>, 会将pushee txn加入到txnwait.Queue.</p>
+<p><code>pkg/storage/replica_proposal.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *Replica)</span> <span class="title">handleLocalEvalResult</span><span class="params">(ctx context.Context, lResult result.LocalResult)</span></span> &#123;</div><div class="line">	<span class="comment">// Enqueue failed push transactions on the txnWaitQueue.</span></div><div class="line">	<span class="keyword">if</span> !r.store.cfg.DontRetryPushTxnFailures &#123;</div><div class="line">		<span class="keyword">if</span> tpErr, ok := lResult.Err.GetDetail().(*roachpb.TransactionPushError); ok &#123;</div><div class="line">			r.txnWaitQueue.Enqueue(&amp;tpErr.PusheeTxn)</div><div class="line">		&#125;</div><div class="line">	&#125;</div></pre></td></tr></table></figure>
+<h3><span id="chong-shi-pushtxnrequest">重试PushTxnRequest</span></h3>
+<p>出现TransactionPushError之后，除了按照上面将txn放入到Queue中，还会retry PushTxnRequest.</p>
+<p>根据<code>store.Send执行流程</code>描述，出现错误后，会进行重试，出现<code>TransactionPushError</code>后也会进行重试.</p>
+<p><code>maybeWaitForPushee</code>会调用<code>MaybeWaitForPush</code>函数, 逻辑如下：</p>
+<ol>
+<li>获取Queue.mu.txns中对应的pendingTxn, 记为pending.</li>
+<li>如果没有pending，返回成功</li>
+<li>将当前的pushtxnrequest记录到pending.waitingPushes, 同时定义一个channel</li>
+<li>等待消息
+<ul>
+<li><code>&lt;-ctx.Done()</code>: pusher自动放弃</li>
+<li><code>txn := &lt;-push.pending</code>: pushee txn结束，可能commit或者abort了，返回成功</li>
+<li><code>&lt;-pusheeTxnTimer.C</code>: 定时器, pushee txn expire时间触发，更新pushee txn的信息</li>
+</ul>
+</li>
+</ol>
+<p>主要就是等待push.pending管道同步事务的最新消息。</p>
+<h3><span id="pushee-txn-geng-xin-shi-wu-xin-xi">pushee txn更新事务信息</span></h3>
+<p><code>pkg/storage/txnwait/queue.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(q *Queue)</span> <span class="title">UpdateTxn</span><span class="params">(ctx context.Context, txn *roachpb.Transaction)</span></span> &#123;</div><div class="line">	txn.AssertInitialized(ctx)</div><div class="line">	q.mu.Lock()</div><div class="line"></div><div class="line">	<span class="keyword">if</span> log.V(<span class="number">1</span>) &#123;</div><div class="line">		<span class="keyword">if</span> count := <span class="built_in">len</span>(q.mu.queries[txn.ID]); count &gt; <span class="number">0</span> &#123;</div><div class="line">			log.Infof(ctx, <span class="string">"returning %d waiting queries for %s"</span>, count, txn.ID.Short())</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">for</span> _, w := <span class="keyword">range</span> q.mu.queries[txn.ID] &#123;</div><div class="line">		<span class="built_in">close</span>(w.pending)</div><div class="line">	&#125;</div><div class="line">	<span class="built_in">delete</span>(q.mu.queries, txn.ID)</div><div class="line"></div><div class="line">	<span class="keyword">if</span> q.mu.txns == <span class="literal">nil</span> &#123;</div><div class="line">		<span class="comment">// Not enabled; do nothing.</span></div><div class="line">		q.mu.Unlock()</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line">	pending, ok := q.mu.txns[txn.ID]</div><div class="line">	<span class="keyword">if</span> !ok &#123;</div><div class="line">		q.mu.Unlock()</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line">	waitingPushes := pending.waitingPushes</div><div class="line">	pending.waitingPushes = <span class="literal">nil</span></div><div class="line">	<span class="built_in">delete</span>(q.mu.txns, txn.ID)</div><div class="line">	pending.txn.Store(txn)</div><div class="line">	q.mu.Unlock()</div><div class="line"></div><div class="line">	<span class="keyword">if</span> log.V(<span class="number">1</span>) &amp;&amp; <span class="built_in">len</span>(waitingPushes) &gt; <span class="number">0</span> &#123;</div><div class="line">		log.Infof(context.Background(), <span class="string">"updating %d push waiters for %s"</span>, <span class="built_in">len</span>(waitingPushes), txn.ID.Short())</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Send on pending waiter channels outside of the mutex lock.</span></div><div class="line">	<span class="keyword">for</span> _, w := <span class="keyword">range</span> waitingPushes &#123;</div><div class="line">		w.pending &lt;- txn</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3><span id="huo-qu-pushee-txn-de-shi-wu-ti-jiao-xiao-xi">获取pushee txn的事务提交消息</span></h3>
+<p><code>pkg/storage/txnwait/queue.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">case</span> txn := &lt;-push.pending:</div><div class="line">	log.Eventf(ctx, <span class="string">"result of pending push: %v"</span>, txn)</div><div class="line">	log.Infof(ctx, <span class="string">"[crdb debug] result of pending push: %v"</span>, txn)</div><div class="line">	<span class="comment">// If txn is nil, the queue was cleared, presumably because the</span></div><div class="line">	<span class="comment">// replica lost the range lease. Return not pushed so request</span></div><div class="line">	<span class="comment">// proceeds and is redirected to the new range lease holder.</span></div><div class="line">	<span class="keyword">if</span> txn == <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span></div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Transaction was committed, aborted or had its timestamp</span></div><div class="line">	<span class="comment">// pushed. If this PushTxn request is satisfied, return</span></div><div class="line">	<span class="comment">// successful PushTxn response.</span></div><div class="line">	<span class="keyword">if</span> isPushed(req, txn) &#123;</div><div class="line">		log.Event(ctx, <span class="string">"push request is satisfied"</span>)</div><div class="line">		<span class="keyword">return</span> createPushTxnResponse(txn), <span class="literal">nil</span></div><div class="line">	&#125;</div><div class="line">	<span class="comment">// If not successfully pushed, return not pushed so request proceeds.</span></div><div class="line">	log.Event(ctx, <span class="string">"not pushed; returning to caller"</span>)</div><div class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span></div></pre></td></tr></table></figure>
+<p><code>isPushed</code>中会发现pushee txn已经commit了，此时直接返回PushTxnResponse，不再实际进行PushTxnRequest.</p>
+<h3><span id="resolveintentrequest-chu-li-liu-cheng">ResolveIntentRequest处理流程</span></h3>
+<p>PushTxnRequest处理完成后，需要进行ResolveIntentRequest, 解决WriteIntent。</p>
+<p><code>pkg/storage/intent_resolver.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ir *intentResolver)</span> <span class="title">resolveIntents</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ctx context.Context, intents []roachpb.Intent, opts ResolveOptions,</span></span></div><div class="line"><span class="function"><span class="params">)</span> <span class="title">error</span></span> &#123;</div></pre></td></tr></table></figure>
+<p><code>pkg/storage/engine/mvcc.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">mvccResolveWriteIntent</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	ctx context.Context,</span></span></div><div class="line"><span class="function"><span class="params">	engine ReadWriter,</span></span></div><div class="line"><span class="function"><span class="params">	iter Iterator,</span></span></div><div class="line"><span class="function"><span class="params">	ms *enginepb.MVCCStats,</span></span></div><div class="line"><span class="function"><span class="params">	intent roachpb.Intent,</span></span></div><div class="line"><span class="function"><span class="params">	buf *putBuffer,</span></span></div><div class="line"><span class="function"><span class="params">)</span> <span class="title">error</span></span> &#123;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2017/12/18/crdb-txn-txnwait/">crdb事务冲突处理</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2017年12月18日 - 14:12</p>
+  <p><span>最后更新:</span>2017年12月21日 - 11:12</p>
+  <p><span>原始链接:</span><a href="/2017/12/18/crdb-txn-txnwait/">/2017/12/18/crdb-txn-txnwait/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/cockroachdb/" rel="tag"># cockroachdb</a>
+          
+            <a href="/tags/txn/" rel="tag"># txn</a>
+          
+            <a href="/tags/write-intent/" rel="tag"># write intent</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/18/crdb-txn-todo/" rel="next" title="需要跟踪的crdb txn细节列表">
+                <i class="fa fa-chevron-left"></i> 需要跟踪的crdb txn细节列表
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Louis" />
+            
+              <p class="site-author-name" itemprop="name">Louis</p>
+              <p class="site-description motion-element" itemprop="description">记录工作和生活点滴</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">56</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">78</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/louishust" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="ju-ge-li-zi">&#x4E3E;&#x4E2A;&#x6817;&#x5B50;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="zai-ju-ge-li-zi">&#x518D;&#x4E3E;&#x4E2A;&#x6817;&#x5B50;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="bei-jing-zhi-shi">&#x80CC;&#x666F;&#x77E5;&#x8BC6;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.1.</span> <span class="nav-text"><span id="intent-vs-value">Intent VS Value</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.2.</span> <span class="nav-text"><span id="mvccgetinternal-luo-ji">mvccGetInternal&#x903B;&#x8F91;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.</span> <span class="nav-text"><span id="txn-record-heartbeat">Txn Record HeartBeat</span></span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.1.</span> <span class="nav-text"><span id="txn-coordinator-ding-qi-fa-song-heartbeat-shi-jian">txn coordinator&#x5B9A;&#x671F;&#x53D1;&#x9001;heartbeat&#x4E8B;&#x4EF6;</span></span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.3.2.</span> <span class="nav-text"><span id="heartbeat-shi-jian-zhi-xing-luo-ji">HeartBeat&#x4E8B;&#x4EF6;&#x6267;&#x884C;&#x903B;&#x8F91;</span></span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">3.4.</span> <span class="nav-text"><span id="store-send-zhi-xing-liu-cheng">store.Send&#x6267;&#x884C;&#x6D41;&#x7A0B;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="writeintenterror-chu-li-liu-cheng">WriteIntentError&#x5904;&#x7406;&#x6D41;&#x7A0B;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text"><span id="sheng-cheng-pushtxnrequest">&#x751F;&#x6210;PushTxnRequest</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text"><span id="pushtxnrequest-zhi-xing-luo-ji">PushTxnRequest&#x6267;&#x884C;&#x903B;&#x8F91;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text"><span id="transactionpusherror-chu-li-liu-cheng">TransactionPushError&#x5904;&#x7406;&#x6D41;&#x7A0B;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text"><span id="txnwait-queue-jie-gou">txnwait.Queue&#x7ED3;&#x6784;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text"><span id="transactionpusherror-pushee-txn-enqueue">TransactionPushError pushee txn Enqueue</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.</span> <span class="nav-text"><span id="chong-shi-pushtxnrequest">&#x91CD;&#x8BD5;PushTxnRequest</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.4.</span> <span class="nav-text"><span id="pushee-txn-geng-xin-shi-wu-xin-xi">pushee txn&#x66F4;&#x65B0;&#x4E8B;&#x52A1;&#x4FE1;&#x606F;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.5.</span> <span class="nav-text"><span id="huo-qu-pushee-txn-de-shi-wu-ti-jiao-xiao-xi">&#x83B7;&#x53D6;pushee txn&#x7684;&#x4E8B;&#x52A1;&#x63D0;&#x4EA4;&#x6D88;&#x606F;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.6.</span> <span class="nav-text"><span id="resolveintentrequest-chu-li-liu-cheng">ResolveIntentRequest&#x5904;&#x7406;&#x6D41;&#x7A0B;</span></span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">true</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/fastclick/1.0.6/fastclick.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
