@@ -79,7 +79,7 @@
 
 
 
-  <meta name="keywords" content="go,underscore," />
+  <meta name="keywords" content="runner,gitlab," />
 
 
 
@@ -90,18 +90,18 @@
 
 
 
-<meta name="description" content="Import 12345import (	_ &quot;github.com/cockroachdb/cockroach/pkg/ccl&quot; // ccl init hooks	&quot;github.com/cockroachdb/cockroach/pkg/cli&quot;	_ &quot;github.com/cockroachdb/cockroach/pkg/ui/distccl&quot; // ccl web UI init ho">
-<meta name="keywords" content="go,underscore">
+<meta name="description" content="选一台独立机器，尽量不要和gitlab在一台机器上。">
+<meta name="keywords" content="runner,gitlab">
 <meta property="og:type" content="article">
-<meta property="og:title" content="golang underscore下划线作用">
-<meta property="og:url" content="http://louishust.github.io/2017/12/13/golang-underscore/index.html">
+<meta property="og:title" content="gitlab配置runner">
+<meta property="og:url" content="http://louishust.github.io/2017/12/23/gitlab-runner/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="Import 12345import (	_ &quot;github.com/cockroachdb/cockroach/pkg/ccl&quot; // ccl init hooks	&quot;github.com/cockroachdb/cockroach/pkg/cli&quot;	_ &quot;github.com/cockroachdb/cockroach/pkg/ui/distccl&quot; // ccl web UI init ho">
+<meta property="og:description" content="选一台独立机器，尽量不要和gitlab在一台机器上。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-12-13T07:32:07.000Z">
+<meta property="og:updated_time" content="2017-12-23T14:03:10.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="golang underscore下划线作用">
-<meta name="twitter:description" content="Import 12345import (	_ &quot;github.com/cockroachdb/cockroach/pkg/ccl&quot; // ccl init hooks	&quot;github.com/cockroachdb/cockroach/pkg/cli&quot;	_ &quot;github.com/cockroachdb/cockroach/pkg/ui/distccl&quot; // ccl web UI init ho">
+<meta name="twitter:title" content="gitlab配置runner">
+<meta name="twitter:description" content="选一台独立机器，尽量不要和gitlab在一台机器上。">
 
 
 
@@ -131,13 +131,13 @@
 
 
 
-  <link rel="canonical" href="http://louishust.github.io/2017/12/13/golang-underscore/"/>
+  <link rel="canonical" href="http://louishust.github.io/2017/12/23/gitlab-runner/"/>
 
 
 
 
 
-  <title>golang underscore下划线作用 | 小贝壳爸爸</title>
+  <title>gitlab配置runner | 小贝壳爸爸</title>
   
 
 
@@ -274,7 +274,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/12/13/golang-underscore/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/12/23/gitlab-runner/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -291,7 +291,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">golang underscore下划线作用</h1>
+          <h1 class="post-title" itemprop="name headline">gitlab配置runner</h1>
         
 
         <div class="post-meta">
@@ -303,8 +303,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-13T15:21:33+08:00">
-                2017-12-13
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-23T21:53:32+08:00">
+                2017-12-23
               </time>
             
 
@@ -326,8 +326,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/go/" itemprop="url" rel="index">
-                    <span itemprop="name">go</span>
+                  <a href="/categories/gitlab/" itemprop="url" rel="index">
+                    <span itemprop="name">gitlab</span>
                   </a>
                 </span>
 
@@ -368,16 +368,27 @@
       
 
       
-        <h2><span id="import">Import</span></h2>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> (</div><div class="line">	_ <span class="string">"github.com/cockroachdb/cockroach/pkg/ccl"</span> <span class="comment">// ccl init hooks</span></div><div class="line">	<span class="string">"github.com/cockroachdb/cockroach/pkg/cli"</span></div><div class="line">	_ <span class="string">"github.com/cockroachdb/cockroach/pkg/ui/distccl"</span> <span class="comment">// ccl web UI init hook</span></div><div class="line">)</div></pre></td></tr></table></figure>
-<p>当前文件不使用import的相关函数，但是需要先执行其中的init function。</p>
+        <p>选一台独立机器，尽量不要和gitlab在一台机器上。</p>
 <a id="more"></a>
-<h2><span id="hu-lue-fan-hui-zhi">忽略返回值</span></h2>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> initialSklAllocSize = <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">int</span></span> &#123;</div><div class="line">	a := arenaskl.NewArena(<span class="number">1000</span>)</div><div class="line">	_ = arenaskl.NewSkiplist(a)</div><div class="line">	<span class="keyword">return</span> <span class="keyword">int</span>(a.Size())</div><div class="line">&#125;()</div></pre></td></tr></table></figure>
-<p>忽略函数中的某个返回值。</p>
-<h2><span id="jie-kou-shi-xian-jian-cha">接口实现检查</span></h2>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Cache <span class="keyword">interface</span> &#123;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> _ Cache = &amp;sklImpl&#123;&#125;</div></pre></td></tr></table></figure>
-<p>其中Cache是interface, sklImpl是具体实现，这样可以进行类型断言，如果sklImpl没有实现Cache接口的方法，则编译报错。</p>
+<h2><span id="install-docker">Install docker</span></h2>
+<p>删除老版本docker</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ sudo yum remove docker \</div><div class="line">                  docker-common \</div><div class="line">                  docker-selinux \</div><div class="line">                  docker-engine</div></pre></td></tr></table></figure>
+<p><a href="https://download.docker.com/linux/centos/7/x86_64/stable/Packages/" target="_blank" rel="noopener">下载RPM包</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ sudo yum install /path/to/package.rpm</div><div class="line">$ sudo systemctl start docker</div><div class="line">$ sudo docker run hello-world</div></pre></td></tr></table></figure>
+<p>修改docker image存储路径/var/lib/docker,使用软连接。</p>
+<p>下载镜像：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">docker pull ubuntu:14.04</div><div class="line">docker pull ubuntu:16.04</div></pre></td></tr></table></figure>
+<h2><span id="install-gitlab-runner">Install gitlab-runner</span></h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh | sudo bash</div><div class="line">sudo yum install gitlab-runner</div></pre></td></tr></table></figure>
+<h2><span id="register-runner">Register runner</span></h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo gitlab-runner register   --url <span class="string">"http://gitlab.greatopensource.com/"</span>   --registration-token <span class="string">"fyWsKa3wWyBYffjHogTE"</span>   --description <span class="string">"docker-ubuntu-16.04"</span>   --executor <span class="string">"docker"</span>   --docker-image ubuntu:16.04</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo gitlab-runner register   --url <span class="string">"http://gitlab.greatopensource.com/"</span>   --registration-token <span class="string">"fyWsKa3wWyBYffjHogTE"</span>   --description <span class="string">"docker-ubuntu-14.04"</span>   --executor <span class="string">"docker"</span>   --docker-image ubuntu:14.04</div></pre></td></tr></table></figure>
+<h2><span id="xiang-guan-lian-jie">相关链接</span></h2>
+<ol>
+<li><a href="https://docs.docker.com/engine/installation/linux/docker-ce/centos/#install-using-the-repository" target="_blank" rel="noopener">install docker</a></li>
+<li><a href="https://docs.gitlab.com/runner/install/linux-repository.html" target="_blank" rel="noopener">install gitlab-runner</a></li>
+<li><a href="https://docs.gitlab.com/runner/register/index.html" target="_blank" rel="noopener">register runner</a></li>
+</ol>
 
       
     </div>
@@ -394,11 +405,11 @@
   <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
   <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
-  <p><span>本文标题:</span><a href="/2017/12/13/golang-underscore/">golang underscore下划线作用</a></p>
+  <p><span>本文标题:</span><a href="/2017/12/23/gitlab-runner/">gitlab配置runner</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
-  <p><span>发布时间:</span>2017年12月13日 - 15:12</p>
-  <p><span>最后更新:</span>2017年12月13日 - 15:12</p>
-  <p><span>原始链接:</span><a href="/2017/12/13/golang-underscore/">/2017/12/13/golang-underscore/</a></p>
+  <p><span>发布时间:</span>2017年12月23日 - 21:12</p>
+  <p><span>最后更新:</span>2017年12月23日 - 22:12</p>
+  <p><span>原始链接:</span><a href="/2017/12/23/gitlab-runner/">/2017/12/23/gitlab-runner/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
 
@@ -416,9 +427,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/go/" rel="tag"># go</a>
+            <a href="/tags/runner/" rel="tag"># runner</a>
           
-            <a href="/tags/underscore/" rel="tag"># underscore</a>
+            <a href="/tags/gitlab/" rel="tag"># gitlab</a>
           
         </div>
       
@@ -431,8 +442,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/12/13/hlc/" rel="next" title="crdb HLC 实现">
-                <i class="fa fa-chevron-left"></i> crdb HLC 实现
+              <a href="/2017/12/22/gitlab/" rel="next" title="gitlab配置smtp, ldap">
+                <i class="fa fa-chevron-left"></i> gitlab配置smtp, ldap
               </a>
             
           </div>
@@ -440,10 +451,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/12/14/crdb-trx/" rel="prev" title="crdb事务处理流程">
-                crdb事务处理流程 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -589,7 +596,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="import">Import</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="hu-lue-fan-hui-zhi">&#x5FFD;&#x7565;&#x8FD4;&#x56DE;&#x503C;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="jie-kou-shi-xian-jian-cha">&#x63A5;&#x53E3;&#x5B9E;&#x73B0;&#x68C0;&#x67E5;</span></span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="install-docker">Install docker</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="install-gitlab-runner">Install gitlab-runner</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="register-runner">Register runner</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="xiang-guan-lian-jie">&#x76F8;&#x5173;&#x94FE;&#x63A5;</span></span></a></li></ol></div>
             
 
           </div>
