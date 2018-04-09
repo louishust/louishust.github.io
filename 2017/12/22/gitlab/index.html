@@ -98,7 +98,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="配置smtp 12345678910111213#configuration for smtpgitlab_rails[&apos;smtp_enable&apos;] = truegitlab_rails[&apos;smtp_address&apos;] = &quot;smtp.mxhichina.com&quot;gitlab_rails[&apos;smtp_port&apos;] = 25gitlab_rails[&apos;smtp_user_name&apos;] = &quot;gitl">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-02-07T09:06:08.000Z">
+<meta property="og:updated_time" content="2018-04-09T07:43:41.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="gitlab配置smtp, ldap">
 <meta name="twitter:description" content="配置smtp 12345678910111213#configuration for smtpgitlab_rails[&apos;smtp_enable&apos;] = truegitlab_rails[&apos;smtp_address&apos;] = &quot;smtp.mxhichina.com&quot;gitlab_rails[&apos;smtp_port&apos;] = 25gitlab_rails[&apos;smtp_user_name&apos;] = &quot;gitl">
@@ -374,6 +374,8 @@
 <h2><span id="pei-zhi-ldap">配置LDAP</span></h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">gitlab_rails[<span class="string">'ldap_enabled'</span>] = <span class="literal">true</span></div><div class="line">gitlab_rails[<span class="string">'ldap_servers'</span>] = YAML.load &lt;&lt;-<span class="string">'EOS'</span> <span class="comment"># remember to close this block with 'EOS' below</span></div><div class="line">  main: <span class="comment"># 'main' is the GitLab 'provider ID' of this LDAP server</span></div><div class="line">    label: <span class="string">'LDAP'</span></div><div class="line">    host: <span class="string">'x.x.x.x'</span></div><div class="line">    port: 389</div><div class="line">    uid: <span class="string">'uid'</span></div><div class="line">    method: <span class="string">'plain'</span> <span class="comment"># "tls" or "ssl" or "plain"</span></div><div class="line">    bind_dn: <span class="string">'cn=Manager,dc=xxx,dc=com'</span></div><div class="line">    password: <span class="string">'xxx'</span></div><div class="line">    active_directory: <span class="literal">true</span></div><div class="line">    allow_username_or_email_login: <span class="literal">true</span></div><div class="line">    block_auto_created_users: <span class="literal">false</span></div><div class="line">    base: <span class="string">'dc=xxx,dc=com'</span></div><div class="line">    user_filter: <span class="string">''</span></div><div class="line">    attributes:</div><div class="line">      username: [<span class="string">'uid'</span>, <span class="string">'userid'</span>, <span class="string">'sAMAccountName'</span>]</div><div class="line">      email:    [<span class="string">'mail'</span>, <span class="string">'email'</span>, <span class="string">'userPrincipalName'</span>]</div><div class="line">      name:       <span class="string">'cn'</span></div><div class="line">      first_name: <span class="string">'givenName'</span></div><div class="line">      last_name:  <span class="string">'sn'</span></div><div class="line">EOS</div></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">gitlab-ctl reconfigure</div></pre></td></tr></table></figure>
+<h2><span id="openstack-xu-ni-ji-shang-de-gitlab-chong-qi-hou-wu-fa-fa-you-jian">openstack虚拟机上的gitlab重启后，无法发邮件</span></h2>
+<p>虚拟机重启后，nameserver被重置，需要重新修改/etc/resolv.cnf</p>
 <h2><span id="can-kao-lian-jie">参考链接</span></h2>
 <ol>
 <li><a href="https://docs.gitlab.com/omnibus/settings/smtp.html" target="_blank" rel="noopener">SMTP settings</a></li>
@@ -398,7 +400,7 @@
   <p><span>本文标题:</span><a href="/2017/12/22/gitlab/">gitlab配置smtp, ldap</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2017年12月22日 - 13:12</p>
-  <p><span>最后更新:</span>2018年02月07日 - 17:02</p>
+  <p><span>最后更新:</span>2018年04月09日 - 15:04</p>
   <p><span>原始链接:</span><a href="/2017/12/22/gitlab/">/2017/12/22/gitlab/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
@@ -592,7 +594,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="pei-zhi-smtp">&#x914D;&#x7F6E;smtp</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="pei-zhi-ldap">&#x914D;&#x7F6E;LDAP</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="can-kao-lian-jie">&#x53C2;&#x8003;&#x94FE;&#x63A5;</span></span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="pei-zhi-smtp">&#x914D;&#x7F6E;smtp</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="pei-zhi-ldap">&#x914D;&#x7F6E;LDAP</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="openstack-xu-ni-ji-shang-de-gitlab-chong-qi-hou-wu-fa-fa-you-jian">openstack&#x865A;&#x62DF;&#x673A;&#x4E0A;&#x7684;gitlab&#x91CD;&#x542F;&#x540E;&#xFF0C;&#x65E0;&#x6CD5;&#x53D1;&#x90AE;&#x4EF6;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="can-kao-lian-jie">&#x53C2;&#x8003;&#x94FE;&#x63A5;</span></span></a></li></ol></div>
             
 
           </div>
