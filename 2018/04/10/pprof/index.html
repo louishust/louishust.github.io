@@ -98,7 +98,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="修改代码加入pprof 12345678910111213package mainimport (	_ &quot;net/http/pprof&quot;)func main() &amp;#123;	// we need a webserver to get the pprof webserver	go func() &amp;#123;		log.Println(http.ListenAndServe(&quot;localhost:6">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-04-10T01:18:16.000Z">
+<meta property="og:updated_time" content="2018-04-10T08:08:51.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="pprof发现go程序性能">
 <meta name="twitter:description" content="修改代码加入pprof 12345678910111213package mainimport (	_ &quot;net/http/pprof&quot;)func main() &amp;#123;	// we need a webserver to get the pprof webserver	go func() &amp;#123;		log.Println(http.ListenAndServe(&quot;localhost:6">
@@ -378,12 +378,22 @@
 </li>
 <li>
 <p>生成内存性能报表</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">go tool pprof -png http://localhost:6060/debug/pprof/heap &gt; heap.png</div></pre></td></tr></table></figure>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">go tool pprof ./apply_idem http://localhost:6060/debug/pprof/heap</div></pre></td></tr></table></figure>
 </li>
 <li>
 <p>生成CPU性能报表</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">go tool pprof -png http://localhost:6060/debug/pprof/profile &gt; cpu.png</div></pre></td></tr></table></figure>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">	go tool pprof ./apply_idem http://localhost:6060/debug/pprof/profile</div><div class="line">	Fetching profile over HTTP from http://localhost:6060/debug/pprof/profile</div><div class="line">    Saved profile <span class="keyword">in</span> /Users/loushuai/pprof/pprof.apply_idem.samples.cpu.001.pb.gz</div><div class="line">    File: apply_idem</div><div class="line">    Type: cpu</div><div class="line">    Time: Apr 10, 2018 at 3:33pm (CST)</div><div class="line">    Duration: 30.02s, Total samples = 2.55s ( 8.49%)</div><div class="line">    Entering interactive mode (<span class="built_in">type</span> <span class="string">"help"</span> <span class="keyword">for</span> commands, <span class="string">"o"</span> <span class="keyword">for</span> options)</div><div class="line">	(pprof) list exec_on_source_for_one_row</div><div class="line">Total: 2.55s</div><div class="line">ROUTINE ======================== main.exec_on_source_for_one_row <span class="keyword">in</span> /Users/loushuai/dbscale/apply_script_go/apply_idem.go</div><div class="line">         0      350ms (flat, cum) 13.73% of Total</div><div class="line">         .          .    225:	<span class="built_in">return</span> time_region_sql_snippet, time_region_sql_snippet_with_t</div><div class="line">         .          .    226:&#125;</div><div class="line">         .          .    227:</div><div class="line">         .          .    228:func exec_on_source_for_one_row(query_sql string, column_count int) []string &#123;</div><div class="line">         .          .    229:	row := make([]string, column_count)</div><div class="line">         .      320ms    230:	rows := exec_on_source(query_sql)</div><div class="line">         .          .    231:	defer rows.Close()</div><div class="line">         .          .    232:	rawResult_onerow := make([][]byte, column_count)</div><div class="line">         .          .    233:	dest_onerow := make([]interface&#123;&#125;, column_count)</div><div class="line">         .          .    234:	<span class="keyword">for</span> i, _ := range rawResult_onerow &#123;</div><div class="line">         .          .    235:		dest_onerow[i] = &amp;rawResult_onerow[i]</div><div class="line">         .          .    236:	&#125;</div><div class="line">         .          .    237:	<span class="keyword">for</span> rows.<span class="function"><span class="title">Next</span></span>() &#123;</div><div class="line">         .          .    238:		err := rows.Scan(dest_onerow...)</div><div class="line">         .          .    239:		<span class="keyword">if</span> err != nil &#123;</div><div class="line">         .          .    240:			fatal_error(err.Error())</div><div class="line">         .          .    241:		&#125;</div><div class="line">         .          .    242:		<span class="keyword">for</span> i, raw := range rawResult_onerow &#123;</div><div class="line">         .          .    243:			<span class="keyword">if</span> raw == nil &#123;</div><div class="line">         .          .    244:				row[i] = <span class="string">"\\N"</span></div><div class="line">         .          .    245:			&#125; <span class="keyword">else</span> &#123;</div><div class="line">         .       10ms    246:				row[i] = string(raw)</div><div class="line">         .          .    247:			&#125;</div><div class="line">         .          .    248:		&#125;</div><div class="line">         .          .    249:		<span class="built_in">break</span></div><div class="line">         .          .    250:	&#125;</div><div class="line">         .       20ms    251:	<span class="built_in">return</span> row</div><div class="line">         .          .    252:&#125;</div><div class="line">         .          .    253:</div><div class="line">         .          .    254:func exec_on_target(query_sql string) &#123;</div><div class="line">         .          .    255:	retry_count := 10</div><div class="line">         .          .    256:	<span class="keyword">if</span> Print_msg &#123;</div></pre></td></tr></table></figure>
 </li>
+<li>
+<p>生成flumegraph</p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">go-torch  -u http://127.0.0.1:6060/ --seconds 30</div></pre></td></tr></table></figure>
+<h2><span id="can-kao-wen-zhang">参考文章</span></h2>
+<ol>
+<li><a href="http://cizixs.com/2017/09/11/profiling-golang-program" target="_blank" rel="noopener">使用 pprof 和火焰图调试 golang 应用</a></li>
+<li><a href="https://golang.org/pkg/net/http/pprof/" target="_blank" rel="noopener">net/http/pprof/</a></li>
+<li><a href="https://golang.org/pkg/runtime/pprof/" target="_blank" rel="noopener">runtime/pprof/</a></li>
 </ol>
 
       
@@ -404,7 +414,7 @@
   <p><span>本文标题:</span><a href="/2018/04/10/pprof/">pprof发现go程序性能</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2018年04月10日 - 08:04</p>
-  <p><span>最后更新:</span>2018年04月10日 - 09:04</p>
+  <p><span>最后更新:</span>2018年04月10日 - 16:04</p>
   <p><span>原始链接:</span><a href="/2018/04/10/pprof/">/2018/04/10/pprof/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
@@ -592,7 +602,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="xiu-gai-dai-ma-jia-ru-pprof">&#x4FEE;&#x6539;&#x4EE3;&#x7801;&#x52A0;&#x5165;pprof</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="sheng-cheng-xing-neng-bao-biao">&#x751F;&#x6210;&#x6027;&#x80FD;&#x62A5;&#x8868;</span></span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="xiu-gai-dai-ma-jia-ru-pprof">&#x4FEE;&#x6539;&#x4EE3;&#x7801;&#x52A0;&#x5165;pprof</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="sheng-cheng-xing-neng-bao-biao">&#x751F;&#x6210;&#x6027;&#x80FD;&#x62A5;&#x8868;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="can-kao-wen-zhang">&#x53C2;&#x8003;&#x6587;&#x7AE0;</span></span></a></li></ol></div>
             
 
           </div>
