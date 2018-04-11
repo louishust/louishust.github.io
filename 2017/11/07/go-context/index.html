@@ -79,7 +79,7 @@
 
 
 
-  <meta name="keywords" content="grpc," />
+  <meta name="keywords" content="go,context," />
 
 
 
@@ -91,14 +91,14 @@
 
 
 <meta name="description" content="context context是go并发模式，用户处理goroutines和其父亲之间逻辑。比如接受一个用户的请求后，针对这个请求可能需要开启多个并发的goroutine，如何把这些goroutine和这个client进行关联？就是通过context，如果用户取消请求，所有的goroutine应该能感知，并自动结束。同时可以将共用的变量存储在context之中，供不同的goroutine使用。">
-<meta name="keywords" content="grpc">
+<meta name="keywords" content="go,context">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang context使用">
 <meta property="og:url" content="http://louishust.github.io/2017/11/07/go-context/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="context context是go并发模式，用户处理goroutines和其父亲之间逻辑。比如接受一个用户的请求后，针对这个请求可能需要开启多个并发的goroutine，如何把这些goroutine和这个client进行关联？就是通过context，如果用户取消请求，所有的goroutine应该能感知，并自动结束。同时可以将共用的变量存储在context之中，供不同的goroutine使用。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-11-09T08:27:26.000Z">
+<meta property="og:updated_time" content="2018-04-11T06:52:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang context使用">
 <meta name="twitter:description" content="context context是go并发模式，用户处理goroutines和其父亲之间逻辑。比如接受一个用户的请求后，针对这个请求可能需要开启多个并发的goroutine，如何把这些goroutine和这个client进行关联？就是通过context，如果用户取消请求，所有的goroutine应该能感知，并自动结束。同时可以将共用的变量存储在context之中，供不同的goroutine使用。">
@@ -402,7 +402,7 @@
   <p><span>本文标题:</span><a href="/2017/11/07/go-context/">golang context使用</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2017年11月07日 - 13:11</p>
-  <p><span>最后更新:</span>2017年11月09日 - 16:11</p>
+  <p><span>最后更新:</span>2018年04月11日 - 14:04</p>
   <p><span>原始链接:</span><a href="/2017/11/07/go-context/">/2017/11/07/go-context/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
@@ -421,7 +421,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/grpc/" rel="tag"># grpc</a>
+            <a href="/tags/go/" rel="tag"># go</a>
+          
+            <a href="/tags/context/" rel="tag"># context</a>
           
         </div>
       
@@ -527,7 +529,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">64</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -549,7 +551,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">93</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
