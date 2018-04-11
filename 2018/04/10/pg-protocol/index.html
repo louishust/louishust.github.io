@@ -102,7 +102,7 @@
 <meta property="og:image" content="http://louishust.github.io/images/pg/pg_protocol.002.png">
 <meta property="og:image" content="http://louishust.github.io/images/pg/pg_protocol.003.png">
 <meta property="og:image" content="http://louishust.github.io/images/pg/pg_protocol.004.png">
-<meta property="og:updated_time" content="2018-04-10T14:44:20.000Z">
+<meta property="og:updated_time" content="2018-04-11T11:05:52.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="PG协议解析">
 <meta name="twitter:description" content="概述 协议总体分类  startup phase normal phase  simple query extended query  prepare step bind step execute step">
@@ -414,6 +414,12 @@
 <h3><span id="simple-query">Simple Query</span></h3>
 <p><img src="/images/pg/pg_protocol.003.png" alt="select"></p>
 <p><img src="/images/pg/pg_protocol.004.png" alt="insert"></p>
+<h2><span id="can-kao-wen-dang">参考文档</span></h2>
+<ol>
+<li><a href="https://www.postgresql.org/docs/current/static/protocol-flow.html" target="_blank" rel="noopener">Message Flow</a></li>
+<li><a href="https://www.postgresql.org/docs/current/static/protocol-overview.html" target="_blank" rel="noopener">Protocol Overview</a></li>
+<li><a href="https://www.postgresql.org/docs/current/static/protocol-message-formats.html" target="_blank" rel="noopener">Message Format</a></li>
+</ol>
 
       
     </div>
@@ -433,7 +439,7 @@
   <p><span>本文标题:</span><a href="/2018/04/10/pg-protocol/">PG协议解析</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2018年04月10日 - 21:04</p>
-  <p><span>最后更新:</span>2018年04月10日 - 22:04</p>
+  <p><span>最后更新:</span>2018年04月11日 - 19:04</p>
   <p><span>原始链接:</span><a href="/2018/04/10/pg-protocol/">/2018/04/10/pg-protocol/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
@@ -625,7 +631,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="gai-shu">&#x6982;&#x8FF0;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.1.</span> <span class="nav-text"><span id="xie-yi-zong-ti-fen-lei">&#x534F;&#x8BAE;&#x603B;&#x4F53;&#x5206;&#x7C7B;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.</span> <span class="nav-text"><span id="xiao-xi-gai-lan">&#x6D88;&#x606F;&#x6982;&#x89C8;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.3.</span> <span class="nav-text"><span id="ge-shi-hua">&#x683C;&#x5F0F;&#x5316;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="xiao-xi-liu-cheng">&#x6D88;&#x606F;&#x6D41;&#x7A0B;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text"><span id="start-up">Start-up</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text"><span id="simple-query">Simple Query</span></span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="gai-shu">&#x6982;&#x8FF0;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.1.</span> <span class="nav-text"><span id="xie-yi-zong-ti-fen-lei">&#x534F;&#x8BAE;&#x603B;&#x4F53;&#x5206;&#x7C7B;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.</span> <span class="nav-text"><span id="xiao-xi-gai-lan">&#x6D88;&#x606F;&#x6982;&#x89C8;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.3.</span> <span class="nav-text"><span id="ge-shi-hua">&#x683C;&#x5F0F;&#x5316;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="xiao-xi-liu-cheng">&#x6D88;&#x606F;&#x6D41;&#x7A0B;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text"><span id="start-up">Start-up</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text"><span id="simple-query">Simple Query</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="can-kao-wen-dang">&#x53C2;&#x8003;&#x6587;&#x6863;</span></span></a></li></ol></div>
             
 
           </div>
