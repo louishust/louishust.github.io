@@ -79,7 +79,7 @@
 
 
 
-  <meta name="keywords" content="panic,go,defer,recover," />
+  <meta name="keywords" content="cockroachdb源码,tls," />
 
 
 
@@ -90,18 +90,18 @@
 
 
 
-<meta name="description" content="defer  LIFO, 后进先出队列 在return语句之后，在返回上层函数之前执行 参数预编译，涉及到的参数，在定义defer的地方已经语句赋值了  12345678func c() (i int) &amp;#123;	defer func() &amp;#123; i++ &amp;#125;()	return 1&amp;#125;func main() &amp;#123;	fmt.Println(c())&amp;#125;">
-<meta name="keywords" content="panic,go,defer,recover">
+<meta name="description" content="两种认证流程 pkg/server/config.go 12cfg.UseLegacyConnHandling = envutil.EnvOrDefaultBool(	&quot;COCKROACH_USE_LEGACY_CONN_HANDLING&quot;, false)">
+<meta name="keywords" content="cockroachdb源码,tls">
 <meta property="og:type" content="article">
-<meta property="og:title" content="panic defer recover">
-<meta property="og:url" content="http://louishust.github.io/2018/04/11/panicdefer/index.html">
+<meta property="og:title" content="crdb代码阅读03——客户端连接认证流程">
+<meta property="og:url" content="http://louishust.github.io/2018/04/16/crdb03-connect/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
-<meta property="og:description" content="defer  LIFO, 后进先出队列 在return语句之后，在返回上层函数之前执行 参数预编译，涉及到的参数，在定义defer的地方已经语句赋值了  12345678func c() (i int) &amp;#123;	defer func() &amp;#123; i++ &amp;#125;()	return 1&amp;#125;func main() &amp;#123;	fmt.Println(c())&amp;#125;">
+<meta property="og:description" content="两种认证流程 pkg/server/config.go 12cfg.UseLegacyConnHandling = envutil.EnvOrDefaultBool(	&quot;COCKROACH_USE_LEGACY_CONN_HANDLING&quot;, false)">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-04-11T06:39:14.000Z">
+<meta property="og:updated_time" content="2018-04-17T07:26:06.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="panic defer recover">
-<meta name="twitter:description" content="defer  LIFO, 后进先出队列 在return语句之后，在返回上层函数之前执行 参数预编译，涉及到的参数，在定义defer的地方已经语句赋值了  12345678func c() (i int) &amp;#123;	defer func() &amp;#123; i++ &amp;#125;()	return 1&amp;#125;func main() &amp;#123;	fmt.Println(c())&amp;#125;">
+<meta name="twitter:title" content="crdb代码阅读03——客户端连接认证流程">
+<meta name="twitter:description" content="两种认证流程 pkg/server/config.go 12cfg.UseLegacyConnHandling = envutil.EnvOrDefaultBool(	&quot;COCKROACH_USE_LEGACY_CONN_HANDLING&quot;, false)">
 
 
 
@@ -131,13 +131,13 @@
 
 
 
-  <link rel="canonical" href="http://louishust.github.io/2018/04/11/panicdefer/"/>
+  <link rel="canonical" href="http://louishust.github.io/2018/04/16/crdb03-connect/"/>
 
 
 
 
 
-  <title>panic defer recover | 小贝壳爸爸</title>
+  <title>crdb代码阅读03——客户端连接认证流程 | 小贝壳爸爸</title>
   
 
 
@@ -274,7 +274,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2018/04/11/panicdefer/">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2018/04/16/crdb03-connect/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Louis">
@@ -291,7 +291,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">panic defer recover</h1>
+          <h1 class="post-title" itemprop="name headline">crdb代码阅读03——客户端连接认证流程</h1>
         
 
         <div class="post-meta">
@@ -303,8 +303,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-11T14:28:44+08:00">
-                2018-04-11
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-16T19:53:02+08:00">
+                2018-04-16
               </time>
             
 
@@ -326,8 +326,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/go/" itemprop="url" rel="index">
-                    <span itemprop="name">go</span>
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
                   </a>
                 </span>
 
@@ -368,22 +368,36 @@
       
 
       
-        <h2><span id="defer">defer</span></h2>
-<ol>
-<li>LIFO, 后进先出队列</li>
-<li>在return语句之后，在返回上层函数之前执行</li>
-<li>参数预编译，涉及到的参数，在定义defer的地方已经语句赋值了</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">c</span><span class="params">()</span> <span class="params">(i <span class="keyword">int</span>)</span></span> &#123;</div><div class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; i++ &#125;()</div><div class="line">	<span class="keyword">return</span> <span class="number">1</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	fmt.Println(c())</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+        <h2><span id="liang-chong-ren-zheng-liu-cheng">两种认证流程</span></h2>
+<p><code>pkg/server/config.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cfg.UseLegacyConnHandling = envutil.EnvOrDefaultBool(</div><div class="line">	<span class="string">"COCKROACH_USE_LEGACY_CONN_HANDLING"</span>, <span class="literal">false</span>)</div></pre></td></tr></table></figure>
 <a id="more"></a>
-<p>return 1将1赋值给i，defer执行，对i进行加1，最终返回值i为2</p>
-<h2><span id="panic">panic</span></h2>
+<p><code>pkg/server/server.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> !s.cfg.UseLegacyConnHandling &#123;</div><div class="line">	serveFn = s.pgServer.ServeConn2</div><div class="line">&#125; <span class="keyword">else</span> &#123;</div><div class="line">	serveFn = s.pgServer.ServeConn</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>ServeConn是原始的处理方式，单routine for循环处理请求，已经不是默认处理方式。<br>
+ServeConn2是最新的处理方式，双routine处理逻辑.</p>
+<h2><span id="shuang-goroutine-chu-li-qing-qiu">双goroutine处理请求</span></h2>
 <ol>
-<li>panic类似c语言里的throw，不再执行后面的语句</li>
-<li>返回上一层函数之前，依然会执行之前的defer语句</li>
-<li>直到遇到recover函数，处理异常，否则程序core</li>
+<li>负责接受客户端请求</li>
 </ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	f()</div><div class="line">	fmt.Println(<span class="string">"Returned normally from f."</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> r := <span class="built_in">recover</span>(); r != <span class="literal">nil</span> &#123;</div><div class="line">			fmt.Println(<span class="string">"Recovered in f"</span>, r)</div><div class="line">		&#125;</div><div class="line">	&#125;()</div><div class="line">	fmt.Println(<span class="string">"Calling g."</span>)</div><div class="line">	g(<span class="number">0</span>)</div><div class="line">	fmt.Println(<span class="string">"Returned normally from g."</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">g</span><span class="params">(i <span class="keyword">int</span>)</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> i &gt; <span class="number">3</span> &#123;</div><div class="line">		fmt.Println(<span class="string">"Panicking!"</span>)</div><div class="line">		<span class="built_in">panic</span>(fmt.Sprintf(<span class="string">"%v"</span>, i))</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">defer</span> fmt.Println(<span class="string">"Defer in g"</span>, i)</div><div class="line">	fmt.Println(<span class="string">"Printing in g"</span>, i)</div><div class="line">	g(i + <span class="number">1</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line">Calling g.</div><div class="line">Printing in g <span class="number">0</span></div><div class="line">Printing in g <span class="number">1</span></div><div class="line">Printing in g <span class="number">2</span></div><div class="line">Printing in g <span class="number">3</span></div><div class="line">Panicking!</div><div class="line">Defer in g <span class="number">3</span></div><div class="line">Defer in g <span class="number">2</span></div><div class="line">Defer in g <span class="number">1</span></div><div class="line">Defer in g <span class="number">0</span></div><div class="line">Recovered in f <span class="number">4</span></div><div class="line">Returned normally from f.</div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">Loop:</div><div class="line">	<span class="keyword">for</span> &#123;</div><div class="line">		<span class="keyword">var</span> typ pgwirebase.ClientMessageType</div><div class="line">		<span class="keyword">var</span> n <span class="keyword">int</span></div><div class="line">		typ, n, err = c.readBuf.ReadTypedMsg(&amp;c.rd)</div><div class="line">		c.metrics.BytesInCount.Inc(<span class="keyword">int64</span>(n))</div><div class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">break</span> Loop</div><div class="line">		&#125;</div><div class="line">		<span class="keyword">if</span> log.V(<span class="number">2</span>) &#123;</div><div class="line">			log.Infof(ctx, <span class="string">"pgwire: processing %s"</span>, typ)</div><div class="line">		&#125;</div><div class="line">		timeReceived := timeutil.Now()</div><div class="line">		<span class="keyword">switch</span> typ &#123;</div><div class="line">		<span class="keyword">case</span> pgwirebase.ClientMsgSimpleQuery:</div><div class="line">			<span class="keyword">if</span> doingExtendedQueryMessage &#123;</div></pre></td></tr></table></figure>
+<ol start="2">
+<li>负责处理请求</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> sqlServer != <span class="literal">nil</span> &#123;</div><div class="line">	wg.Add(<span class="number">1</span>)</div><div class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		writerErr = sqlServer.ServeConn(</div><div class="line">			processorCtx, c.sessionArgs, c.stmtBuf, c, reserved, &amp;c.metrics.SQLMemMetrics, stopProcessor)</div><div class="line">		<span class="comment">// TODO(andrei): Should we sometimes transmit the writerErr's to the</span></div><div class="line">		<span class="comment">// client?</span></div><div class="line">		wg.Done()</div><div class="line">		stopReader()</div><div class="line">	&#125;()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2><span id="ren-zheng-fang-shi">认证方式</span></h2>
+<ol>
+<li>–insecure<br>
+测试使用，不需要密码，不走TLS</li>
+<li>–certs-dir
+<ul>
+<li>使用密码: 如果没有client.username.crt和client.username.key，则需要输入密码</li>
+<li>不使用密码: 如果存在client.username.crt/key，则不需要输入密码</li>
+</ul>
+</li>
+</ol>
+<p><code>pkg/sql/pgwire/server.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *v3Conn)</span> <span class="title">handleAuthentication</span><span class="params">(ctx context.Context, insecure <span class="keyword">bool</span>)</span> <span class="title">error</span></span> &#123;</div><div class="line">...</div><div class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(tlsState.PeerCertificates) == <span class="number">0</span> &#123;</div><div class="line">			password, err := c.sendAuthPasswordRequest()</div><div class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">				<span class="keyword">return</span> c.sendError(err)</div><div class="line">			&#125;</div><div class="line">			authenticationHook = security.UserAuthPasswordHook(</div><div class="line">				insecure, password, hashedPassword,</div><div class="line">			)</div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			<span class="comment">// Normalize the username contained in the certificate.</span></div><div class="line">			tlsState.PeerCertificates[<span class="number">0</span>].Subject.CommonName = tree.Name(</div><div class="line">				tlsState.PeerCertificates[<span class="number">0</span>].Subject.CommonName,</div><div class="line">			).Normalize()</div><div class="line">			<span class="keyword">var</span> err error</div><div class="line">			authenticationHook, err = security.UserAuthCertHook(insecure, &amp;tlsState)</div><div class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">				<span class="keyword">return</span> c.sendError(err)</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line"></div><div class="line">		<span class="keyword">if</span> err := authenticationHook(c.sessionArgs.User, <span class="literal">true</span> <span class="comment">/* public */</span>); err != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">return</span> c.sendError(err)</div><div class="line">		&#125;</div></pre></td></tr></table></figure>
 
       
     </div>
@@ -400,11 +414,11 @@
   <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
   <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
-  <p><span>本文标题:</span><a href="/2018/04/11/panicdefer/">panic defer recover</a></p>
+  <p><span>本文标题:</span><a href="/2018/04/16/crdb03-connect/">crdb代码阅读03——客户端连接认证流程</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
-  <p><span>发布时间:</span>2018年04月11日 - 14:04</p>
-  <p><span>最后更新:</span>2018年04月11日 - 14:04</p>
-  <p><span>原始链接:</span><a href="/2018/04/11/panicdefer/">/2018/04/11/panicdefer/</a></p>
+  <p><span>发布时间:</span>2018年04月16日 - 19:04</p>
+  <p><span>最后更新:</span>2018年04月17日 - 15:04</p>
+  <p><span>原始链接:</span><a href="/2018/04/16/crdb03-connect/">/2018/04/16/crdb03-connect/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
 
@@ -422,13 +436,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/panic/" rel="tag"># panic</a>
+            <a href="/tags/cockroachdb源码/" rel="tag"># cockroachdb源码</a>
           
-            <a href="/tags/go/" rel="tag"># go</a>
-          
-            <a href="/tags/defer/" rel="tag"># defer</a>
-          
-            <a href="/tags/recover/" rel="tag"># recover</a>
+            <a href="/tags/tls/" rel="tag"># tls</a>
           
         </div>
       
@@ -441,8 +451,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/04/10/pg-protocol/" rel="next" title="PG协议解析">
-                <i class="fa fa-chevron-left"></i> PG协议解析
+              <a href="/2018/04/16/crdb02-dbinit/" rel="next" title="crdb代码阅读02——system数据库初始化流程">
+                <i class="fa fa-chevron-left"></i> crdb代码阅读02——system数据库初始化流程
               </a>
             
           </div>
@@ -450,10 +460,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/04/11/crdb01-cmux/" rel="prev" title="crdb代码阅读01——cmux多路复用">
-                crdb代码阅读01——cmux多路复用 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -599,7 +605,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="defer">defer</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="panic">panic</span></span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="liang-chong-ren-zheng-liu-cheng">&#x4E24;&#x79CD;&#x8BA4;&#x8BC1;&#x6D41;&#x7A0B;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="shuang-goroutine-chu-li-qing-qiu">&#x53CC;goroutine&#x5904;&#x7406;&#x8BF7;&#x6C42;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="ren-zheng-fang-shi">&#x8BA4;&#x8BC1;&#x65B9;&#x5F0F;</span></span></a></li></ol></div>
             
 
           </div>
