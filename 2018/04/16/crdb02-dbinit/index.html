@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link href="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+  
+
+<link href="//cdn.staticfile.org/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="cockroachdb源码,range,system," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="表描述定义 pkg/sql/sqlbase/system.go 123456789101112131415161718192021UsersTable = TableDescriptor&amp;#123;	Name:     &quot;users&quot;,	ID:       keys.UsersTableID,	ParentID: keys.SystemDatabaseID,	Version:  1,	Column">
+<meta name="keywords" content="cockroachdb源码,range,system">
+<meta property="og:type" content="article">
+<meta property="og:title" content="crdb代码阅读02——system数据库初始化流程">
+<meta property="og:url" content="http://louishust.github.io/2018/04/16/crdb02-dbinit/index.html">
+<meta property="og:site_name" content="小贝壳爸爸">
+<meta property="og:description" content="表描述定义 pkg/sql/sqlbase/system.go 123456789101112131415161718192021UsersTable = TableDescriptor&amp;#123;	Name:     &quot;users&quot;,	ID:       keys.UsersTableID,	ParentID: keys.SystemDatabaseID,	Version:  1,	Column">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-04-16T08:54:15.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="crdb代码阅读02——system数据库初始化流程">
+<meta name="twitter:description" content="表描述定义 pkg/sql/sqlbase/system.go 123456789101112131415161718192021UsersTable = TableDescriptor&amp;#123;	Name:     &quot;users&quot;,	ID:       keys.UsersTableID,	ParentID: keys.SystemDatabaseID,	Version:  1,	Column">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"right","display":"hide","offset":12,"b2t":true,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://louishust.github.io/2018/04/16/crdb02-dbinit/"/>
+
+
+
+
+
+  <title>crdb代码阅读02——system数据库初始化流程 | 小贝壳爸爸</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小贝壳爸爸</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">天桥扛把子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2018/04/16/crdb02-dbinit/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">crdb代码阅读02——system数据库初始化流程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-16T16:14:58+08:00">
+                2018-04-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-eye"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2><span id="biao-miao-shu-ding-yi">表描述定义</span></h2>
+<p><code>pkg/sql/sqlbase/system.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">UsersTable = TableDescriptor&#123;</div><div class="line">	Name:     <span class="string">"users"</span>,</div><div class="line">	ID:       keys.UsersTableID,</div><div class="line">	ParentID: keys.SystemDatabaseID,</div><div class="line">	Version:  <span class="number">1</span>,</div><div class="line">	Columns: []ColumnDescriptor&#123;</div><div class="line">		&#123;Name: <span class="string">"username"</span>, ID: <span class="number">1</span>, Type: colTypeString&#125;,</div><div class="line">		&#123;Name: <span class="string">"hashedPassword"</span>, ID: <span class="number">2</span>, Type: colTypeBytes, Nullable: <span class="literal">true</span>&#125;,</div><div class="line">	&#125;,</div><div class="line">	NextColumnID: <span class="number">3</span>,</div><div class="line">	Families: []ColumnFamilyDescriptor&#123;</div><div class="line">		&#123;Name: <span class="string">"primary"</span>, ID: <span class="number">0</span>, ColumnNames: []<span class="keyword">string</span>&#123;<span class="string">"username"</span>&#125;, ColumnIDs: singleID1&#125;,</div><div class="line">		&#123;Name: <span class="string">"fam_2_hashedPassword"</span>, ID: <span class="number">2</span>, ColumnNames: []<span class="keyword">string</span>&#123;<span class="string">"hashedPassword"</span>&#125;, ColumnIDs: []ColumnID&#123;<span class="number">2</span>&#125;, DefaultColumnID: <span class="number">2</span>&#125;,</div><div class="line">	&#125;,</div><div class="line">	PrimaryIndex:   pk(<span class="string">"username"</span>),</div><div class="line">	NextFamilyID:   <span class="number">3</span>,</div><div class="line">	NextIndexID:    <span class="number">2</span>,</div><div class="line">	Privileges:     NewCustomRootPrivilegeDescriptor(SystemAllowedPrivileges[keys.UsersTableID]),</div><div class="line">	FormatVersion:  InterleavedFormatVersion,</div><div class="line">	NextMutationID: <span class="number">1</span>,</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2><span id="chu-shi-hua-biao-miao-shu-wei-nei-cun-tai-kv-pairs">初始化表描述为内存态KV pairs</span></h2>
+<p><code>pkg/server/node.go</code><br>
+<code>pkg/sql/sqlbase/metadata.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&gt; server.bootstrapCluster</div><div class="line">| &gt; server.GetBootstrapSchema</div><div class="line">| | &gt; sqlbase.MakeMetadataSchema</div><div class="line">| | | &gt; sqlbase.addSystemDatabaseToSchema</div><div class="line">| &gt; sqlbase.MetadataSchema.GetInitialValues</div></pre></td></tr></table></figure>
+<p>将表定义描述转换成内存的kv形式，便于后面进行插入</p>
+<h2><span id="chu-shi-hua-di-yi-ge-range-xie-ru-dao-rocksdb">初始化第一个range，写入到rocksdb</span></h2>
+<p>这里将上一步的所有kv对，直接插入rocksdb中</p>
+<p><code>pkg/storage/store.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Store)</span> <span class="title">BootstrapRange</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">	initialValues []roachpb.KeyValue, bootstrapVersion roachpb.Version,</span></span></div><div class="line"><span class="function"><span class="params">)</span> <span class="title">error</span></span> &#123;</div><div class="line">	desc := &amp;roachpb.RangeDescriptor&#123;</div><div class="line">		RangeID:       <span class="number">1</span>,</div><div class="line">		StartKey:      roachpb.RKeyMin,</div><div class="line">		EndKey:        roachpb.RKeyMax,</div><div class="line">		NextReplicaID: <span class="number">2</span>,</div><div class="line">		Replicas: []roachpb.ReplicaDescriptor&#123;</div><div class="line">			&#123;</div><div class="line">				NodeID:    <span class="number">1</span>,</div><div class="line">				StoreID:   <span class="number">1</span>,</div><div class="line">				ReplicaID: <span class="number">1</span>,</div><div class="line">			&#125;,</div><div class="line">		&#125;,</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> err := desc.Validate(); err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> err</div><div class="line">	&#125;</div><div class="line">	batch := s.engine.NewBatch()</div><div class="line">	<span class="keyword">defer</span> batch.Close()</div><div class="line">	ms := &amp;enginepb.MVCCStats&#123;&#125;</div><div class="line">	now := s.cfg.Clock.Now()</div><div class="line">	ctx := context.Background()</div><div class="line"></div><div class="line">	<span class="comment">// Bootstrap version information. We don't do this if this is v1.0, which is</span></div><div class="line">	<span class="comment">// never going to be true in versions that have this code in production, but</span></div><div class="line">	<span class="comment">// can be true in tests.</span></div><div class="line">	<span class="keyword">if</span> bootstrapVersion != cluster.VersionByKey(cluster.VersionBase) &#123;</div><div class="line">		<span class="keyword">if</span> err := engine.MVCCPutProto(ctx, batch, ms <span class="comment">/* ms */</span>, keys.BootstrapVersionKey, hlc.Timestamp&#123;&#125;, <span class="literal">nil</span>, &amp;bootstrapVersion); err != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">return</span> err</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Range descriptor.</span></div><div class="line">	<span class="keyword">if</span> err := engine.MVCCPutProto(ctx, batch, ms, keys.RangeDescriptorKey(desc.StartKey), now, <span class="literal">nil</span>, desc); err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> err</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Replica GC timestamp.</span></div><div class="line">	<span class="keyword">if</span> err := engine.MVCCPutProto(ctx, batch, <span class="literal">nil</span> <span class="comment">/* ms */</span>, keys.RangeLastReplicaGCTimestampKey(desc.RangeID), hlc.Timestamp&#123;&#125;, <span class="literal">nil</span>, &amp;now); err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> err</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Range addressing for meta2.</span></div><div class="line">	meta2Key := keys.RangeMetaKey(roachpb.RKeyMax)</div><div class="line">	<span class="keyword">if</span> err := engine.MVCCPutProto(ctx, batch, ms, meta2Key.AsRawKey(), now, <span class="literal">nil</span>, desc); err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> err</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// Range addressing for meta1.</span></div><div class="line">	meta1Key := keys.RangeMetaKey(meta2Key)</div><div class="line">	<span class="keyword">if</span> err := engine.MVCCPutProto(ctx, batch, ms, meta1Key.AsRawKey(), now, <span class="literal">nil</span>, desc); err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> err</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// Now add all passed-in default entries.</span></div><div class="line">	<span class="keyword">for</span> _, kv := <span class="keyword">range</span> initialValues &#123;</div><div class="line">		<span class="comment">// Initialize the checksums.</span></div><div class="line">		kv.Value.InitChecksum(kv.Key)</div><div class="line">		<span class="keyword">if</span> err := engine.MVCCPut(ctx, batch, ms, kv.Key, now, kv.Value, <span class="literal">nil</span>); err != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">return</span> err</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	lease := roachpb.BootstrapLease()</div><div class="line">	updatedMS, err := writeInitialState(ctx, s.cfg.Settings, batch, *ms, *desc,</div><div class="line">		lease, hlc.Timestamp&#123;&#125;, hlc.Timestamp&#123;&#125;)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> err</div><div class="line">	&#125;</div><div class="line">	*ms = updatedMS</div><div class="line"></div><div class="line">	<span class="keyword">return</span> batch.Commit(<span class="literal">true</span> <span class="comment">/* sync */</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>初始化第一个range的desc</li>
+<li>插入meta2的key</li>
+<li>插入meta1的key</li>
+<li>插入系统表描述的kv pair</li>
+<li>commit</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2018/04/16/crdb02-dbinit/">crdb代码阅读02——system数据库初始化流程</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2018年04月16日 - 16:04</p>
+  <p><span>最后更新:</span>2018年04月16日 - 16:04</p>
+  <p><span>原始链接:</span><a href="/2018/04/16/crdb02-dbinit/">/2018/04/16/crdb02-dbinit/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/cockroachdb源码/" rel="tag"># cockroachdb源码</a>
+          
+            <a href="/tags/range/" rel="tag"># range</a>
+          
+            <a href="/tags/system/" rel="tag"># system</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/12/crdb03-connect/" rel="next" title="crdb代码阅读02——客户端连接认证流程">
+                <i class="fa fa-chevron-left"></i> crdb代码阅读02——客户端连接认证流程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Louis" />
+            
+              <p class="site-author-name" itemprop="name">Louis</p>
+              <p class="site-description motion-element" itemprop="description">记录工作和生活点滴</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">96</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/louishust" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="biao-miao-shu-ding-yi">&#x8868;&#x63CF;&#x8FF0;&#x5B9A;&#x4E49;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="chu-shi-hua-biao-miao-shu-wei-nei-cun-tai-kv-pairs">&#x521D;&#x59CB;&#x5316;&#x8868;&#x63CF;&#x8FF0;&#x4E3A;&#x5185;&#x5B58;&#x6001;KV pairs</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="chu-shi-hua-di-yi-ge-range-xie-ru-dao-rocksdb">&#x521D;&#x59CB;&#x5316;&#x7B2C;&#x4E00;&#x4E2A;range&#xFF0C;&#x5199;&#x5165;&#x5230;rocksdb</span></span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">true</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/fastclick/1.0.6/fastclick.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -273,6 +273,330 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2018/04/16/crdb02-dbinit/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/16/crdb02-dbinit/" itemprop="url">crdb代码阅读02——system数据库初始化流程</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-16T16:14:58+08:00">
+                2018-04-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="biao-miao-shu-ding-yi"><a class="header-anchor" href="#表描述定义"></a>表描述定义</h2>
+<p><code>pkg/sql/sqlbase/system.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">UsersTable = TableDescriptor&#123;</div><div class="line">	Name:     <span class="string">"users"</span>,</div><div class="line">	ID:       keys.UsersTableID,</div><div class="line">	ParentID: keys.SystemDatabaseID,</div><div class="line">	Version:  <span class="number">1</span>,</div><div class="line">	Columns: []ColumnDescriptor&#123;</div><div class="line">		&#123;Name: <span class="string">"username"</span>, ID: <span class="number">1</span>, Type: colTypeString&#125;,</div><div class="line">		&#123;Name: <span class="string">"hashedPassword"</span>, ID: <span class="number">2</span>, Type: colTypeBytes, Nullable: <span class="literal">true</span>&#125;,</div><div class="line">	&#125;,</div><div class="line">	NextColumnID: <span class="number">3</span>,</div><div class="line">	Families: []ColumnFamilyDescriptor&#123;</div><div class="line">		&#123;Name: <span class="string">"primary"</span>, ID: <span class="number">0</span>, ColumnNames: []<span class="keyword">string</span>&#123;<span class="string">"username"</span>&#125;, ColumnIDs: singleID1&#125;,</div><div class="line">		&#123;Name: <span class="string">"fam_2_hashedPassword"</span>, ID: <span class="number">2</span>, ColumnNames: []<span class="keyword">string</span>&#123;<span class="string">"hashedPassword"</span>&#125;, ColumnIDs: []ColumnID&#123;<span class="number">2</span>&#125;, DefaultColumnID: <span class="number">2</span>&#125;,</div><div class="line">	&#125;,</div><div class="line">	PrimaryIndex:   pk(<span class="string">"username"</span>),</div><div class="line">	NextFamilyID:   <span class="number">3</span>,</div><div class="line">	NextIndexID:    <span class="number">2</span>,</div><div class="line">	Privileges:     NewCustomRootPrivilegeDescriptor(SystemAllowedPrivileges[keys.UsersTableID]),</div><div class="line">	FormatVersion:  InterleavedFormatVersion,</div><div class="line">	NextMutationID: <span class="number">1</span>,</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/04/16/crdb02-dbinit/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+    <div>
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2018/04/12/crdb03-connect/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/12/crdb03-connect/" itemprop="url">crdb代码阅读02——客户端连接认证流程</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-12T19:53:02+08:00">
+                2018-04-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
+                    <span itemprop="name">cockroachdb</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2><span id="liang-chong-ren-zheng-liu-cheng">两种认证流程</span></h2>
+<p><code>pkg/server/config.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cfg.UseLegacyConnHandling = envutil.EnvOrDefaultBool(</div><div class="line">	<span class="string">"COCKROACH_USE_LEGACY_CONN_HANDLING"</span>, <span class="literal">false</span>)</div></pre></td></tr></table></figure>
+<p><code>pkg/server/server.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> !s.cfg.UseLegacyConnHandling &#123;</div><div class="line">	serveFn = s.pgServer.ServeConn2</div><div class="line">&#125; <span class="keyword">else</span> &#123;</div><div class="line">	serveFn = s.pgServer.ServeConn</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>ServeConn是原始的处理方式，单routine for循环处理请求，已经不是默认处理方式。<br>
+ServeConn2是最新的处理方式，双routine处理逻辑.</p>
+<h2><span id="shuang-goroutine-chu-li-qing-qiu">双goroutine处理请求</span></h2>
+<ol>
+<li>负责接受客户端请求</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">Loop:</div><div class="line">	<span class="keyword">for</span> &#123;</div><div class="line">		<span class="keyword">var</span> typ pgwirebase.ClientMessageType</div><div class="line">		<span class="keyword">var</span> n <span class="keyword">int</span></div><div class="line">		typ, n, err = c.readBuf.ReadTypedMsg(&amp;c.rd)</div><div class="line">		c.metrics.BytesInCount.Inc(<span class="keyword">int64</span>(n))</div><div class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">break</span> Loop</div><div class="line">		&#125;</div><div class="line">		<span class="keyword">if</span> log.V(<span class="number">2</span>) &#123;</div><div class="line">			log.Infof(ctx, <span class="string">"pgwire: processing %s"</span>, typ)</div><div class="line">		&#125;</div><div class="line">		timeReceived := timeutil.Now()</div><div class="line">		<span class="keyword">switch</span> typ &#123;</div><div class="line">		<span class="keyword">case</span> pgwirebase.ClientMsgSimpleQuery:</div><div class="line">			<span class="keyword">if</span> doingExtendedQueryMessage &#123;</div></pre></td></tr></table></figure>
+<ol start="2">
+<li>负责处理请求</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> sqlServer != <span class="literal">nil</span> &#123;</div><div class="line">	wg.Add(<span class="number">1</span>)</div><div class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		writerErr = sqlServer.ServeConn(</div><div class="line">			processorCtx, c.sessionArgs, c.stmtBuf, c, reserved, &amp;c.metrics.SQLMemMetrics, stopProcessor)</div><div class="line">		<span class="comment">// TODO(andrei): Should we sometimes transmit the writerErr's to the</span></div><div class="line">		<span class="comment">// client?</span></div><div class="line">		wg.Done()</div><div class="line">		stopReader()</div><div class="line">	&#125;()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2><span id="ren-zheng-fang-shi">认证方式</span></h2>
+<ol>
+<li>–insecure<br>
+测试使用，不需要密码，不走TLS</li>
+<li>–certs-dir
+<ul>
+<li>使用密码: 如果没有client.username.crt和client.username.key，则需要输入密码</li>
+<li>不使用密码: 如果存在client.username.crt/key，则不需要输入密码</li>
+</ul>
+</li>
+</ol>
+<p><code>pkg/sql/pgwire/server.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *v3Conn)</span> <span class="title">handleAuthentication</span><span class="params">(ctx context.Context, insecure <span class="keyword">bool</span>)</span> <span class="title">error</span></span> &#123;</div><div class="line">...</div><div class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(tlsState.PeerCertificates) == <span class="number">0</span> &#123;</div><div class="line">			password, err := c.sendAuthPasswordRequest()</div><div class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">				<span class="keyword">return</span> c.sendError(err)</div><div class="line">			&#125;</div><div class="line">			authenticationHook = security.UserAuthPasswordHook(</div><div class="line">				insecure, password, hashedPassword,</div><div class="line">			)</div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			<span class="comment">// Normalize the username contained in the certificate.</span></div><div class="line">			tlsState.PeerCertificates[<span class="number">0</span>].Subject.CommonName = tree.Name(</div><div class="line">				tlsState.PeerCertificates[<span class="number">0</span>].Subject.CommonName,</div><div class="line">			).Normalize()</div><div class="line">			<span class="keyword">var</span> err error</div><div class="line">			authenticationHook, err = security.UserAuthCertHook(insecure, &amp;tlsState)</div><div class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">				<span class="keyword">return</span> c.sendError(err)</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line"></div><div class="line">		<span class="keyword">if</span> err := authenticationHook(c.sessionArgs.User, <span class="literal">true</span> <span class="comment">/* public */</span>); err != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">return</span> c.sendError(err)</div><div class="line">		&#125;</div></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+    <div>
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2018/04/11/crdb01-cmux/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1476,314 +1800,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/12/18/crdb-txn-txnwait/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Louis">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小贝壳爸爸">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/12/18/crdb-txn-txnwait/" itemprop="url">crdb事务冲突处理</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-18T14:09:12+08:00">
-                2017-12-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
-                    <span itemprop="name">cockroachdb</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="ju-ge-li-zi"><a class="header-anchor" href="#举个栗子"></a>举个栗子</h2>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> test.t1(c1 <span class="built_in">int</span> primary <span class="keyword">key</span>, c2 <span class="built_in">int</span>);</div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t1 <span class="keyword">values</span>(<span class="number">1</span>,<span class="number">1</span>);</div><div class="line"></div><div class="line">txn1: <span class="keyword">begin</span>;</div><div class="line">txn2: <span class="keyword">begin</span>;</div><div class="line">txn1: <span class="keyword">update</span> t1 <span class="keyword">set</span> c2=<span class="number">2</span> <span class="keyword">where</span> c1=<span class="number">1</span>;</div><div class="line">txn2: <span class="keyword">select</span> * <span class="keyword">from</span> t1; (hang here)</div></pre></td></tr></table></figure>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/12/18/crdb-txn-txnwait/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-    <div>
-      
-    </div>
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2017/12/18/crdb-txn-todo/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Louis">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小贝壳爸爸">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/12/18/crdb-txn-todo/" itemprop="url">需要跟踪的crdb txn细节列表</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-18T13:02:33+08:00">
-                2017-12-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/cockroachdb/" itemprop="url" rel="index">
-                    <span itemprop="name">cockroachdb</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="txn-shi-xian-xi-jie"><a class="header-anchor" href="#txn实现细节"></a>txn实现细节</h2>
-<ol>
-<li>txnwait.Queue</li>
-<li>TimestampCache</li>
-<li>CommandQueue</li>
-<li>quiescer</li>
-<li>txn heartbeat</li>
-<li>txn restart</li>
-<li>txn epoch</li>
-</ol>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/12/18/crdb-txn-todo/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-    <div>
-      
-    </div>
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1838,7 +1854,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">64</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1860,7 +1876,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">93</span>
+                  <span class="site-state-item-count">96</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
