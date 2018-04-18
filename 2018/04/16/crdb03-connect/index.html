@@ -98,7 +98,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="两种认证流程 pkg/server/config.go 12cfg.UseLegacyConnHandling = envutil.EnvOrDefaultBool(	&quot;COCKROACH_USE_LEGACY_CONN_HANDLING&quot;, false)">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-04-17T07:26:06.000Z">
+<meta property="og:updated_time" content="2018-04-17T11:39:46.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="crdb代码阅读03——客户端连接认证流程">
 <meta name="twitter:description" content="两种认证流程 pkg/server/config.go 12cfg.UseLegacyConnHandling = envutil.EnvOrDefaultBool(	&quot;COCKROACH_USE_LEGACY_CONN_HANDLING&quot;, false)">
@@ -417,7 +417,7 @@ ServeConn2是最新的处理方式，双routine处理逻辑.</p>
   <p><span>本文标题:</span><a href="/2018/04/16/crdb03-connect/">crdb代码阅读03——客户端连接认证流程</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2018年04月16日 - 19:04</p>
-  <p><span>最后更新:</span>2018年04月17日 - 15:04</p>
+  <p><span>最后更新:</span>2018年04月17日 - 19:04</p>
   <p><span>原始链接:</span><a href="/2018/04/16/crdb03-connect/">/2018/04/16/crdb03-connect/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
@@ -460,6 +460,10 @@ ServeConn2是最新的处理方式，双routine处理逻辑.</p>
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/18/crdb04-howtest/" rel="prev" title="crdb代码阅读04——make test">
+                crdb代码阅读04——make test <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -540,7 +544,7 @@ ServeConn2是最新的处理方式，双routine处理逻辑.</p>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-count">67</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -562,7 +566,7 @@ ServeConn2是最新的处理方式，双routine处理逻辑.</p>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">97</span>
+                  <span class="site-state-item-count">98</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
