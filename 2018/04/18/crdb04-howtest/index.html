@@ -98,7 +98,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="提交pr之前需要做如下测试 12$ make test$ make pre-push">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-04-18T02:53:50.000Z">
+<meta property="og:updated_time" content="2018-04-19T06:25:31.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="crdb代码阅读04——make test">
 <meta name="twitter:description" content="提交pr之前需要做如下测试 12$ make test$ make pre-push">
@@ -373,6 +373,8 @@
 <a id="more"></a>
 <h2><span id="ce-li-diao-shi-fang-fa">测例调试方法</span></h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Run all tests in ./pkg/storage</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/storage</div><div class="line"><span class="comment"># Run all tests in ./pkg/storage with verbose logs</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/storage TESTFLAGS=<span class="string">"-v -show-logs"</span></div><div class="line"><span class="comment"># Run all kv tests matching '^TestFoo' with a timeout of 10s</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/kv TESTS=<span class="string">'^TestFoo'</span> TESTTIMEOUT=10s</div><div class="line"><span class="comment"># Run the sql logic tests</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/sql TESTS=<span class="string">'TestLogic$$'</span></div><div class="line"><span class="comment"># or, using a shortcut,</span></div><div class="line">make testlogic</div><div class="line"><span class="comment"># Run a specific sql logic subtest</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/sql TESTS=<span class="string">'TestLogic$$/select$$'</span></div><div class="line"><span class="comment"># or, using a shortcut,</span></div><div class="line">make testlogic FILES=select</div></pre></td></tr></table></figure>
+<p><strong>重写logictest输出文件</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">make testlogic FILES=&quot;...&quot; TESTFLAGS=-rewrite-results-in-testfiles</div></pre></td></tr></table></figure>
 
       
     </div>
@@ -382,6 +384,21 @@
     <div>
       
         
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2018/04/18/crdb04-howtest/">crdb代码阅读04——make test</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2018年04月18日 - 09:04</p>
+  <p><span>最后更新:</span>2018年04月19日 - 14:04</p>
+  <p><span>原始链接:</span><a href="/2018/04/18/crdb04-howtest/">/2018/04/18/crdb04-howtest/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
 
       
     </div>
@@ -420,6 +437,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/18/crdb05-stop/" rel="prev" title="crdb代码阅读05——Stopper">
+                crdb代码阅读05——Stopper <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -500,7 +521,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-count">70</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -511,7 +532,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-count">22</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -522,7 +543,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">98</span>
+                  <span class="site-state-item-count">101</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
