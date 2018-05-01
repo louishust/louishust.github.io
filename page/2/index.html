@@ -384,7 +384,7 @@
 </ol>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/04/10/pg-protocol/#espandi" rel="contents">
+            <a class="btn" href="/2018/04/10/pg-protocol/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -534,7 +534,7 @@
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	_ <span class="string">"net/http/pprof"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="comment">// we need a webserver to get the pprof webserver</span></div><div class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		log.Println(http.ListenAndServe(<span class="string">"localhost:6060"</span>, <span class="literal">nil</span>))</div><div class="line">	&#125;()</div><div class="line">	<span class="comment">// your code</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/04/10/pprof/#espandi" rel="contents">
+            <a class="btn" href="/2018/04/10/pprof/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -830,7 +830,7 @@
 <p><strong>如果在vector push back过程中出现引用元素的情况，可能导致内存问题。</strong></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/05/stl-vector/#espandi" rel="contents">
+            <a class="btn" href="/2018/01/05/stl-vector/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -979,7 +979,7 @@
           <p>选一台独立机器，尽量不要和gitlab在一台机器上。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/12/23/gitlab-runner/#espandi" rel="contents">
+            <a class="btn" href="/2017/12/23/gitlab-runner/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1129,7 +1129,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#configuration for smtp</span></div><div class="line">gitlab_rails[<span class="string">'smtp_enable'</span>] = <span class="literal">true</span></div><div class="line">gitlab_rails[<span class="string">'smtp_address'</span>] = <span class="string">"smtp.mxhichina.com"</span></div><div class="line">gitlab_rails[<span class="string">'smtp_port'</span>] = 25</div><div class="line">gitlab_rails[<span class="string">'smtp_user_name'</span>] = <span class="string">"gitlab@gos.com"</span></div><div class="line">gitlab_rails[<span class="string">'smtp_password'</span>] = <span class="string">"xxxxxx"</span></div><div class="line">gitlab_rails[<span class="string">'smtp_domain'</span>] = <span class="string">"gos.com"</span></div><div class="line">gitlab_rails[<span class="string">'smtp_authentication'</span>] = <span class="string">"login"</span></div><div class="line">gitlab_rails[<span class="string">'smtp_enable_starttls_auto'</span>] = <span class="literal">true</span></div><div class="line"><span class="comment">#gitlab_rails['smtp_openssl_verify_mode'] = 'peer'</span></div><div class="line">gitlab_rails[<span class="string">'smtp_tls'</span>] = <span class="literal">false</span></div><div class="line">gitlab_rails[<span class="string">'gitlab_email_from'</span>] = <span class="string">'gitlab@gos.com'</span></div><div class="line"><span class="comment">#gitlab_rails['gitlab_email_reply_to'] = 'gitlab@gos.com'</span></div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/12/22/gitlab/#espandi" rel="contents">
+            <a class="btn" href="/2017/12/22/gitlab/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1279,7 +1279,7 @@
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> test.t1(c1 <span class="built_in">int</span> primary <span class="keyword">key</span>, c2 <span class="built_in">int</span>);</div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t1 <span class="keyword">values</span>(<span class="number">1</span>,<span class="number">1</span>);</div><div class="line"></div><div class="line">txn1: <span class="keyword">begin</span>;</div><div class="line">txn2: <span class="keyword">begin</span>;</div><div class="line">txn1: <span class="keyword">update</span> t1 <span class="keyword">set</span> c2=<span class="number">2</span> <span class="keyword">where</span> c1=<span class="number">1</span>;</div><div class="line">txn2: <span class="keyword">select</span> * <span class="keyword">from</span> t1; (hang here)</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/12/18/crdb-txn-txnwait/#espandi" rel="contents">
+            <a class="btn" href="/2017/12/18/crdb-txn-txnwait/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1437,7 +1437,7 @@
 </ol>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/12/18/crdb-txn-todo/#espandi" rel="contents">
+            <a class="btn" href="/2017/12/18/crdb-txn-todo/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1589,7 +1589,7 @@
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">txnState.resetForNewSQLTxn(</div><div class="line">	e, session,</div><div class="line">	autoCommit, <span class="comment">/* implicitTxn */</span></div><div class="line">	<span class="literal">false</span>,      <span class="comment">/* retryIntent */</span></div><div class="line">	e.cfg.Clock.PhysicalTime(), <span class="comment">/* sqlTimestamp */</span></div><div class="line">	session.DefaultIsolationLevel,</div><div class="line">	roachpb.NormalUserPriority,</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/12/14/crdb-trx/#espandi" rel="contents">
+            <a class="btn" href="/2017/12/14/crdb-trx/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1740,7 +1740,7 @@
 <p>当前文件不使用import的相关函数，但是需要先执行其中的init function。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/12/13/golang-underscore/#espandi" rel="contents">
+            <a class="btn" href="/2017/12/13/golang-underscore/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>

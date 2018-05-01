@@ -372,7 +372,7 @@
 <p>HLC同时使用了物理时钟和逻辑时钟，能够保证单点的时间发生器是单调递增的，同时能够尽量控制不同节点之间的时钟偏差在规定的误差范围内。主要用于分布式系统中。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/12/13/hlc/#espandi" rel="contents">
+            <a class="btn" href="/2017/12/13/hlc/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -537,7 +537,7 @@
 </ul>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/12/12/raft-library/#espandi" rel="contents">
+            <a class="btn" href="/2017/12/12/raft-library/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -859,7 +859,7 @@
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">database</span> <span class="keyword">test</span>;</div><div class="line"></div><div class="line"><span class="keyword">use</span> <span class="keyword">test</span>;</div><div class="line"></div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> t1(c1 <span class="built_in">int</span> primary <span class="keyword">key</span>, c2 <span class="built_in">varchar</span>(<span class="number">20</span>));</div><div class="line"></div><div class="line"><span class="keyword">begin</span>;</div><div class="line"></div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> t1 <span class="keyword">values</span>(<span class="number">2</span>, <span class="string">'aaaaaaa'</span>);</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/27/crdb-insert/#espandi" rel="contents">
+            <a class="btn" href="/2017/11/27/crdb-insert/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1010,7 +1010,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">➜  docker search  --<span class="built_in">limit</span> 10  cockroachdb/builder</div><div class="line">NAME                                DESCRIPTION                                     STARS               OFFICIAL            AUTOMATED</div><div class="line">cockroachdb/cockroach               CockroachDB is an open <span class="built_in">source</span>, survivable,...   39</div><div class="line">electronuserland/electron-builder   electron-builder                                14                                      [OK]</div><div class="line">deis/builder                        Docker-in-docker image builder <span class="keyword">for</span> the Dei...   5</div><div class="line">jekyll/builder                      Builder image                                   2                                       [OK]</div><div class="line">abcstartsiden/builder               Images <span class="keyword">for</span> builder                              1</div><div class="line">cockroachdb/builder                 Image containing tools <span class="keyword">for</span> building cockroach   1</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/22/docker/#espandi" rel="contents">
+            <a class="btn" href="/2017/11/22/docker/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1161,7 +1161,7 @@
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> IsolationType <span class="keyword">int32</span></div><div class="line"></div><div class="line"><span class="keyword">const</span> (</div><div class="line">	SERIALIZABLE IsolationType = <span class="number">0</span></div><div class="line">	SNAPSHOT     IsolationType = <span class="number">1</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">var</span> IsolationType_name = <span class="keyword">map</span>[<span class="keyword">int32</span>]<span class="keyword">string</span>&#123;</div><div class="line">	<span class="number">0</span>: <span class="string">"SERIALIZABLE"</span>,</div><div class="line">	<span class="number">1</span>: <span class="string">"SNAPSHOT"</span>,</div><div class="line">&#125;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/15/crdb-set-session-vars/#espandi" rel="contents">
+            <a class="btn" href="/2017/11/15/crdb-set-session-vars/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1310,7 +1310,7 @@
           <p>跟踪insert和select语句对应的从sql层到kv层的调度堆栈</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/15/crdb-stack/#espandi" rel="contents">
+            <a class="btn" href="/2017/11/15/crdb-stack/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1459,7 +1459,7 @@
           <p>TPC-C是事务测试标准，数据库性能唯一官方指标。TPC-C模拟商品库存，交易，支付等过程，相比之下，sysbench就是个玩具。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/14/tpcc/#espandi" rel="contents">
+            <a class="btn" href="/2017/11/14/tpcc/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1608,7 +1608,7 @@
           <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">➜  myblog go env</div><div class="line">GOARCH=<span class="string">"amd64"</span></div><div class="line">GOBIN=<span class="string">""</span></div><div class="line">GOEXE=<span class="string">""</span></div><div class="line">GOHOSTARCH=<span class="string">"amd64"</span></div><div class="line">GOHOSTOS=<span class="string">"darwin"</span></div><div class="line">GOOS=<span class="string">"darwin"</span></div><div class="line">GOPATH=<span class="string">"/Users/loushuai/workspace/go"</span></div><div class="line">GORACE=<span class="string">""</span></div><div class="line">GOROOT=<span class="string">"/usr/local/go"</span></div><div class="line">GOTOOLDIR=<span class="string">"/usr/local/go/pkg/tool/darwin_amd64"</span></div><div class="line">GCCGO=<span class="string">"gccgo"</span></div><div class="line">CC=<span class="string">"clang"</span></div><div class="line">GOGCCFLAGS=<span class="string">"-fPIC -m64 -pthread -fno-caret-diagnostics -Qunused-arguments -fmessage-length=0 -fdebug-prefix-map=/var/folders/zj/8lzwbz994g798wpl5z7b90l00000gn/T/go-build607707803=/tmp/go-build -gno-record-gcc-switches -fno-common"</span></div><div class="line">CXX=<span class="string">"clang++"</span></div><div class="line">CGO_ENABLED=<span class="string">"1"</span></div><div class="line">CGO_CFLAGS=<span class="string">"-g -O2"</span></div><div class="line">CGO_CPPFLAGS=<span class="string">""</span></div><div class="line">CGO_CXXFLAGS=<span class="string">"-g -O2"</span></div><div class="line">CGO_FFLAGS=<span class="string">"-g -O2"</span></div><div class="line">CGO_LDFLAGS=<span class="string">"-g -O2"</span></div><div class="line">PKG_CONFIG=<span class="string">"pkg-config"</span></div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/13/go-env/#espandi" rel="contents">
+            <a class="btn" href="/2017/11/13/go-env/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1768,7 +1768,7 @@
 </ol>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/13/crdb-init-intro/#espandi" rel="contents">
+            <a class="btn" href="/2017/11/13/crdb-init-intro/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>

@@ -379,7 +379,7 @@
           <p>字符集一直是MySQL让人蛋疼的问题，MySQL8.0将默认字符集定义为utf8mb4，如果一个DBA没有碰到过字符集乱码的问题，那肯定不是一个合格的厨子。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/04/30/mysql-source-code-charset/#espandi" rel="contents">
+            <a class="btn" href="/2018/04/30/mysql-source-code-charset/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -841,7 +841,7 @@ workload，各种问题，导入数据就会出错。</p>
 <a href="https://louishust.github.io/2017/10/10/cock-enterprise-lic/">点我开启企业版本</a></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/04/19/crdb-tpcc-benchmark/#espandi" rel="contents">
+            <a class="btn" href="/2018/04/19/crdb-tpcc-benchmark/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -991,7 +991,7 @@ workload，各种问题，导入数据就会出错。</p>
 有两种可执行任务：Task和Worker。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/04/18/crdb05-stop/#espandi" rel="contents">
+            <a class="btn" href="/2018/04/18/crdb05-stop/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1141,7 +1141,7 @@ workload，各种问题，导入数据就会出错。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ make test</div><div class="line">$ make pre-push</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/04/18/crdb04-howtest/#espandi" rel="contents">
+            <a class="btn" href="/2018/04/18/crdb04-howtest/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1292,7 +1292,7 @@ workload，各种问题，导入数据就会出错。</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cfg.UseLegacyConnHandling = envutil.EnvOrDefaultBool(</div><div class="line">	<span class="string">"COCKROACH_USE_LEGACY_CONN_HANDLING"</span>, <span class="literal">false</span>)</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/04/16/crdb03-connect/#espandi" rel="contents">
+            <a class="btn" href="/2018/04/16/crdb03-connect/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1443,7 +1443,7 @@ workload，各种问题，导入数据就会出错。</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">UsersTable = TableDescriptor&#123;</div><div class="line">	Name:     <span class="string">"users"</span>,</div><div class="line">	ID:       keys.UsersTableID,</div><div class="line">	ParentID: keys.SystemDatabaseID,</div><div class="line">	Version:  <span class="number">1</span>,</div><div class="line">	Columns: []ColumnDescriptor&#123;</div><div class="line">		&#123;Name: <span class="string">"username"</span>, ID: <span class="number">1</span>, Type: colTypeString&#125;,</div><div class="line">		&#123;Name: <span class="string">"hashedPassword"</span>, ID: <span class="number">2</span>, Type: colTypeBytes, Nullable: <span class="literal">true</span>&#125;,</div><div class="line">	&#125;,</div><div class="line">	NextColumnID: <span class="number">3</span>,</div><div class="line">	Families: []ColumnFamilyDescriptor&#123;</div><div class="line">		&#123;Name: <span class="string">"primary"</span>, ID: <span class="number">0</span>, ColumnNames: []<span class="keyword">string</span>&#123;<span class="string">"username"</span>&#125;, ColumnIDs: singleID1&#125;,</div><div class="line">		&#123;Name: <span class="string">"fam_2_hashedPassword"</span>, ID: <span class="number">2</span>, ColumnNames: []<span class="keyword">string</span>&#123;<span class="string">"hashedPassword"</span>&#125;, ColumnIDs: []ColumnID&#123;<span class="number">2</span>&#125;, DefaultColumnID: <span class="number">2</span>&#125;,</div><div class="line">	&#125;,</div><div class="line">	PrimaryIndex:   pk(<span class="string">"username"</span>),</div><div class="line">	NextFamilyID:   <span class="number">3</span>,</div><div class="line">	NextIndexID:    <span class="number">2</span>,</div><div class="line">	Privileges:     NewCustomRootPrivilegeDescriptor(SystemAllowedPrivileges[keys.UsersTableID]),</div><div class="line">	FormatVersion:  InterleavedFormatVersion,</div><div class="line">	NextMutationID: <span class="number">1</span>,</div><div class="line">&#125;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/04/16/crdb02-dbinit/#espandi" rel="contents">
+            <a class="btn" href="/2018/04/16/crdb02-dbinit/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1594,7 +1594,7 @@ workload，各种问题，导入数据就会出错。</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> cMux <span class="keyword">struct</span> &#123;</div><div class="line">	root   net.Listener <span class="comment">//net监听结构</span></div><div class="line">	bufLen <span class="keyword">int</span></div><div class="line">	errh   ErrorHandler</div><div class="line">	donec  <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</div><div class="line">	sls    []matchersListener <span class="comment">//协议匹配函数</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> MuxConn <span class="keyword">struct</span> &#123;</div><div class="line">	net.Conn</div><div class="line">	buf     bytes.Buffer</div><div class="line">	sniffer bufferedReader</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> bufferedReader <span class="keyword">struct</span> &#123;</div><div class="line">	source     io.Reader</div><div class="line">	buffer     *bytes.Buffer</div><div class="line">	bufferRead <span class="keyword">int</span></div><div class="line">	bufferSize <span class="keyword">int</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/04/11/crdb01-cmux/#espandi" rel="contents">
+            <a class="btn" href="/2018/04/11/crdb01-cmux/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1749,7 +1749,7 @@ workload，各种问题，导入数据就会出错。</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">c</span><span class="params">()</span> <span class="params">(i <span class="keyword">int</span>)</span></span> &#123;</div><div class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; i++ &#125;()</div><div class="line">	<span class="keyword">return</span> <span class="number">1</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	fmt.Println(c())</div><div class="line">&#125;</div></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/04/11/panicdefer/#espandi" rel="contents">
+            <a class="btn" href="/2018/04/11/panicdefer/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
