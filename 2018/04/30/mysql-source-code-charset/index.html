@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link href="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+  
+
+<link href="//cdn.staticfile.org/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="mysql,character set,charset," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="字符集一直是MySQL让人蛋疼的问题，MySQL8.0将默认字符集定义为utf8mb4，如果一个DBA没有碰到过字符集乱码的问题，那肯定不是一个合格的厨子。">
+<meta name="keywords" content="mysql,character set,charset">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL源码学习002--字符集问题">
+<meta property="og:url" content="http://louishust.github.io/2018/04/30/mysql-source-code-charset/index.html">
+<meta property="og:site_name" content="小贝壳爸爸">
+<meta property="og:description" content="字符集一直是MySQL让人蛋疼的问题，MySQL8.0将默认字符集定义为utf8mb4，如果一个DBA没有碰到过字符集乱码的问题，那肯定不是一个合格的厨子。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://louishust.github.io/images/mysql/mysql-charset-01.png.png">
+<meta property="og:updated_time" content="2018-05-01T05:15:32.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL源码学习002--字符集问题">
+<meta name="twitter:description" content="字符集一直是MySQL让人蛋疼的问题，MySQL8.0将默认字符集定义为utf8mb4，如果一个DBA没有碰到过字符集乱码的问题，那肯定不是一个合格的厨子。">
+<meta name="twitter:image" content="http://louishust.github.io/images/mysql/mysql-charset-01.png.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"right","display":"hide","offset":12,"b2t":true,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://louishust.github.io/2018/04/30/mysql-source-code-charset/"/>
+
+
+
+
+
+  <title>MySQL源码学习002--字符集问题 | 小贝壳爸爸</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小贝壳爸爸</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">天桥扛把子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://louishust.github.io/2018/04/30/mysql-source-code-charset/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Louis">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小贝壳爸爸">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MySQL源码学习002--字符集问题</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-30T18:55:06+08:00">
+                2018-04-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/mysql/" itemprop="url" rel="index">
+                    <span itemprop="name">mysql</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/mysql/mysql源码学习/" itemprop="url" rel="index">
+                    <span itemprop="name">mysql源码学习</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-eye"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>字符集一直是MySQL让人蛋疼的问题，MySQL8.0将默认字符集定义为utf8mb4，如果一个DBA没有碰到过字符集乱码的问题，那肯定不是一个合格的厨子。</p>
+<a id="more"></a>
+<h2><span id="unicode-yu-utf-8">Unicode与UTF-8</span></h2>
+<blockquote>
+<p>Unicode 是一个很大的集合，现在的规模可以容纳100多万个符号。每个符号的编码都不一样，比如，U+0639表示阿拉伯字母Ain，U+0041表示英语的大写字母A，U+4E25表示汉字严.</p>
+</blockquote>
+<blockquote>
+<p>Unicode 只是一个符号集，它只规定了符号的二进制代码，却没有规定这个二进制代码应该如何存储。</p>
+</blockquote>
+<blockquote>
+<p>比如，汉字严的 Unicode 是十六进制数4E25，转换成二进制数足足有15位（100111000100101），也就是说，这个符号的表示至少需要2个字节。表示其他更大的符号，可能需要3个字节或者4个字节，甚至更多。</p>
+</blockquote>
+<p><a href="http://www.chi2ko.com/tool/CJK.htm" target="_blank" rel="noopener">unicode编码表</a></p>
+<p><a href="http://www.mytju.com/classcode/tools/encode_utf8.asp" target="_blank" rel="noopener">utf-8编码表</a></p>
+<h2><span id="mysql-zi-fu-ji-can-shu-yi-yi">MySQL字符集参数意义</span></h2>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">mysql&gt; show variables like '%char%';</div><div class="line">+<span class="comment">----------------------------------------+------------------------------------------------------+</span></div><div class="line">| Variable_name                          | Value                                                |</div><div class="line">+<span class="comment">----------------------------------------+------------------------------------------------------+</span></div><div class="line">| character_set_client                   | utf8                                                 |</div><div class="line">| character_set_connection               | utf8                                                 |</div><div class="line">| character_set_database                 | latin1                                               |</div><div class="line">| character_set_filesystem               | binary                                               |</div><div class="line">| character_set_results                  | utf8                                                 |</div><div class="line">| character_set_server                   | latin1                                               |</div><div class="line">| character_set_system                   | utf8                                                 |</div><div class="line">| character_sets_dir                     | /home/shuail/src/sgrdb/debug/<span class="keyword">install</span>/<span class="keyword">share</span>/charsets/ |</div><div class="line">| simple_password_check_other_characters | <span class="number">1</span>                                                    |</div><div class="line">+<span class="comment">----------------------------------------+------------------------------------------------------+</span></div></pre></td></tr></table></figure>
+<h3><span id="fu-wu-qi-duan-she-zhi-de-can-shu">服务器端设置的参数</span></h3>
+<ol>
+<li><code>character_set_server</code>: create database不指定字符集时，使用此参数的字符集。</li>
+<li><code>character_set_database</code>: 不可设置参数，用户表示当前数据库的字符集。USE到不同库时，会变成不同库的字符集。</li>
+<li><code>character_set_filesystem</code>: 文件名解析时使用的字符集，比如load data， select into outfile等命令指定文件时会用到。</li>
+<li><code>character_set_system</code>: server层存储标识符等用到的字符集，固定utf8.</li>
+</ol>
+<h3><span id="ke-hu-duan-she-zhi-de-can-shu">客户端设置的参数</span></h3>
+<ol>
+<li><code>character_set_client</code>: 用户指定客户端的字符集</li>
+<li><code>character_set_connection</code>: 用户指定客户端的字符集</li>
+<li><code>character_set_results</code>: 服务器返回给客户端消息之前，会把对应的字段转换成此值所规定的字符集</li>
+</ol>
+<h3><span id="lie-de-zi-fu-ji">列的字符集</span></h3>
+<p>列的字符集可以使用create table选项进行统一定义，也可以单独对某个列进行定义：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">GreatOpenSource&gt; create table t1(c1 varchar(20) charset latin1, c2 varchar(20)) charset utf8;</div><div class="line">Query OK, 0 rows affected (0.02 sec)</div><div class="line"></div><div class="line">GreatOpenSource&gt; show full columns from t1;</div><div class="line">+<span class="comment">-------+-------------+-------------------+------+-----+---------+-------+---------------------------------+---------+</span></div><div class="line">| Field | Type        | Collation         | Null | Key | Default | Extra | Privileges                      | <span class="keyword">Comment</span> |</div><div class="line">+<span class="comment">-------+-------------+-------------------+------+-----+---------+-------+---------------------------------+---------+</span></div><div class="line">| c1    | <span class="built_in">varchar</span>(<span class="number">20</span>) | latin1_swedish_ci | YES  |     | <span class="literal">NULL</span>    |       | <span class="keyword">select</span>,<span class="keyword">insert</span>,<span class="keyword">update</span>,<span class="keyword">references</span> |         |</div><div class="line">| c2    | <span class="built_in">varchar</span>(<span class="number">20</span>) | utf8_general_ci   | YES  |     | <span class="literal">NULL</span>    |       | <span class="keyword">select</span>,<span class="keyword">insert</span>,<span class="keyword">update</span>,<span class="keyword">references</span> |         |</div><div class="line">+<span class="comment">-------+-------------+-------------------+------+-----+---------+-------+---------------------------------+---------+</span></div><div class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.01</span> sec)</div></pre></td></tr></table></figure>
+<h3><span id="terminal-zi-fu-ji">terminal字符集</span></h3>
+<p>除了MySQL的字符集，还有一个字符集比较容易被忽略，那就是终端的字符集，比如terminal、iterm2等终端，都可以设置不同的字符集，用于终端显示的判断。</p>
+<h2><span id="cha-ru-guo-cheng-zi-fu-ji-zhuan-hua-liu-cheng">插入过程字符集转化流程</span></h2>
+<p><img src="/images/mysql/mysql-charset-01.png.png" alt=""></p>
+<h2><span id="ju-li-fen-xi">举例分析</span></h2>
+<h3><span id="zhong-guo-bian-ma"><code>中国</code>编码</span></h3>
+<table>
+<thead>
+<tr>
+<th>汉字</th>
+<th>Unicode</th>
+<th>UTF-8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>中</td>
+<td>4E2D</td>
+<td>E4B8AD</td>
+</tr>
+<tr>
+<td>国</td>
+<td>56FD</td>
+<td>E59BBD</td>
+</tr>
+</tbody>
+</table>
+<h3><span id="cha-ru-liu-cheng">插入流程</span></h3>
+<p>表定义见<strong>列的字符集</strong>一节</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">GreatOpenSource&gt; set names latin1;</div><div class="line">Query OK, 0 rows affected (0.00 sec)</div><div class="line"></div><div class="line">GreatOpenSource&gt; insert into t1 values("中国", "中国");</div><div class="line">Query OK, 1 row affected (0.02 sec)</div><div class="line"></div><div class="line">GreatOpenSource&gt; select * from t1;</div><div class="line">+<span class="comment">--------+--------+</span></div><div class="line">| c1     | c2     |</div><div class="line">+<span class="comment">--------+--------+</span></div><div class="line">| 中国   | 中国   |</div><div class="line">+<span class="comment">--------+--------+</span></div><div class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</div><div class="line">GreatOpenSource&gt; <span class="keyword">select</span> <span class="keyword">hex</span>(c1), <span class="keyword">hex</span>(c2) <span class="keyword">from</span> t1;</div><div class="line">+<span class="comment">--------------+----------------------------+</span></div><div class="line">| hex(c1)      | hex(c2)                    |</div><div class="line">+<span class="comment">--------------+----------------------------+</span></div><div class="line">| E4B8ADE59BBD | C3A4C2B8C2ADC3A5E280BAC2BD |</div><div class="line">+<span class="comment">--------------+----------------------------+</span></div><div class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</div></pre></td></tr></table></figure>
+<ol>
+<li>终端数据同样的汉字，编码相同，均为utf-8编码.</li>
+<li>server将字符按照<code>character_set_client=latin1</code>解析，转化为<code>character_set_connection=latin1</code>, 由于两个字符集一样，故不做任何转化。</li>
+<li>server将字符按照<code>character_set_connection=latin1</code>解析，转化为<code>character_set_system=utf8</code>，字符集不同，需要逐字转换
+<ol>
+<li>latin1转为unicode, 中国的latin1=E4B8ADE59BBD, 转为unicode=E4B8ADE59BBD</li>
+<li>unicode转为utf-8, unicode转为utf-8为C3A4C2B8C2ADC3A5E280BAC2BD</li>
+</ol>
+</li>
+<li>server按照列定义字符集进行转化
+<ol>
+<li>c1由utf-8转为latin1，即是上面的逆向转化, 最后存储E4B8ADE59BBD</li>
+<li>c2定义为utf-8，不需要转化，故直接存储C3A4C2B8C2ADC3A5E280BAC2BD</li>
+</ol>
+</li>
+</ol>
+<p>虽然最后终端两个字符都能正常显示，但是在内部存储其实是两种存储格式。</p>
+<h2><span id="shen-ru-yuan-ma">深入源码</span></h2>
+<h3><span id="character-set-client-gt-character-set-connection">character_set_client =&gt; character_set_connection</span></h3>
+<p><code>sql_yacc.yy</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">text_literal:</div><div class="line">          TEXT_STRING</div><div class="line">          &#123;</div><div class="line">            LEX_STRING tmp;</div><div class="line">            CHARSET_INFO *cs_con= thd-&gt;variables.collation_connection;</div><div class="line">            CHARSET_INFO *cs_cli= thd-&gt;variables.character_set_client;</div><div class="line">            uint repertoire= thd-&gt;lex-&gt;text_string_is_7bit &amp;&amp;</div><div class="line">                             my_charset_is_ascii_based(cs_cli) ?</div><div class="line">                             MY_REPERTOIRE_ASCII : MY_REPERTOIRE_UNICODE30;</div><div class="line">            <span class="keyword">if</span> (thd-&gt;charset_is_collation_connection ||</div><div class="line">                (repertoire == MY_REPERTOIRE_ASCII &amp;&amp;</div><div class="line">                 my_charset_is_ascii_based(cs_con)))</div><div class="line">              tmp= $<span class="number">1</span>;</div><div class="line">            <span class="keyword">else</span></div><div class="line">            &#123;</div><div class="line">              <span class="keyword">if</span> (thd-&gt;convert_string(&amp;tmp, cs_con, $<span class="number">1.</span>str, $<span class="number">1.l</span>ength, cs_cli))</div><div class="line">                MYSQL_YYABORT;</div><div class="line">            &#125;</div><div class="line">            $$= <span class="keyword">new</span> (thd-&gt;mem_root) Item_string(thd, tmp.str, tmp.length,</div><div class="line">                                                cs_con,</div><div class="line">                                                DERIVATION_COERCIBLE,</div><div class="line">                                                repertoire);</div><div class="line">            <span class="keyword">if</span> ($$ == <span class="literal">NULL</span>)</div><div class="line">              MYSQL_YYABORT;</div><div class="line">          &#125;</div></pre></td></tr></table></figure>
+<h3><span id="character-set-connection-gt-character-set-system">character_set_connection =&gt; character_set_system</span></h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">| &gt; my_convert_using_func</div><div class="line">| | &gt; my_convert</div><div class="line">| | | &gt; copy_and_convert</div><div class="line">| | | | &gt; sql_strmake_with_convert</div><div class="line">| | | | | &gt; Item::set_name</div><div class="line">| | | | | | &gt; Item_string::fix_and_set_name_from_value</div><div class="line">| | | | | | | &gt; Item_string::Item_string</div></pre></td></tr></table></figure>
+<h3><span id="character-set-system-gt-field-charset">character_set_system =&gt; field charset</span></h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">| &gt; my_convert_fix</div><div class="line">| | &gt; String_copier::well_formed_copy</div><div class="line">| | | &gt; Field_varstring::store</div><div class="line">| | | | &gt; Item::save_str_value_in_field</div><div class="line">| | | | | &gt; Item_string::save_in_field</div><div class="line">| | | | | | &gt; fill_record</div><div class="line">| | | | | | | &gt; fill_record_n_invoke_before_triggers</div><div class="line">| | | | | | | | &gt; mysql_insert</div></pre></td></tr></table></figure>
+<h2><span id="can-kao-wen-xian">参考文献</span></h2>
+<ol>
+<li><a href="http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html" target="_blank" rel="noopener">字符编码笔记：ASCII，Unicode 和 UTF-8</a></li>
+<li><a href="http://www.chi2ko.com/tool/CJK.htm" target="_blank" rel="noopener">unicode编码表</a></li>
+<li><a href="http://www.mytju.com/classcode/tools/encode_utf8.asp" target="_blank" rel="noopener">utf-8编码表</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/2018/04/30/mysql-source-code-charset/">MySQL源码学习002--字符集问题</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
+  <p><span>发布时间:</span>2018年04月30日 - 18:04</p>
+  <p><span>最后更新:</span>2018年05月01日 - 13:05</p>
+  <p><span>原始链接:</span><a href="/2018/04/30/mysql-source-code-charset/">/2018/04/30/mysql-source-code-charset/</a></p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
+</div>
+
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mysql/" rel="tag"># mysql</a>
+          
+            <a href="/tags/character-set/" rel="tag"># character set</a>
+          
+            <a href="/tags/charset/" rel="tag"># charset</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/26/crdb06-query/" rel="next" title="crdb代码阅读06——语句执行流程">
+                <i class="fa fa-chevron-left"></i> crdb代码阅读06——语句执行流程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Louis" />
+            
+              <p class="site-author-name" itemprop="name">Louis</p>
+              <p class="site-description motion-element" itemprop="description">记录工作和生活点滴</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">72</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">103</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/louishust" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text"><span id="unicode-yu-utf-8">Unicode&#x4E0E;UTF-8</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text"><span id="mysql-zi-fu-ji-can-shu-yi-yi">MySQL&#x5B57;&#x7B26;&#x96C6;&#x53C2;&#x6570;&#x610F;&#x4E49;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.1.</span> <span class="nav-text"><span id="fu-wu-qi-duan-she-zhi-de-can-shu">&#x670D;&#x52A1;&#x5668;&#x7AEF;&#x8BBE;&#x7F6E;&#x7684;&#x53C2;&#x6570;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.2.</span> <span class="nav-text"><span id="ke-hu-duan-she-zhi-de-can-shu">&#x5BA2;&#x6237;&#x7AEF;&#x8BBE;&#x7F6E;&#x7684;&#x53C2;&#x6570;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.3.</span> <span class="nav-text"><span id="lie-de-zi-fu-ji">&#x5217;&#x7684;&#x5B57;&#x7B26;&#x96C6;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.4.</span> <span class="nav-text"><span id="terminal-zi-fu-ji">terminal&#x5B57;&#x7B26;&#x96C6;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text"><span id="cha-ru-guo-cheng-zi-fu-ji-zhuan-hua-liu-cheng">&#x63D2;&#x5165;&#x8FC7;&#x7A0B;&#x5B57;&#x7B26;&#x96C6;&#x8F6C;&#x5316;&#x6D41;&#x7A0B;</span></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text"><span id="ju-li-fen-xi">&#x4E3E;&#x4F8B;&#x5206;&#x6790;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.1.</span> <span class="nav-text"><span id="zhong-guo-bian-ma"><code>&#x4E2D;&#x56FD;</code>&#x7F16;&#x7801;</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">4.2.</span> <span class="nav-text"><span id="cha-ru-liu-cheng">&#x63D2;&#x5165;&#x6D41;&#x7A0B;</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text"><span id="shen-ru-yuan-ma">&#x6DF1;&#x5165;&#x6E90;&#x7801;</span></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.1.</span> <span class="nav-text"><span id="character-set-client-gt-character-set-connection">character_set_client =&gt; character_set_connection</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.2.</span> <span class="nav-text"><span id="character-set-connection-gt-character-set-system">character_set_connection =&gt; character_set_system</span></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">5.3.</span> <span class="nav-text"><span id="character-set-system-gt-field-charset">character_set_system =&gt; field charset</span></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">6.</span> <span class="nav-text"><span id="can-kao-wen-xian">&#x53C2;&#x8003;&#x6587;&#x732E;</span></span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">true</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/fastclick/1.0.6/fastclick.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.staticfile.org/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
