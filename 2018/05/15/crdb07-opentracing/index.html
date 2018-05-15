@@ -93,18 +93,18 @@
 <meta name="description" content="对于golang的routine调试，gdb和delve感觉非常的无力，要么堆栈到处跳， 要么变量无法显示，使用tracing日志才能解决分布式并发程序的调试工作。 opentracing可以根据context记录不同会话的执行路径。 opentracing的具体实现可以有lightstep和zipkin。由于lightstep需要注册官网的token，记录保持在lightstep官网，这里使用z">
 <meta name="keywords" content="cockroachdb源码,opentracing">
 <meta property="og:type" content="article">
-<meta property="og:title" content="crdb代码阅读06——opentracing">
+<meta property="og:title" content="crdb代码阅读07——opentracing">
 <meta property="og:url" content="http://louishust.github.io/2018/05/15/crdb07-opentracing/index.html">
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="对于golang的routine调试，gdb和delve感觉非常的无力，要么堆栈到处跳， 要么变量无法显示，使用tracing日志才能解决分布式并发程序的调试工作。 opentracing可以根据context记录不同会话的执行路径。 opentracing的具体实现可以有lightstep和zipkin。由于lightstep需要注册官网的token，记录保持在lightstep官网，这里使用z">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://louishust.github.io/images/crdb/opentracing0.png">
-<meta property="og:image" content="http://louishust.github.io/images/crdb/opentracing1.png">
-<meta property="og:updated_time" content="2018-05-15T07:38:54.000Z">
+<meta property="og:image" content="http://louishust.github.io/images/crdb/opentracing0.jpg">
+<meta property="og:image" content="http://louishust.github.io/images/crdb/opentracing1.jpg">
+<meta property="og:updated_time" content="2018-05-15T07:53:16.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="crdb代码阅读06——opentracing">
+<meta name="twitter:title" content="crdb代码阅读07——opentracing">
 <meta name="twitter:description" content="对于golang的routine调试，gdb和delve感觉非常的无力，要么堆栈到处跳， 要么变量无法显示，使用tracing日志才能解决分布式并发程序的调试工作。 opentracing可以根据context记录不同会话的执行路径。 opentracing的具体实现可以有lightstep和zipkin。由于lightstep需要注册官网的token，记录保持在lightstep官网，这里使用z">
-<meta name="twitter:image" content="http://louishust.github.io/images/crdb/opentracing0.png">
+<meta name="twitter:image" content="http://louishust.github.io/images/crdb/opentracing0.jpg">
 
 
 
@@ -140,7 +140,7 @@
 
 
 
-  <title>crdb代码阅读06——opentracing | 小贝壳爸爸</title>
+  <title>crdb代码阅读07——opentracing | 小贝壳爸爸</title>
   
 
 
@@ -294,7 +294,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">crdb代码阅读06——opentracing</h1>
+          <h1 class="post-title" itemprop="name headline">crdb代码阅读07——opentracing</h1>
         
 
         <div class="post-meta">
@@ -371,10 +371,8 @@
       
 
       
-        <p>对于golang的routine调试，gdb和delve感觉非常的无力，要么堆栈到处跳，<br>
-要么变量无法显示，使用tracing日志才能解决分布式并发程序的调试工作。</p>
-<p>opentracing可以根据context记录不同会话的执行路径。<br>
-opentracing的具体实现可以有lightstep和zipkin。由于lightstep需要注册官网的token，记录保持在lightstep官网，这里使用zipkin进行演示。</p>
+        <p>对于golang的routine调试，gdb和delve感觉非常的无力，要么堆栈到处跳， 要么变量无法显示，使用tracing日志才能解决分布式并发程序的调试工作。</p>
+<p>opentracing可以根据context记录不同会话的执行路径。 opentracing的具体实现可以有lightstep和zipkin。由于lightstep需要注册官网的token，记录保持在lightstep官网，这里使用zipkin进行演示。</p>
 <a id="more"></a>
 <h2><span id="kai-qi-zipkin-fu-wu">开启zipkin服务</span></h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">➜  docker run -d -p 9411:9411 openzipkin/zipkin</div></pre></td></tr></table></figure>
@@ -383,8 +381,8 @@ opentracing的具体实现可以有lightstep和zipkin。由于lightstep需要注
 <h2><span id="jia-ru-zi-ji-de-ri-zhi">加入自己的日志</span></h2>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">log.VEventf(ctx, <span class="number">2</span>, <span class="string">"queryID: %s"</span>, queryID)</div></pre></td></tr></table></figure>
 <h2><span id="cha-kan-zhi-xing-yu-ju-de-liu-cheng">查看执行语句的流程</span></h2>
-<p><img src="/images/crdb/opentracing0.png" alt=""></p>
-<p><img src="/images/crdb/opentracing1.png" alt=""></p>
+<p><img src="/images/crdb/opentracing0.jpg" alt=""></p>
+<p><img src="/images/crdb/opentracing1.jpg" alt=""></p>
 <h2><span id="can-kao-wen-xian">参考文献</span></h2>
 <ol>
 <li><a href="https://github.com/openzipkin/zipkin" target="_blank" rel="noopener">zipkin</a></li>
@@ -407,7 +405,7 @@ opentracing的具体实现可以有lightstep和zipkin。由于lightstep需要注
   <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.7.1/jquery.min.js"></script>
   <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
-  <p><span>本文标题:</span><a href="/2018/05/15/crdb07-opentracing/">crdb代码阅读06——opentracing</a></p>
+  <p><span>本文标题:</span><a href="/2018/05/15/crdb07-opentracing/">crdb代码阅读07——opentracing</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2018年05月15日 - 15:05</p>
   <p><span>最后更新:</span>2018年05月15日 - 15:05</p>
