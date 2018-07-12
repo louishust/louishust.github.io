@@ -98,7 +98,7 @@
 <meta property="og:site_name" content="小贝壳爸爸">
 <meta property="og:description" content="提交pr之前需要做如下测试 12$ make test$ make pre-push">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-04-19T06:25:31.000Z">
+<meta property="og:updated_time" content="2018-05-31T01:56:58.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="crdb代码阅读04——make test">
 <meta name="twitter:description" content="提交pr之前需要做如下测试 12$ make test$ make pre-push">
@@ -372,9 +372,13 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ make test</div><div class="line">$ make pre-push</div></pre></td></tr></table></figure>
 <a id="more"></a>
 <h2><span id="ce-li-diao-shi-fang-fa">测例调试方法</span></h2>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Run all tests in ./pkg/storage</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/storage</div><div class="line"><span class="comment"># Run all tests in ./pkg/storage with verbose logs</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/storage TESTFLAGS=<span class="string">"-v -show-logs"</span></div><div class="line"><span class="comment"># Run all kv tests matching '^TestFoo' with a timeout of 10s</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/kv TESTS=<span class="string">'^TestFoo'</span> TESTTIMEOUT=10s</div><div class="line"><span class="comment"># Run the sql logic tests</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/sql TESTS=<span class="string">'TestLogic$$'</span></div><div class="line"><span class="comment"># or, using a shortcut,</span></div><div class="line">make testlogic</div><div class="line"><span class="comment"># Run a specific sql logic subtest</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/sql TESTS=<span class="string">'TestLogic$$/select$$'</span></div><div class="line"><span class="comment"># or, using a shortcut,</span></div><div class="line">make testlogic FILES=select</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Run all tests in ./pkg/storage</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/storage</div><div class="line"><span class="comment"># Run all tests in ./pkg/storage with verbose logs</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/storage TESTFLAGS=<span class="string">"-v -show-logs"</span></div><div class="line"><span class="comment"># Run all kv tests matching '^TestFoo' with a timeout of 10s</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/kv TESTS=<span class="string">'^TestFoo'</span> TESTTIMEOUT=10s</div><div class="line"><span class="comment"># Run the sql logic tests</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/sql TESTS=<span class="string">'TestLogic$$'</span></div><div class="line"><span class="comment"># or, using a shortcut,</span></div><div class="line">make testlogic</div><div class="line"><span class="comment"># Run a specific sql logic subtest</span></div><div class="line">make <span class="built_in">test</span> PKG=./pkg/sql TESTS=<span class="string">'TestLogic$$/select$$'</span></div><div class="line"><span class="comment"># or, using a shortcut,</span></div><div class="line">make testlogic FILES=select</div><div class="line"></div><div class="line">make testlogic FILES=aggregate TESTFLAGS=<span class="string">"-max-errors 1000"</span> &gt; fail</div></pre></td></tr></table></figure>
 <p><strong>重写logictest输出文件</strong></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">make testlogic FILES=&quot;...&quot; TESTFLAGS=-rewrite-results-in-testfiles</div></pre></td></tr></table></figure>
+<p><strong>输出所有错误</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">make testlogic FILES=&quot;aggregate&quot; TESTFLAGS=&quot;-test.v -max-errors 1000 -show-sql true&quot;</div></pre></td></tr></table></figure>
+<p><strong>调试单文件</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">make testlogic FILES=&quot;table&quot; TESTFLAGS=&quot;-test.v -show-sql -show-logs  true&quot;</div></pre></td></tr></table></figure>
 
       
     </div>
@@ -394,7 +398,7 @@
   <p><span>本文标题:</span><a href="/2018/04/18/crdb04-howtest/">crdb代码阅读04——make test</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Louis 的个人博客">Louis</a></p>
   <p><span>发布时间:</span>2018年04月18日 - 09:04</p>
-  <p><span>最后更新:</span>2018年04月19日 - 14:04</p>
+  <p><span>最后更新:</span>2018年05月31日 - 09:05</p>
   <p><span>原始链接:</span><a href="/2018/04/18/crdb04-howtest/">/2018/04/18/crdb04-howtest/</a></p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">Louis-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>
 </div>
@@ -521,7 +525,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">73</span>
+                  <span class="site-state-item-count">75</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -543,7 +547,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">104</span>
+                  <span class="site-state-item-count">108</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
